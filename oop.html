@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<h1>Object Oriented JavaScript</h1>
+<p id="output"></p>
+<iframe width="854" height="510" src="//www.youtube.com/embed/PMfcsYzj-9M" frameborder="0" allowfullscreen></iframe>
+</body>
+<script type="text/javascript">
+	function exampleClass(){
+	this.property1= "sumel";
+	this.property2= "Saurav";
+	this.method1=function method1(arg1){
+		return arg1 +" "+ this.property2;
+	}
+}
+var instance1=new exampleClass();
+var instance2=new exampleClass();
+var result=instance1.method1("Hello");
+document.getElementById('output').innerHTML+=result;
+</script>
+</html>
+
