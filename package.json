@@ -1,0 +1,51 @@
+{
+  "name": "baghchal",
+  "version": "1.0.0",
+  "description": "Baghchal in canvas",
+  "main": "server.js",
+  "scripts": {
+    "start": "npm run build && webpack-dev-server",
+    "build": "webpack --mode=production --config webpack.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tekraj/baghchal.git"
+  },
+  "keywords": [
+    "baghchal",
+    "nepali",
+    "game"
+  ],
+  "author": "Tek Raj",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tekraj/baghchal/issues"
+  },
+  "homepage": "https://github.com/tekraj/baghchal#readme",
+  "dependencies": {
+    "express": "4.16.4",
+    "path": "0.12.7"
+  },
+  "devDependencies": {
+    "@babel/core": "7.2.2",
+    "@babel/polyfill": "^7.2.5",
+    "@babel/preset-env": "7.3.1",
+    "autoprefixer": "9.4.7",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.0.5",
+    "babel-preset-env": "^1.7.0",
+    "clean-webpack-plugin": "^1.0.1",
+    "css-loader": "2.1.0",
+    "extract-loader": "3.1.0",
+    "file-loader": "3.0.1",
+    "node-sass": "4.11.0",
+    "postcss-loader": "3.0.0",
+    "sass-loader": "7.1.0",
+    "style-loader": "^0.23.1",
+    "url-loader": "1.1.2",
+    "webpack": "^4.29.1",
+    "webpack-cli": "3.2.3",
+    "webpack-dev-server": "^3.2.0"
+  }
+}
