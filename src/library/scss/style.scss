@@ -1,0 +1,40 @@
+@import "bootstrap.css";
+@import "material-design.css";
+@font-face{
+	font-family:'Material Icons';
+	font-style: normal;
+	font-weight: normal;
+	src: url("MaterialIcons-Regular.eot?") format("eot"),
+	     url("MaterialIcons-Regular.woff2") format("woff2"),
+	     url("MaterialIcons-Regular.woff") format("woff"),
+	     url("MaterialIcons-Regular.ttf") format("truetype"),
+	     url("MaterialIcons-Regular.svg#Samplina_Neue") format("svg");
+}
+
+
+ .material-icons {
+   font-family: 'Material Icons';
+   font-weight: normal;
+   font-style: normal;
+   font-size: 24px;  /* Preferred icon size */
+   display: inline-block;
+   line-height: 1;
+   text-transform: none;
+   letter-spacing: normal;
+   word-wrap: normal;
+   white-space: nowrap;
+   direction: ltr;
+ 
+   /* Support for all WebKit browsers. */
+   -webkit-font-smoothing: antialiased;
+   /* Support for Safari and Chrome. */
+   text-rendering: optimizeLegibility;
+ 
+   /* Support for Firefox. */
+   -moz-osx-font-smoothing: grayscale;
+ 
+   /* Support for IE. */
+   font-feature-settings: 'liga';
+ }
+
+ body{background:#fafafa;}

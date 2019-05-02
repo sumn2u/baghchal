@@ -25,6 +25,8 @@
   "homepage": "https://github.com/tekraj/baghchal#readme",
   "dependencies": {
     "express": "4.16.4",
+    "material-icons": "0.3.1",
+    "npm": "6.7.0",
     "path": "0.12.7"
   },
   "devDependencies": {

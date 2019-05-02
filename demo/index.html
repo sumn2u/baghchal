@@ -1,80 +1,20 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>Game</title>
-	<style type="text/css">
-	.main{width:1200px;margin:auto;}
-	#myCanvas{border: 1px solid black;float: left}
-	p{font-size: 20px;font-family: arial;font-weight: bold;color:red; float: left; margin-left:40px;}
-	</style>
-	<script src="jquery.js"></script>
 </head>
 
-
-
 <body>
-	<div class="main">
-	<canvas id="myCanvas" width="660" height="660"></canvas>
-	<p>Goats In Queue =<span id="goatNo">20</span></p>
-	<p>Remaining Goats =<span id="rGoat">20</span></p>
-	<p>Dead Goats =<span id="dGoat">0</span></p>
-	<p id="check"></p>
-	<p id="output1"></p>
+	<div class="container mt-1">
+		<div id="game-container"></div>
 	</div>
-</body>
-<script src="mainGameFunction.js"></script>
-<script src="drawEveryThing.js"></script>
-<script src="eatGoat.js"></script>
-<script type="text/javascript">
-$(document).ready(function(){
-	canvasAnimation();
-})
-var c=document.getElementById('myCanvas'),
-		ctx=c.getContext('2d'); 
-		//array and object that holds the total points
-		var point;
-		var points=new Array();
-		//array and object that holds the current position of the goat 
-		var stockPoints=new Array();
-		var stockActual=new Array();//Variable to hold the no of Goat Permantly
-		var canvas=$('#myCanvas');
-		
-		var count=0;//variable for the counting of goats
-
-		var actualcount=1;//variable that holds the increament valuee of count; 
-		var mouseX;//holds the current position of mouse
-		var mouseY;
-		var mousePointX;// holds the actual position of the goat
-		var mousePointY;
-		//Arrays and objects to store the positions of tigers and goats
-		var tigerObject;
-		var tigerArray=new Array();
-		var goatObjects;
-		var goatEatObject;
-		var condition=0;
-		var mouseState=false;
-		var clickOutsideCondition=false;//variable that stops the counting of count if we click outside of the boundry( mouseClick bug)	
-		var matchingCondition;//variable to prevent the overlaping of tiger over goat or over itself
-		var eatGoatCondition;//varibale to check the condition that the Tiger can Eat Goat or Not			
-		Array.prototype.insert = function (index, item) {
-  				this.splice(index, 0, item);
-				};//inplementing the insert method for array;
-		Array.prototype.remove = function(from, to){
-				this.splice(from, (to=[0,from||1,++to-from][arguments.length])<0?this.length+to:to);
-				  return this.length;
-				};
-		Array.prototype.removeDuplicates = function (){
-				  var temp=new Array();
-				  this.sort();
-				  for(i=0;i<this.length;i++){
-				    if(this[i]==this[i+1]) {continue}
-				    temp[temp.length]=this[i];
-				  }
-				  return temp;
-				}
-		console.log('baghchat application'); 
-		alert('new game application')
-
+	<script src='dist/game.js'></script>
+	<script>
+ let app = game.init({
+				container: "game-container"
+			});
 	</script>
+</body>
 
 </html>

@@ -16,7 +16,7 @@ module.exports = {
         compress: true,
         open: true,
         hot: true,
-        port: 8000,
+        port: 5000||process.env.port,
         writeToDisk:true
     },
     module: {
@@ -40,16 +40,27 @@ module.exports = {
                   ]
             },
             {
-                test: /\.(woff|woff2|ttf|eot|svg|png|jpg)$/,
+                test: /\.(woff|woff2|ttf|eot)$/,
                 use: [
                     {
                      loader :'file-loader',
                      options : {
                          name : '[name].[ext]'
+                         
                      }
                     }
                 ]
                 
+            },
+            {
+                test: /\.(png|jp(e*)g|svg)$/,  
+                use: [{
+                    loader: 'url-loader',
+                    options: { 
+                        limit: 8000, // Convert images < 8kb to base64 strings
+                        name: '[name].[ext]'
+                    } 
+                }]
             }
             
         ],
