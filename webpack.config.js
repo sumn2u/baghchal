@@ -5,7 +5,7 @@ const webpack = require('webpack');
 
 module.exports = {
     mode: 'development',
-    entry: ['@babel/polyfill','./src/library/index.js', './src/library/scss/style.scss'],
+    entry: ['./src/library/index.js', './src/library/scss/style.scss'],
     output: {
         path: path.resolve(__dirname, 'dist'),
         publicPath: "dist",
