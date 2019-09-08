@@ -4,6 +4,7 @@ package-lock.json
 /.idea/
 .idea/
 .idea
+.DS_Store
 # Logs
 logs
 *.log
