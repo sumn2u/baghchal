@@ -44,7 +44,9 @@ export class Board {
         this.totalMoveAttempts = 0;
 
     }
-
+    /**
+     * handle mouse intraction 
+     */
     mouseIntraction() {
         let mouseDown = false;
         let dragStaticGoat = false;
@@ -59,7 +61,7 @@ export class Board {
                 this.goats.forEach((point, index) => {
 
                     if (!point.pulled &&
-                        !point.deat &&
+                        !point.dead &&
                         this.currentX >= point.x
                         && this.currentX <= point.x + this.goatWidth
                         && this.currentY >= point.y
@@ -109,7 +111,9 @@ export class Board {
 
     }
 
-
+    /**
+     * render all objects
+     */
     render() {
         this.tigerMoveAttems = 0;
         this.canvas.clearRect(0, 0, this.totalWidth, this.totalHeight);
@@ -117,6 +121,9 @@ export class Board {
         this.drawTigers();
         this.renderGoats();
     }
+    /**
+     * calculate all posible points of board
+     */
     calculatePoints() {
         let points = [];
         for (let y = this.paddingTop; y <= this.totalHeight; y += this.horizontalStep) {
@@ -128,10 +135,15 @@ export class Board {
         }
         return points;
     }
+    /**
+     * add points to tiger array while initialising the game
+     */
     fillTigerPoints() {
         this.tigers.push(this.points[0], this.points[4], this.points[20], this.points[24]);
     }
-
+    /**
+     * fill goats initial points
+     */
     fillGoatPoints() {
 
         let padding = 20;
@@ -148,6 +160,9 @@ export class Board {
     }
 
 
+    /**
+     * draw square and lines for board
+     */
     drawBoard() {
         let sides = ['vertical', 'horizontal'];
         //draw inner rectangle
@@ -183,6 +198,9 @@ export class Board {
 
     }
 
+    /**
+     * draw tigers on board
+     */
     drawTigers() {
         this.tigers.forEach((element) => {
             let img = new Image();
@@ -192,6 +210,10 @@ export class Board {
             img.src = tigerImage;
         });
     }
+
+    /**
+     * draw goats on standby rectangle or on board
+     */
     renderGoats() {
         let padding = 20;
         let rectHeight = this.paddingTop - 2.5 * padding;
@@ -206,12 +228,20 @@ export class Board {
         this.goats.forEach((point) => {
             if (!point.pulled && !point.dead) {
                 this.drawStandByGoat(point.x, point.y, true, '#fff', this.canvas);
-            } else if (point.pulled && !point.deat) {
+            } else if (point.pulled && !point.dead) {
                 this.drawBoardGoat(point.x, point.y, this.canvas);
             }
         });
     }
-
+    /**
+     * draw goat on the upper rectangle standby mode
+     * user will drag them to board
+     * @param {} x1 
+     * @param {*} y1 
+     * @param {*} drawImage 
+     * @param {*} bg 
+     * @param {*} canvas 
+     */
     drawStandByGoat(x1, y1, drawImage, bg = '#fff', canvas) {
         let spacing = 5;
         canvas.beginPath();
@@ -228,6 +258,13 @@ export class Board {
         canvas.closePath();
     }
 
+    /**
+     * draw goat on board from their static position if user drags
+     * goat to the board near a point
+     * @param {*} x 
+     * @param {*} y 
+     * @param {*} staticGoatIndex 
+     */
     putGoatToBoard(x, y, staticGoatIndex) {
 
         let goatDrawn = false;
@@ -257,7 +294,12 @@ export class Board {
 
     }
 
-
+    /**
+     * method to draw goat
+     * @param {*} x1 
+     * @param {*} y1 
+     * @param {*} canvas fake/real canvas object
+     */
     drawBoardGoat(x1, y1, canvas) {
         canvas.beginPath();
         canvas.globalCompositeOperation = "source-over";
@@ -269,7 +311,13 @@ export class Board {
         canvas.closePath();
     }
 
-
+    /**
+     * method to draw line on canvas
+     * @param {} x1 
+     * @param {*} y1 
+     * @param {*} x2 
+     * @param {*} y2 
+     */
     drawLine(x1, y1, x2, y2) {
         this.canvas.beginPath();
         this.canvas.moveTo(x1, y1);
@@ -286,7 +334,9 @@ export class Board {
     }
 
 
-
+    /**
+     * method to get canvas positio on current window
+     */
     getCanvasPosition() {
         let box = this.holder.getBoundingClientRect();
         let scrollLeft = this.holder.parentNode.scrollLeft;
@@ -304,70 +354,93 @@ export class Board {
         return { top: Math.round(top), left: Math.round(left) };
     }
 
+    /**
+     * show fake canvas for the animation purpose
+     */
     showFakeCanvas() {
         this.fakeCanvas.clearRect(0, 0, this.totalHeight, this.totalWidth);
         this.fakeHolder.classList.remove('hide');
     }
-
+    /**
+     * hide fake canvas once animation is over
+     */
     hideFakeCanvas() {
         this.fakeCanvas.clearRect(0, 0, this.totalHeight, this.totalWidth);
         this.fakeHolder.classList.add('hide');
     }
-
+    /**
+     * check that at the given position tiger is already there or not
+     * @param {*} x1 
+     * @param {*} y1 
+     * @param {*} index 
+     */
     checkTigerPosition(x1, y1, index = -1) {
         let x = parseInt(x1);
         let y = parseInt(y1);
         let spotAvilable = true;
-        for (let i in this.tigers) {
-            let tiger = this.tigers[i];
+        this.tigers.forEach((tiger,i)=>{
             if (tiger && parseInt(tiger.x) == x && parseInt(tiger.y) == y && index != i) {
                 spotAvilable = false;
-                break;
+                return;
             }
-        }
+        });
         return spotAvilable;
     }
 
+    /**
+     * check at given x1, y1 goat is already there or not
+     * @param {*} x1 
+     * @param {*} y1 
+     * @param {*} index 
+     */
     checkGoatPosition(x1, y1, index = -1) {
         let x = parseInt(x1);
         let y = parseInt(y1);
         let spotAvilable = true;
-        for (let i in this.goats) {
-            let goat = this.goats[i];
+        this.goats.forEach((goat,i)=>{
             if (goat && goat.pulled && parseInt(goat.x) == x && parseInt(goat.y) == y && index != i) {
                 spotAvilable = false;
-                break;
+                return;
             }
-        }
+        })
         return spotAvilable;
     }
 
+    /**
+     * move the tiger after user moves the goat
+     */
     renderTigerMove() {
         let avilableTigers = [];
-        for (let i = 0; i < 4; i++) {
-
-            let tigerPoint = this.tigers[i];
-
+        this.tigers.forEach( (tigerPoint,i)=>{
             let pointIndex;
-
-            for (let j in this.points) {
-                let point = this.points[j];
+            this.points.forEach((point,j)=>{
                 if (parseInt(point.x) == parseInt(tigerPoint.x) && parseInt(point.y) == parseInt(tigerPoint.y)) {
                     pointIndex = j;
-                    break;
+                    return;
                 }
-            }
-
+            });
             let nextMovePossibleMoves = this.getNextPossibleMove(pointIndex);
-
             if (nextMovePossibleMoves.length>0) {
                 avilableTigers.push({ tiger: i, possibleMoves: nextMovePossibleMoves });
             }
-
-        }
-
+        
+        });
+       if(avilableTigers.length>0){
+        let randomTiger = Math.floor(Math.random() * avilableTigers.length);
+        let tigerToMove = avilableTigers[randomTiger];
+        let randomMove = Math.floor(Math.random() * tigerToMove.possibleMoves.length);
+        let tigerMovePoint = tigerToMove.possibleMoves[randomMove];
+        this.tigers[randomTiger] = tigerMovePoint;
+        this.render();
+       }else{
+           alert('Congratulations! You won the game! ')
+       }
     }
 
+    /**
+     * get next possible moves of tiger/goat
+     * @param {} pointIndex 
+     */
     getNextPossibleMove(pointIndex) {
         pointIndex = parseInt(pointIndex);
         this.totalMoveAttempts++;
@@ -397,7 +470,6 @@ export class Board {
         });
         return nextLegalPoints;
     }
-
 
 }
 
