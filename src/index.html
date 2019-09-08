@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= htmlWebpackPlugin.options.title %></title>
+</head>
+
+<body>
+    <div>
+        <div class="container mt-1">
+            <div id="game-container"></div>
+        </div>
+        <script src='../bundle.js'></script>
+        <script>
+            let app = game.init({
+                container: "game-container"
+            });
+        </script>
+</body>
+
+</html>
