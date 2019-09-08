@@ -1,6 +1,8 @@
 const path = require('path');
+const Dotenv = require('dotenv-webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 
 module.exports = {
@@ -8,11 +10,10 @@ module.exports = {
     entry: ['./src/library/index.js', './src/library/scss/style.scss'],
     output: {
         path: path.resolve(__dirname, 'dist'),
-        publicPath: "dist",
-        filename: 'game.js'
+        filename: 'bundle.js'
     },
     devServer: {
-        contentBase: path.join(__dirname, 'demo'),
+        contentBase: path.join(__dirname, 'dist'),
         compress: true,
         open: true,
         hot: true,
@@ -45,7 +46,7 @@ module.exports = {
                     {
                      loader :'file-loader',
                      options : {
-                         name : '[name].[ext]'
+                         name: '[hash]-[name].[ext]'
                          
                      }
                     }
@@ -58,7 +59,7 @@ module.exports = {
                     loader: 'url-loader',
                     options: { 
                         limit: 8000, // Convert images < 8kb to base64 strings
-                        name: '[name].[ext]'
+                        name: 'images/[hash]-[name].[ext]'
                     } 
                 }]
             }
@@ -67,6 +68,10 @@ module.exports = {
     },
     plugins: [
         new CleanWebpackPlugin(['dist']),
-        new webpack.HotModuleReplacementPlugin()
+        new webpack.HotModuleReplacementPlugin(),
+        new HtmlWebpackPlugin({
+            title: 'Bagh Chal',
+            template: './src/index.html'
+        })
       ],    
 };
