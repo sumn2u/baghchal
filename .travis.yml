@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+  - "node"
+script:
+  - npm install
+  - npm run build
+deploy:
+  provider: firebase
+  token:
+    secure: $FIREBASE_CI_TOKEN
