@@ -20,7 +20,7 @@ The game is asymmetric in that one player controls four tigers and the other pla
 Installing `bagh-chal` is easy.  You can clone the repo from here.
 
 ```
- git clone https://github.com/tekraj/baghchal.git
+ git clone https://github.com/sumn2u/baghchal.git
 ```
 
 ... and run the following command

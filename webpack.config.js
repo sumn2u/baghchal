@@ -1,5 +1,5 @@
 const path = require('path');
-const Dotenv = require('dotenv-webpack');
+const CopyPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -72,6 +72,10 @@ module.exports = {
         new HtmlWebpackPlugin({
             title: 'Bagh Chal',
             template: './src/index.html'
-        })
+        }),
+        new CopyPlugin([{
+            from: 'fbapp-config.json',
+            to: 'fbapp-config.json'
+        }])
       ],    
 };
