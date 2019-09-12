@@ -22,7 +22,7 @@ export class Board {
         this.steps = 4;
         this.verticalStep = this.width / this.steps;
         this.horizontalStep = this.height / this.steps;
-
+        this.firstGoatRender = 0;
         this.tigerImage = null;
         this.goatImage = null;
         this.verticalIndicators = [1,2,3,4,5];
@@ -123,6 +123,7 @@ export class Board {
         this.drawBoard();
         this.drawTigers();
         this.renderGoats();
+        this.firstGoatRender++;
     }
     /**
      * calculate all posible points of board
@@ -211,12 +212,12 @@ export class Board {
     drawTigers() {
         this.tigers.forEach(  (element) => {
             if(this.tigerImage){
-                this.canvas.drawImage(this.tigerImage, element.x - 15, element.y - 25, 40, 40);
+                this.canvas.drawImage(this.tigerImage, element.x - 50, element.y - 35, 80, 60);
                 return;
             }
             this.tigerImage = new Image();
             this.tigerImage.onload = () => {
-                this.canvas.drawImage(this.tigerImage, element.x - 15, element.y - 25, 40, 40);
+                this.canvas.drawImage(this.tigerImage, element.x - 50, element.y - 35, 80, 60);
                 this.drawTigers();
             }
             this.tigerImage.src = tigerImage;
@@ -261,7 +262,7 @@ export class Board {
         canvas.fillStyle = bg;
         canvas.fillRect(x1, y1, this.goatWidth - spacing, this.goatHeight - spacing);
         if (drawImage) {
-            if(this.goatImage){
+            if(this.firstGoatRender>0){
                 canvas.drawImage(this.goatImage,x1,y1,30,30);
             }else{
                 this.goatImage = new Image();
@@ -291,8 +292,8 @@ export class Board {
                 && x <= point.x + this.goatWidth
                 && y >= point.y - this.goatHeight
                 && y <= point.y + this.goatHeight
-                && this.checkTigerPosition(point.x, point.y)
-                && this.checkGoatPosition(point.x, point.y)
+                && this.checkTigerPosition(point.x, point.y)===-1
+                && this.checkGoatPosition(point.x, point.y)===-1
             ) {
                 this.drawBoardGoat(point.x, point.y, this.canvas);
                 this.goats[staticGoatIndex] = { x: point.x, y: point.y, pulled: true, dead: false };
@@ -390,15 +391,15 @@ export class Board {
     checkTigerPosition(x1, y1, index = -1) {
         let x = parseInt(x1);
         let y = parseInt(y1);
-        let spotAvilable = true;
+        let tigerIndex = -1;
        for(let i in  this.tigers){
            const tiger = this.tigers[i];
             if (tiger && parseInt(tiger.x) == x && parseInt(tiger.y) == y && index != i) {
-                spotAvilable = false;
+                tigerIndex = i;
                 break;
             }
         };
-        return spotAvilable;
+        return tigerIndex;
     }
 
     /**
@@ -410,15 +411,15 @@ export class Board {
     checkGoatPosition(x1, y1, index = -1) {
         let x = parseInt(x1);
         let y = parseInt(y1);
-        let spotAvilable = true;
+        let goatPosition = -1;
         for(let i  in this.goats){
             const goat = this.goats[i];
             if (goat && goat.pulled && parseInt(goat.x) == x && parseInt(goat.y) == y && index != i) {
-                spotAvilable = false;
+                goatPosition = i;
                 break;
             }
         }
-        return spotAvilable;
+        return goatPosition;
     }
 
     /**
@@ -441,23 +442,39 @@ export class Board {
             }
             
         });
-        this.dataContainer.innerHTML = '';
-        avilableTigers.forEach(tiger=>{
-            this.displayPossibleMoves(tiger.tiger,tiger.possibleMoves);
-        })
+       
        if(avilableTigers.length>0){
-        
-        // this.render();
+        const tigerCanEatGoat = avilableTigers.find(t=>t.possibleMoves.find(p=>p.eatGoat));
+        if(tigerCanEatGoat){
+            const tigerEatPoint = tigerCanEatGoat.possibleMoves.find(p=>p.eatGoat);
+            this.goats[tigerEatPoint.eatGoatIndex].dead = true;
+            this.tigers[tigerCanEatGoat.tiger] = this.points[tigerEatPoint.point];
+        }else{
+            let randomTiger = Math.floor(Math.random() * avilableTigers.length);
+            let tigerToMove = avilableTigers[randomTiger];
+            let randomMove = Math.floor(Math.random() * tigerToMove.possibleMoves.length);
+            let tigerMovePoint = tigerToMove.possibleMoves[randomMove];
+            this.tigers[tigerToMove.tiger] = this.points[tigerMovePoint.point];
+        }
+        this.render();
        }else{
            alert('Congratulations! You won the game! ')
        }
+       this.dataContainer.innerHTML = '';
+       const deatGoats = this.goats.filter(g=>g.dead).length;
+       const goatsInBoard = this.goats.filter(g=>g.pulled).length;
+       mount(this.dataContainer,el('p',`Dead Goats: ${deatGoats}`));
+       mount(this.dataContainer,el('p',`Goats On Board: ${goatsInBoard}`));
+       avilableTigers.forEach(tiger=>{
+           this.displayPossibleMoves(tiger.tiger,tiger.possibleMoves.map(p=>p.point));
+       })
     }
 
     /**
      * get next possible moves of tiger/goat
      * @param {} pointIndex 
      */
-    getNextPossibleMove(pointIndex) {
+    getNextPossibleMove(pointIndex,type='tiger') {
         pointIndex = Number(pointIndex);
         this.totalMoveAttempts++;
 
@@ -488,11 +505,34 @@ export class Board {
                 return false;
             }
             const point = this.points[el];
-            const tigerExist = this.checkTigerPosition(point.x,point.y,pointIndex);
-            const goatExist = this.checkGoatPosition(point.x,point.y);
-            return tigerExist && goatExist;
+            const tigerExist = this.checkTigerPosition(point.x,point.y, type==='tiger' ? pointIndex :-1);
+            return tigerExist===-1;
         });
-        return nextLegalPoints;
+        if(type==='goat'){
+            return nextLegalPoints.filter(p => {
+                const point = this.points[p];
+                const goataExists = this.checkGoatPosition(point.x,point.y,pointIndex);
+                return goataExists=== -1;
+            })
+        }
+        nextLegalPoints = nextLegalPoints.map(p=>{
+            const point = this.points[p];
+            const noGoat  = this.checkGoatPosition(point.x,point.y);
+            if(noGoat>-1){
+                const tigerMoveDistance = p-pointIndex;
+                const tigerEatPoint = Number(p)+ Number(tigerMoveDistance);
+                if(tigerEatPoint<0 || tigerEatPoint>this.totalPoints){
+                    return null;
+                }
+                const eatPoint = this.points[tigerEatPoint];
+                if(eatPoint && this.checkGoatPosition(eatPoint.x,eatPoint.y)=== -1 && this.checkTigerPosition(eatPoint.x,eatPoint.y)=== -1){
+                    return {point:tigerEatPoint ,eatGoat: true,eatGoatIndex: noGoat}
+                }
+                return null;
+            }
+            return {point:p,eatGoat: false};
+        })
+        return nextLegalPoints.filter(p=>p);
     }
 
     displayPossibleMoves(tigerIndex,possibleMoves){
