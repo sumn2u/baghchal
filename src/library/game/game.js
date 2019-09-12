@@ -1,14 +1,20 @@
 import { Board } from "../ui/board";
+import { mount,el } from "../ui/dom";
 
 class Game{
     constructor(config){
-        let canvasId = 'baghchal';
-        let fakeCanvasId = 'fake-canvas';
         this.container = document.getElementById(config.container);
-        this.container.innerHTML = `<canvas class="real-canvas" id="${canvasId}"></canvas>
-        <canvas class="fake-canvas" id="${fakeCanvasId}"></canvas>`;
+        this.gameWrapper = el(
+            'div.row',
+            this.canvasWrapper = el('div.col-sm-8',
+                this.realCanvas = el(`canvas#real-canvas.real-canvas`),
+                this.fakeCanvas = el('canvas#fake-canvas.fake-canvas')
+            ),
+            this.dataWrapper = el('div.col-sm-4')
+        );
+            mount(this.container,this.gameWrapper);
         this.container.style.position = 'relative';
-        this.board = new Board(canvasId,fakeCanvasId);
+        this.board = new Board(this.realCanvas,this.fakeCanvas,this.dataWrapper);
         this.board.render();
     }
 }

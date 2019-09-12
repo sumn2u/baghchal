@@ -47,3 +47,9 @@
    z-index: 99;
  }
  .hide{display: none;}
+ .possible-point{
+   font-weight: bold;
+   display: inline-block;
+   margin-right:5px;
+ }
+ .row>div{position: relative;}
