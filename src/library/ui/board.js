@@ -460,18 +460,21 @@ export class Board {
     getNextPossibleMove(pointIndex) {
         pointIndex = Number(pointIndex);
         this.totalMoveAttempts++;
-        const nextPossiblePoints = [ 5, -5];
-        // +1-1+5-5 for straight (current point inedex+1, currentPoint-1,currentPoint+5,currentPoint-5)
+
+        const nextPossiblePoints = [ 5, -5];// 5, -5 for move up down
         if (pointIndex % 2 === 0) { //can move diagonally
-            if (pointIndex%4===0 ) {
-               nextPossiblePoints.push(6, -6,4,-4);
-            }else{
+            if (pointIndex%5===0 ) { // left conrner points
+               nextPossiblePoints.push(-4,6);
+            }else if(pointIndex%5===4){ // right corners
                nextPossiblePoints.push(4,-6)
+            }else{
+                nextPossiblePoints.push(4,-4,6,-6)
             }
         }
-        if((pointIndex+1)%5===1){
+
+        if(pointIndex%5===0){ // left conrner points
             nextPossiblePoints.push(1);
-        }else if((pointIndex+1)%5==0){
+        }else if(pointIndex%5===4){ // right corner points
             nextPossiblePoints.push(-1);
         }else{
             nextPossiblePoints.push(1,-1);
