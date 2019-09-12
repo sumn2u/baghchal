@@ -39,10 +39,14 @@ export class Board {
         this.currentY = 0;
         this.goatHeight = 0;
         this.goatWidth = 0;
-        this.canvasPosition = this.getCanvasPosition();
         this.points = this.calculatePoints();// Array<{x:number,y:number}>;
         this.fillGoatPoints();
         this.fillTigerPoints();
+
+        this.mouseDown = false;
+        this.dragStaticGoat = false;
+        this.staticGoat = {};
+        this.staticGoatIndex;
         this.mouseIntraction();
         this.totalMoveAttempts = 0;
 
@@ -51,69 +55,78 @@ export class Board {
      * handle mouse intraction 
      */
     mouseIntraction() {
-        let mouseDown = false;
-        let dragStaticGoat = false;
-        let staticGoat = {};
-        let staticGoatIndex;
-        this.realCanvasElement.addEventListener('mousedown', (event) => {
-            mouseDown = true;
-            this.currentX = event.pageX - this.canvasPosition.left;
-            this.currentY = event.pageY - this.canvasPosition.top;
-            // intraction with remaining goats
-            if (this.currentY < this.paddingTop) {
-                this.goats.forEach((point, index) => {
 
-                    if (!point.pulled &&
-                        !point.dead &&
-                        this.currentX >= point.x
-                        && this.currentX <= point.x + this.goatWidth
-                        && this.currentY >= point.y
-                        && this.currentY <= point.y + this.goatHeight
+        this.canvasPosition = this.getCanvasPosition();   
+        this.realCanvasElement.addEventListener('mousedown', this.handelMouseDownEvent.bind(this));
+        this.realCanvasElement.addEventListener('touchstart', this.handelMouseDownEvent.bind(this));
 
-                    ) {
-                        staticGoatIndex = index;
-                        dragStaticGoat = true;
-                        staticGoat = point;
-                        this.drawStandByGoat(point.x, point.y, false, '#fff', this.canvas);
-                        this.showFakeCanvas();
-                        return;
-                    }
-                });
-            } else {//intraction with board
+        this.fakeCanvasElement.addEventListener('mouseup',this.handleFakeCanvasMouseUpEvent.bind(this));
+        this.fakeCanvasElement.addEventListener('touchend',this.handleFakeCanvasMouseUpEvent.bind(this));
 
-            }
-        });
-
-        this.fakeCanvasElement.addEventListener('mouseup', (event) => {
-            mouseDown = false;
-            this.currentX = event.pageX - this.canvasPosition.left;
-            this.currentY = event.pageY - this.canvasPosition.top;
-            if (dragStaticGoat) {
-                this.putGoatToBoard(this.currentX, this.currentY, staticGoatIndex);
-            }
-            this.hideFakeCanvas();
-        });
 
         this.realCanvasElement.addEventListener('mouseup', (event) => {
-            mouseDown = false;
+            this.mouseDown = false;
             this.hideFakeCanvas();
         });
-        this.fakeCanvasElement.addEventListener('mousemove', (event) => {
-            this.currentX = event.pageX - this.canvasPosition.left;
-            this.currentY = event.pageY - this.canvasPosition.top;
-            if (!mouseDown) {
-                return true;
-            }
-
-            if (dragStaticGoat) {
-                this.fakeCanvas.clearRect(0, 0, this.totalHeight*2, this.totalWidth*2);
-                this.drawBoardGoat(this.currentX, this.currentY, this.fakeCanvas);
-            }
-
+        this.realCanvasElement.addEventListener('touchend', (event) => {
+            this.mouseDown = false;
+            this.hideFakeCanvas();
         });
 
-    }
+        this.fakeCanvasElement.addEventListener('mousemove',this.handleMouseMoveEvent.bind(this));
+        this.fakeCanvasElement.addEventListener('touchmove',this.handleMouseMoveEvent.bind(this));
 
+
+    }
+    handelMouseDownEvent(event){
+        this.mouseDown = true;
+        this.currentX = event.pageX - this.canvasPosition.left;
+        this.currentY = event.pageY - this.canvasPosition.top;
+        // intraction with remaining goats
+        if (this.currentY < this.paddingTop) {
+            this.goats.forEach((point, index) => {
+
+                if (!point.pulled &&
+                    !point.dead &&
+                    this.currentX >= point.x
+                    && this.currentX <= point.x + this.goatWidth
+                    && this.currentY >= point.y
+                    && this.currentY <= point.y + this.goatHeight
+
+                ) {
+                    this.staticGoatIndex = index;
+                    this.dragStaticGoat = true;
+                    this.staticGoat = point;
+                    this.drawStandByGoat(point.x, point.y, false, '#fff', this.canvas);
+                    this.showFakeCanvas();
+                    return;
+                }
+            });
+        } else {//intraction with board
+            
+        }
+    }
+    handleMouseMoveEvent(event){
+        this.currentX = event.pageX - this.canvasPosition.left;
+        this.currentY = event.pageY - this.canvasPosition.top;
+        if (!this.mouseDown) {
+            return true;
+        }
+
+        if (this.dragStaticGoat) {
+            this.fakeCanvas.clearRect(0, 0, this.totalHeight*2, this.totalWidth*2);
+            this.drawBoardGoat(this.currentX, this.currentY, this.fakeCanvas);
+        }
+    }
+    handleFakeCanvasMouseUpEvent(event){
+        this.mouseDown = false;
+        this.currentX = event.pageX - this.canvasPosition.left;
+        this.currentY = event.pageY - this.canvasPosition.top;
+        if (this.dragStaticGoat) {
+            this.putGoatToBoard(this.currentX, this.currentY, this.staticGoatIndex);
+        }
+        this.hideFakeCanvas();
+    }
     /**
      * render all objects
      */
@@ -518,12 +531,19 @@ export class Board {
         nextLegalPoints = nextLegalPoints.map(p=>{
             const point = this.points[p];
             const noGoat  = this.checkGoatPosition(point.x,point.y);
+            // if next tiger position has goat then check for straight next position for empty
+
             if(noGoat>-1){
                 const tigerMoveDistance = p-pointIndex;
-                const tigerEatPoint = Number(p)+ Number(tigerMoveDistance);
-                if(tigerEatPoint<0 || tigerEatPoint>this.totalPoints){
+                const tigerEatPoint = Number(p)+ Number(tigerMoveDistance); 
+                // get the distance between current position and next position 
+                // and double the distance is where tiger will jump to eat goat
+                if(tigerEatPoint<0 || tigerEatPoint>this.totalPoints || (tigerMoveDistance===1 && p%5===4) || (tigerMoveDistance===-1 && p%5===0)){
+                    // if next eat point is less than zero or greater thant totalPoint
+                    // or the goat is at right most point or goat is at left most point
                     return null;
                 }
+                
                 const eatPoint = this.points[tigerEatPoint];
                 if(eatPoint && this.checkGoatPosition(eatPoint.x,eatPoint.y)=== -1 && this.checkTigerPosition(eatPoint.x,eatPoint.y)=== -1){
                     return {point:tigerEatPoint ,eatGoat: true,eatGoatIndex: noGoat}
