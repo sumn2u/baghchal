@@ -447,7 +447,7 @@ export class Board {
         const tigerCanEatGoat = avilableTigers.find(t=>t.possibleMoves.find(p=>p.eatGoat));
         if(tigerCanEatGoat){
             const tigerEatPoint = tigerCanEatGoat.possibleMoves.find(p=>p.eatGoat);
-            this.goats[tigerEatPoint.eatGoatIndex].dead = true;
+            this.goats[tigerEatPoint.eatGoatIndex] ={x:0,y:0,pulled: true,dead: true};
             this.tigers[tigerCanEatGoat.tiger] = this.points[tigerEatPoint.point];
         }else{
             let randomTiger = Math.floor(Math.random() * avilableTigers.length);
