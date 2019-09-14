@@ -1,3 +1,5 @@
+import { Logic } from '../ai/logic';
+import { TIGER, GOAT } from '../constants';
 import tigerImage from '../images/tiger.png';
 import goatImage from '../images/goat.png';
 import { mount, el, list } from '../ui/dom';
@@ -50,6 +52,8 @@ export class Board {
         this.mouseIntraction();
         this.totalMoveAttempts = 0;
 
+        // AILevel = 2;
+        this.logic = new Logic(this, 2);
     }
     /**
      * handle mouse intraction 
@@ -451,12 +455,14 @@ export class Board {
             }
             let nextMovePossibleMoves = this.getNextPossibleMove(pointIndex);
             if (nextMovePossibleMoves.length>0) {
-                avilableTigers.push({ tiger: i, possibleMoves: nextMovePossibleMoves });
+                avilableTigers.push({ tiger: i, point: pointIndex, possibleMoves: nextMovePossibleMoves });
             }
             
         });
        
        if(avilableTigers.length>0){
+        // getting next best move for tiger, will be improved later
+        this.logic.getNextBestMove(TIGER, avilableTigers, this.goats);
         const tigerCanEatGoat = avilableTigers.find(t=>t.possibleMoves.find(p=>p.eatGoat));
         if(tigerCanEatGoat){
             const tigerEatPoint = tigerCanEatGoat.possibleMoves.find(p=>p.eatGoat);
@@ -487,7 +493,7 @@ export class Board {
      * get next possible moves of tiger/goat
      * @param {} pointIndex 
      */
-    getNextPossibleMove(pointIndex,type='tiger') {
+    getNextPossibleMove(pointIndex,type=TIGER) {
         pointIndex = Number(pointIndex);
         this.totalMoveAttempts++;
 
@@ -518,10 +524,10 @@ export class Board {
                 return false;
             }
             const point = this.points[el];
-            const tigerExist = this.checkTigerPosition(point.x,point.y, type==='tiger' ? pointIndex :-1);
+            const tigerExist = this.checkTigerPosition(point.x,point.y, type===TIGER ? pointIndex :-1);
             return tigerExist===-1;
         });
-        if(type==='goat'){
+        if(type===GOAT){
             return nextLegalPoints.filter(p => {
                 const point = this.points[p];
                 const goataExists = this.checkGoatPosition(point.x,point.y,pointIndex);
@@ -556,13 +562,15 @@ export class Board {
     }
 
     displayPossibleMoves(tigerIndex,possibleMoves){
-        const moves = possibleMoves.map(el=>{
-            return this.verticalIndicators[Math.floor(el/5)].toString() +this.horizontalIndicators[el%5].toString();
-        });
+        const moves = possibleMoves.map(el=> this.pointToBoardPosition(el));
         mount(this.dataContainer,el('h3',`Tiger ${tigerIndex+1}`));
         const tigerPossiblePointList = list(`ul.tiger-possible-points`, TigerPossibleMoveList);
             mount(this.dataContainer, tigerPossiblePointList);
         tigerPossiblePointList.update(moves);
+    }
+
+    pointToBoardPosition(point) {
+        return this.verticalIndicators[Math.floor(point/5)].toString() +this.horizontalIndicators[point%5].toString();
     }
 
     drawText(x,y,side,text){
