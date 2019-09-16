@@ -49,6 +49,7 @@ export class Board {
       element.addEventListener("click", event => {
         if (event.target.classList.contains("tiger")) {
           this.chosenItem = "tiger";
+          this.renderGoatMove();
         } else {
           this.chosenItem = "goat";
         }
@@ -610,7 +611,35 @@ export class Board {
    * render goat after user moves tiger
    */
   renderGoatMove(){
+    if(this.goats.length<20){
+      const availablePoints = this.points.filter(p=>!p.item);
+      const randPoint = Math.floor(Math.random()*availablePoints.length);
+      const point = availablePoints[randPoint];
+      this.points[point.index].item = 'goat';
+      this.points[point.index].itemIndex = this.goats.length;
+      this.goats.push({x:point.x,y:point.y,dead: false,drag: false,index:this.goats.length,currentPoint:point.index});
+    }else{
+      const goatsInBoard = this.goats.filter(g=>!g.dead);
+      const randomGoat = Math.floor(Math.random() * goatInBoard.length);
+      const goat = goatsInBoard[randomGoat];
+      const avialableMoves = this.getNextPossibleMove(goat.currentPoint);
+      if(avialableMoves && avialableMoves.length>0){
+        const randMove = Math.floor(Math.random() * avialableMoves.length);
+        const nextPoint = avialableMoves[randMove];
+        const point = this.points[nextPoint];
+        // release goat from prev point 
+        this.points[goat.currentPoint].item = null;
+        this.points[point.currentPoint].itemIndex = null;
 
+        this.goats[goat.index].x = point.x;
+        this.goats[goat.index].y = point.x;
+        this.goats[goat.index].currentPoint = point.index;
+        // add goat to new point 
+        this.points[point.index].item = 'goat';
+        this.points[point.index].itemIndex = goat.index;
+      }
+    }
+    this.render();
   }
   /**
    * get next possible moves of tiger/goat
