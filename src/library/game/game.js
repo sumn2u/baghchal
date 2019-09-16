@@ -6,13 +6,13 @@ class Game{
         this.container = document.getElementById(config.container);
         this.gameWrapper = el(
             'div.row',
-            this.canvasWrapper = el('div.col-sm-8',
+            this.canvasWrapper = el('div.col-md-8',
                 this.realCanvas = el(`canvas#real-canvas.real-canvas`),
                 this.fakeCanvas = el('canvas#fake-canvas.fake-canvas')
             ),
-            this.dataWrapper = el('div.col-sm-4')
+            this.dataWrapper = el('div.col-md-4')
         );
-            mount(this.container,this.gameWrapper);
+        mount(this.container,this.gameWrapper);
         this.container.style.position = 'relative';
         this.board = new Board(this.realCanvas,this.fakeCanvas,this.dataWrapper);
         this.board.render();
