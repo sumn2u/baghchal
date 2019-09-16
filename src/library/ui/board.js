@@ -218,7 +218,6 @@ export class Board {
           const validPoint = possiblePoints.find(p=>p.point===releasedPoint.index);
           if(validPoint){
             const draggedTiger = this.tigers.find(t=>t.drag);
-            console.log(draggedTiger);
             if(draggedTiger){
                // release  item from prev point
                this.points[draggedTiger.currentPoint].item = null;
