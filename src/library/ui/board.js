@@ -108,7 +108,7 @@ export class Board {
     this.totalMoveAttempts = 0;
     // item ready for drag
     this.dragItem = null;//  {item:TIGER,itemData:clickedPoint}
-
+    this.animationInProgress = false;
 
     // AILevel = 2;
     // this.logic = new Logic(this, 2);
@@ -149,6 +149,9 @@ export class Board {
    * @param {mouse event} event
    */
   handelMouseDownEvent(event) {
+    if(this.animationInProgress){
+      return true;
+    }
     this.mouseDown = true;
     const x = event.pageX - this.canvasPosition.left;
     const y = event.pageY - this.canvasPosition.top;
@@ -258,6 +261,9 @@ export class Board {
   }
 
   handleMouseMoveEvent(event){
+    if(this.animationInProgress){
+      return true;
+    }
     if(!(this.mouseDown && this.dragItem)){
       return true;
     }
@@ -613,7 +619,7 @@ export class Board {
           .currentPoint;
         this.points[currentTigerIndex].item = null;
         this.points[currentTigerIndex].itemIndex = null;
-        this.showMoveAnimation(TIGER,{prevPoint:this.tigers[tigerCanEatGoat.tiger],nextPoint:tigerNewPoint,currentPoint:tigerCanEatGoat.index});
+        this.showMoveAnimation(TIGER,{prevPoint:this.tigers[tigerCanEatGoat.tiger],nextPoint:tigerNewPoint,currentPoint:tigerEatPoint.point});
         
         // add new reference of tiger to the points
         this.points[tigerEatPoint.point].item = TIGER;
@@ -631,7 +637,7 @@ export class Board {
         this.points[currentTigerPoint].itemIndex = null;
 
         const tigerNewPoint = this.points[tigerMovePoint.point];
-        this.showMoveAnimation(TIGER,{prevPoint:this.tigers[tigerToMove.tiger],nextPoint:tigerNewPoint,currentPoint:tigerMovePoint.index});
+        this.showMoveAnimation(TIGER,{prevPoint:this.tigers[tigerToMove.tiger],nextPoint:tigerNewPoint,currentPoint:tigerMovePoint.point});
         
         // add new reference of tiger to the points
         this.points[tigerMovePoint.point].item = TIGER;
@@ -742,9 +748,7 @@ export class Board {
         if (
           tigerEatPoint < 0 ||
           tigerEatPoint > this.totalPoints ||
-          (tigerMoveDistance === 1 && p % 5 === 4) ||
-          (tigerMoveDistance === -1 && p % 5 === 0)
-        ) {
+          ( ([1,4,6,].indexOf(Math.abs(tigerMoveDistance))) >=0)   && (p % 5 === 4 ||  p % 5 === 0) ) {
           // if next eat point is less than zero or greater thant totalPoint
           // or the goat is at right most point or goat is at left most point
           return null;
@@ -796,6 +800,7 @@ export class Board {
    * @param {{prevPoint:this.tigers[tigerToMove.tiger],nextPoint:tigerNewPoint,currentPoint:tigerMovePoint.point}} data 
    */
   showMoveAnimation(item,data){
+    this.animationInProgress = true;
     if(item===TIGER){
       const prevPoint = data.prevPoint;
       const nextPoint = data.nextPoint;
@@ -812,7 +817,7 @@ export class Board {
       this.tigers[prevPoint.index] = {
         x: -2000,
         y: -2000,
-        currentPoint: nextPoint.point
+        currentPoint: data.currentPoint
       };
       const animationFrame = setInterval(()=>{
           if(frame<10){
@@ -830,6 +835,7 @@ export class Board {
             y = (dy/dx)* (x-prevPoint.x)+prevPoint.y;
           }
           if(frame>frameRate){
+            this.animationInProgress = false;
             this.tigers[prevPoint.index] = {
               x: nextPoint.x,
               y: nextPoint.y,
