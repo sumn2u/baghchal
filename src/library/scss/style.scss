@@ -46,6 +46,16 @@
    right:0;
    z-index: 99;
  }
+ .text-right{text-align: right;}
+ .col-xs-6 {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+ .pad-15{padding:15px;}
+ .btn.btn-sm{
+   padding:3px;
+   border-radius: 3px;
+ }
  .hide{display: none;}
  .possible-point{
    font-weight: bold;

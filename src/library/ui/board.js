@@ -18,31 +18,32 @@ export class Board {
     mount(
       this.infoBox,
       (this.selectItem = el(
-        "div.row",
-        el("div.col-sm-6", el("p", "Choose Tiger or Goat")),
-        el(
-          "div.col-sm-6",
+        'div.container-fluid',
+        el("div.row",
+          el("div.col-xs-6", el("p", "Choose Tiger or Goat")),
           el(
-            "button",
-            {
-              class: "btn btn-danger active tiger",
-              style: "margin-right:15px"
-            },
-            TIGER
-          ),
-          el("button", { class: "btn btn-info active goat" }, GOAT)
-        )
+            "div.col-xs-6 text-right",
+            el(
+              "button",
+              {
+                class: "btn btn-danger btn-sm active tiger",
+                style: "margin-right:15px"
+              },
+              TIGER
+            ),
+            el("button", { class: "btn btn-info btn-sm active goat" }, GOAT)
+          )
       ))
-    );
+    ));
     mount(
       this.infoBox,
       (this.genralInfo = el(
         "div.row.hide",
         el(
-          "div.col-sm-6",
+          "div.col-xs-6",
           (this.goatBoardIndicator = el("p", `Goats in board: 0`))
         ),
-        el("div.col-sm-6", (this.deadGoatIndicator = el("p", `Dead Goats: 0`)))
+        el("div.col-xs-6", (this.deadGoatIndicator = el("p", `Dead Goats: 0`)))
       ))
     );
     mount(this.dataContainer, (this.moveIndicator = el("div")));
@@ -62,13 +63,15 @@ export class Board {
     this.goats = []; // Array<{x:number,y:number,dead:false, currentPoint,drag: false,index: number;}>
     this.tigers = []; // Array<{x:number,y:number,currentPoint: number,drag: false,index: number}>
 
-    this.totalHeight = 500;
-    this.totalWidth = 500;
+    const totalWidth = window.innerWidth;
+    const totalHeight = window.innerHeight;
+    this.totalWidth = totalWidth> 500 ? 500: totalWidth;
+    this.totalHeight = totalHeight>totalWidth ? totalWidth : (totalHeight>500?500: totalHeight);
     this.totalPoints = 24;
-    this.paddingLeft = 50;
-    this.paddingRight = 50;
-    this.paddingTop = 50;
-    this.paddingBottom = 50;
+    this.paddingLeft = this.totalWidth/10;
+    this.paddingRight = this.totalWidth/10;
+    this.paddingTop = this.totalWidth/10;
+    this.paddingBottom = this.totalWidth/10;
     this.height = this.totalHeight - (this.paddingTop + this.paddingBottom);
     this.width = this.totalWidth - (this.paddingLeft + this.paddingRight);
     this.steps = 4;
