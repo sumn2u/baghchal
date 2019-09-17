@@ -1,63 +1,61 @@
-import { Logic } from '../ai/logic';
-import { TIGER, GOAT } from '../constants';
+import { Logic } from "../ai/logic";
+import { TIGER, GOAT } from "../constants";
 import tigerImage from "../images/tiger.png";
 import goatImage from "../images/goat.png";
+import diamondCircle from "../images/diamond-circle.png";
+import topBorderImage from "../images/top-bar.png";
+import bottomBorderImage from "../images/bottom-bar.png";
+import leftRightBorderImage from "../images/left-right-bar.png";
 import { mount, el, list } from "../ui/dom";
 import { TigerPossibleMoveList } from "./components/tiger-possible-move-list";
 export class Board {
-  constructor(realCanvasElement, fakeCanvasElement, dataContainer) {
-    this.chosenItem = "tiger";
+  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer) {
+    this.chosenItem = null;
     this.dataContainer = dataContainer;
     this.realCanvasElement = realCanvasElement;
     this.fakeCanvasElement = fakeCanvasElement;
+    this.infoBox = infoBox;
     mount(
-      this.realCanvasElement.parentNode,
+      this.infoBox,
       (this.selectItem = el(
-        "div.pos-absolute",
-        el("h4", "Choose Tiger or Goat"),
+        "div.row",
+        el("div.col-sm-6", el("p", "Choose Tiger or Goat")),
         el(
-          "div.btn-group",
+          "div.col-sm-6",
           el(
             "button",
             {
               class: "btn btn-danger active tiger",
               style: "margin-right:15px"
             },
-            "Tiger"
+            TIGER
           ),
-          el("button", { class: "btn btn-info active goat" }, "Goat")
+          el("button", { class: "btn btn-info active goat" }, GOAT)
         )
       ))
     );
     mount(
-      this.dataContainer,
-      el(
-        "div",
-        (this.genralInfo = el(
-          "div.hide",
-          (this.chooseItemIndicator = el("h4", "")),
-          (this.resetButton = el(
-            "button",
-            { class: "btn btn-primary active" },
-            "Reset Game"
-          ))
-        )),
-        (this.moveIndicator = el("div"))
-      )
+      this.infoBox,
+      (this.genralInfo = el(
+        "div.row.hide",
+        el(
+          "div.col-sm-6",
+          (this.goatBoardIndicator = el("p", `Goats in board: 0`))
+        ),
+        el("div.col-sm-6", (this.deadGoatIndicator = el("p", `Dead Goats: 0`)))
+      ))
     );
+    mount(this.dataContainer, (this.moveIndicator = el("div")));
 
-    this.realCanvasElement.classList.add("hide-visibility");
     this.selectItem.querySelectorAll(".btn").forEach(element => {
       element.addEventListener("click", event => {
-        if (event.target.classList.contains("tiger")) {
-          this.chosenItem = "tiger";
+        if (event.target.classList.contains(TIGER)) {
+          this.chosenItem = TIGER;
           this.renderGoatMove();
         } else {
-          this.chosenItem = "goat";
+          this.chosenItem = GOAT;
         }
-        this.realCanvasElement.classList.remove("hide-visibility");
         this.selectItem.classList.add("hide");
-        this.chooseItemIndicator.innerHTML = `You chose ${this.chosenItem}`;
         this.genralInfo.classList.remove("hide");
       });
     });
@@ -67,10 +65,10 @@ export class Board {
     this.totalHeight = 500;
     this.totalWidth = 500;
     this.totalPoints = 24;
-    this.paddingLeft = 30;
-    this.paddingRight = 30;
-    this.paddingTop = 30;
-    this.paddingBottom = 30;
+    this.paddingLeft = 50;
+    this.paddingRight = 50;
+    this.paddingTop = 50;
+    this.paddingBottom = 50;
     this.height = this.totalHeight - (this.paddingTop + this.paddingBottom);
     this.width = this.totalWidth - (this.paddingLeft + this.paddingRight);
     this.steps = 4;
@@ -79,30 +77,37 @@ export class Board {
     this.firstGoatRender = 0;
     this.tigerImage = null;
     this.goatImage = null;
+    this.diamondCircleImage = null;
+    this.leftRightBorderImage = null;
+    this.topBorderImage = null;
+    this.bottomBorderImage = null;
     this.verticalIndicators = [1, 2, 3, 4, 5];
     this.horizontalIndicators = ["A", "B", "C", "D", "E"];
     this.realCanvasElement.setAttribute("height", this.totalHeight);
     this.realCanvasElement.setAttribute("width", this.totalWidth);
-    this.fakeCanvasElement.setAttribute("height", this.totalHeight + 50);
-    this.fakeCanvasElement.setAttribute("width", this.totalWidth + 50);
+    this.fakeCanvasElement.setAttribute("height", this.totalHeight);
+    this.fakeCanvasElement.setAttribute("width", this.totalWidth);
     this.fakeCanvasElement.classList.add("hide");
     this.realCanvasElement.style.border = "1px solid #ccc";
     this.canvas = this.realCanvasElement.getContext("2d");
     this.fakeCanvas = this.fakeCanvasElement.getContext("2d");
 
-    this.goatHeight = 40;
-    this.goatWidth = 40;
+    this.goatHeight = 60;
+    this.goatWidth = 58;
+    this.tigerWidth = 60;
+    this.tigerHeight = 58;
+    this.cirlceImageRad = 40;
     this.points = this.calculatePoints(); // Array<{x:number,y:number,index: number,item:'tiger or goat', itemIndex: number (tiger goat Index)}>;
     this.fillTigerPoints();
     this.mouseDown = false;
     this.mouseIntraction();
     this.totalMoveAttempts = 0;
     // item ready for drag
-    this.dragItem = null;//  {item:'tiger',itemData:clickedPoint}
-
+    this.dragItem = null; //  {item:TIGER,itemData:clickedPoint}
+    this.animationInProgress = false;
 
     // AILevel = 2;
-    this.logic = new Logic(this, 2);
+    // this.logic = new Logic(this, 2);
   }
   /**
    * handle mouse intraction
@@ -125,14 +130,29 @@ export class Board {
     /**
      * Mouse up /touch end event handlers
      */
-    this.realCanvasElement.addEventListener("mouseup", this.handleMouseUpEvent.bind(this));
-    this.realCanvasElement.addEventListener("touchend",  this.handleMouseUpEvent.bind(this));
-    this.fakeCanvasElement.addEventListener("mouseup", this.handleMouseUpEvent.bind(this));
-    this.fakeCanvasElement.addEventListener("touchend",  this.handleMouseUpEvent.bind(this));
+    this.realCanvasElement.addEventListener(
+      "mouseup",
+      this.handleMouseUpEvent.bind(this)
+    );
+    this.realCanvasElement.addEventListener(
+      "touchend",
+      this.handleMouseUpEvent.bind(this)
+    );
+    this.fakeCanvasElement.addEventListener(
+      "mouseup",
+      this.handleMouseUpEvent.bind(this)
+    );
+    this.fakeCanvasElement.addEventListener(
+      "touchend",
+      this.handleMouseUpEvent.bind(this)
+    );
     /**
      * mouse move/ touch move event handler
      */
-    this.fakeCanvasElement.addEventListener('mousemove', this.handleMouseMoveEvent.bind(this));
+    this.fakeCanvasElement.addEventListener(
+      "mousemove",
+      this.handleMouseMoveEvent.bind(this)
+    );
   }
 
   /**
@@ -140,40 +160,52 @@ export class Board {
    * @param {mouse event} event
    */
   handelMouseDownEvent(event) {
+    if (!this.chosenItem) {
+      return true;
+    }
+    if (this.animationInProgress) {
+      return true;
+    }
     this.mouseDown = true;
     const x = event.pageX - this.canvasPosition.left;
     const y = event.pageY - this.canvasPosition.top;
-    const clickedPoint = this.points.find(point=> {
-        return x >= point.x - this.goatWidth &&
+    const clickedPoint = this.points.find(point => {
+      return (
+        x >= point.x - this.goatWidth &&
         x <= point.x + this.goatWidth &&
         y >= point.y - this.goatHeight &&
         y <= point.y + this.goatHeight
+      );
     });
-    if(!clickedPoint){
+    if (!clickedPoint) {
       return true;
     }
     const i = clickedPoint.index;
-    if( !clickedPoint.item && this.chosenItem==='goat' && this.goats.length<20){
-        this.goats.push({
-          x: clickedPoint.x,
-          y: clickedPoint.y,
-          dead: false,
-          drag: false,
-          currentPoint: i,
-          index: this.goats.length
-        }); // add new point to goat
-        // track goat point to all points array
-        this.points[i].item = "goat";
-        this.points[i].itemIndex = this.goats.length-1;
-        this.renderTigerMove();
-    }else if(this.chosenItem==='goat' && this.goats.length===20){
-        this.goats.forEach(g=> g.drag = g.currentPoint===i?true:false);
-        this.dragItem = {item:'goat',point:clickedPoint}
-    }else if(this.chosenItem==='tiger'){
-      this.tigers.forEach(t=> t.drag = t.currentPoint===i?true:false);
-      this.dragItem = {item:'tiger',point:clickedPoint}
+    if (
+      !clickedPoint.item &&
+      this.chosenItem === GOAT &&
+      this.goats.length < 20
+    ) {
+      this.goats.push({
+        x: clickedPoint.x,
+        y: clickedPoint.y,
+        dead: false,
+        drag: false,
+        currentPoint: i,
+        index: this.goats.length
+      }); // add new point to goat
+      // track goat point to all points array
+      this.points[i].item = GOAT;
+      this.points[i].itemIndex = this.goats.length - 1;
+      this.renderTigerMove();
+    } else if (this.chosenItem === GOAT && this.goats.length === 20) {
+      this.goats.forEach(g => (g.drag = g.currentPoint === i ? true : false));
+      this.dragItem = { item: GOAT, point: clickedPoint };
+    } else if (this.chosenItem === TIGER) {
+      this.tigers.forEach(t => (t.drag = t.currentPoint === i ? true : false));
+      this.dragItem = { item: TIGER, point: clickedPoint };
     }
-    if(!this.dragItem){
+    if (!this.dragItem) {
       return true;
     }
     this.showFakeCanvas();
@@ -184,26 +216,32 @@ export class Board {
    * handle mouse down event
    * @param {mouse event} event
    */
-  handleMouseUpEvent(event){
+  handleMouseUpEvent(event) {
     this.mouseDown = false;
     this.hideFakeCanvas();
-    if(this.dragItem){
+    if (this.dragItem) {
       const x = event.pageX - this.canvasPosition.left;
       const y = event.pageY - this.canvasPosition.top;
-      const releasedPoint = this.points.find(point=> {
-          return x >= point.x - this.goatWidth &&
+      const releasedPoint = this.points.find(point => {
+        return (
+          x >= point.x - this.goatWidth &&
           x <= point.x + this.goatWidth &&
           y >= point.y - this.goatHeight &&
           y <= point.y + this.goatHeight
+        );
       });
-      if(releasedPoint){
-
-        if(this.dragItem.item==='goat'){
-          const possiblePoints = this.getNextPossibleMove(this.dragItem.point.index,'goat');
-          const validPoint = possiblePoints.find(p=>p===releasedPoint.index);
-          if(validPoint){
-            const draggedGoat = this.goats.find(g=>g.drag);
-            if(draggedGoat){
+      if (releasedPoint) {
+        if (this.dragItem.item === GOAT) {
+          const possiblePoints = this.getNextPossibleMove(
+            this.dragItem.point.index,
+            GOAT
+          );
+          const validPoint = possiblePoints.find(
+            p => p === releasedPoint.index
+          );
+          if (validPoint) {
+            const draggedGoat = this.goats.find(g => g.drag);
+            if (draggedGoat) {
               // release  item from prev point
               this.points[draggedGoat.currentPoint].item = null;
               this.points[draggedGoat.currentPoint].itemIndex = null;
@@ -213,27 +251,35 @@ export class Board {
               this.goats[draggedGoat.index].currentPoint = releasedPoint.index;
 
               // add new item to points
-              this.points[releasedPoint.index].item = 'goat';
+              this.points[releasedPoint.index].item = GOAT;
               this.points[releasedPoint.index].itemIndex = draggedGoat.index;
               // computer turn to move tiger
               this.renderTigerMove();
             }
           }
-        }else{
-          const possiblePoints = this.getNextPossibleMove(this.dragItem.point.index,'tiger');
-          const validPoint = possiblePoints.find(p=>p.point===releasedPoint.index);
-          if(validPoint){
-            const draggedTiger = this.tigers.find(t=>t.drag);
-            if(draggedTiger){
-               // release  item from prev point
-               this.points[draggedTiger.currentPoint].item = null;
-               this.points[draggedTiger.currentPoint].itemIndex = null;
-               // update tiger point
+        } else {
+          console.log(this.dragItem);
+          const possiblePoints = this.getNextPossibleMove(
+            this.dragItem.point.index,
+            TIGER
+          );
+          console.log(possiblePoints);
+          const validPoint = possiblePoints.find(
+            p => p.point === releasedPoint.index
+          );
+          if (validPoint) {
+            const draggedTiger = this.tigers.find(t => t.drag);
+            if (draggedTiger) {
+              // release  item from prev point
+              this.points[draggedTiger.currentPoint].item = null;
+              this.points[draggedTiger.currentPoint].itemIndex = null;
+              // update tiger point
               this.tigers[draggedTiger.index].x = x;
               this.tigers[draggedTiger.index].y = y;
-              this.tigers[draggedTiger.index].currentPoint = releasedPoint.index;
+              this.tigers[draggedTiger.index].currentPoint =
+                releasedPoint.index;
               // add this tiger reference to points array
-              this.points[releasedPoint.index].item = 'tiger';
+              this.points[releasedPoint.index].item = TIGER;
               this.points[releasedPoint.index].itemIndex = draggedTiger.index;
               // computer turns to move goat
               this.renderGoatMove();
@@ -243,22 +289,25 @@ export class Board {
       }
     }
     this.dragItem = null;
-    this.goats.forEach(g=>g.drag = false);
-    this.tigers.forEach(t=>t.drag = false);
+    this.goats.forEach(g => (g.drag = false));
+    this.tigers.forEach(t => (t.drag = false));
     this.render();
   }
 
-  handleMouseMoveEvent(event){
-    if(!(this.mouseDown && this.dragItem)){
+  handleMouseMoveEvent(event) {
+    if (this.animationInProgress) {
+      return true;
+    }
+    if (!(this.mouseDown && this.dragItem)) {
       return true;
     }
     const x = event.pageX - this.canvasPosition.left;
     const y = event.pageY - this.canvasPosition.top;
-    this.fakeCanvas.clearRect(0,0,this.width*1.2,this.width*1.2)
-    if(this.dragItem.item ==='goat'){
-      this.drawBoardGoat({x,y},this.fakeCanvas);
-    }else{
-      this.drawTigerImage({x,y},this.fakeCanvas);
+    this.fakeCanvas.clearRect(0, 0, this.width * 1.5, this.height * 1.5);
+    if (this.dragItem.item === GOAT) {
+      this.drawBoardGoat({ x, y }, this.fakeCanvas);
+    } else {
+      this.drawTigerImage({ x, y }, this.fakeCanvas);
     }
   }
   /**
@@ -266,7 +315,7 @@ export class Board {
    */
   render() {
     this.tigerMoveAttems = 0;
-    this.canvas.clearRect(0, 0, this.totalWidth, this.totalHeight);
+    this.canvas.clearRect(0, 0, this.totalWidth * 1.5, this.totalHeight * 1.5);
     this.drawBoard();
     this.drawTigers();
     this.renderGoats();
@@ -287,7 +336,34 @@ export class Board {
         x <= this.totalWidth;
         x += this.verticalStep
       ) {
-        points.push({ x: x, y: y,index:points.length, item: null, itemIndex: null });
+        points.push({
+          x: x,
+          y: y,
+          index: points.length,
+          item: null,
+          itemIndex: null
+        });
+        if (this.diamondCircleImage) {
+          this.canvas.drawImage(
+            this.diamondCircleImage,
+            x - this.cirlceImageRad / 2,
+            y - this.cirlceImageRad / 2,
+            this.cirlceImageRad,
+            this.cirlceImageRad
+          );
+        } else {
+          this.diamondCircleImage = new Image();
+          this.diamondCircleImage.onload = () => {
+            this.canvas.drawImage(
+              this.diamondCircleImage,
+              x - this.cirlceImageRad / 2,
+              y - this.cirlceImageRad / 2,
+              this.cirlceImageRad,
+              this.cirlceImageRad
+            );
+          };
+          this.diamondCircleImage.src = diamondCircle;
+        }
       }
     }
     return points;
@@ -296,11 +372,17 @@ export class Board {
    * add points to tiger array while initialising the game
    */
   fillTigerPoints() {
-    [0, 4, 20, 24].forEach((t,i) => {
-      this.points[t].item = "tiger";
+    [0, 4, 20, 24].forEach((t, i) => {
+      this.points[t].item = TIGER;
       this.points[t].itemIndex = t;
       const point = this.points[t];
-      this.tigers.push({ x: point.x, y: point.y, currentPoint: t,drag:false,index: i });
+      this.tigers.push({
+        x: point.x,
+        y: point.y,
+        currentPoint: t,
+        drag: false,
+        index: i
+      });
     });
   }
 
@@ -372,6 +454,93 @@ export class Board {
         mPointy2
       );
     });
+
+    // draw small circles near each point
+    this.points.forEach((p, i) => {
+      const factor = i % 2 === 0 ? 1 : 2;
+      this.canvas.drawImage(
+        this.diamondCircleImage,
+        p.x - this.cirlceImageRad / (2 * factor),
+        p.y - this.cirlceImageRad / (2 * factor),
+        this.cirlceImageRad / factor,
+        this.cirlceImageRad / factor
+      );
+    });
+
+    // draw left right top down border images
+    if (this.topBorderImage) {
+      this.canvas.drawImage(
+        this.topBorderImage,
+        0,
+        0,
+        this.totalWidth,
+        this.paddingTop
+      );
+      this.canvas.drawImage(
+        this.borderBottomImage,
+        0,
+        this.totalHeight - this.paddingBottom,
+        this.totalWidth,
+        this.paddingBottom
+      );
+      this.canvas.drawImage(
+        this.leftRightBorderImage,
+        0,
+        this.paddingTop,
+        this.paddingLeft,
+        this.height
+      );
+      this.canvas.drawImage(
+        this.leftRightBorderImage,
+        this.totalWidth - this.paddingRight,
+        this.paddingTop,
+        this.paddingRight,
+        this.height
+      );
+    } else {
+      this.topBorderImage = new Image();
+      this.topBorderImage.onload = () => {
+        this.canvas.drawImage(
+          this.topBorderImage,
+          0,
+          0,
+          this.totalWidth,
+          this.paddingTop
+        );
+      };
+      this.topBorderImage.src = topBorderImage;
+
+      this.borderBottomImage = new Image();
+      this.borderBottomImage.onload = () => {
+        this.canvas.drawImage(
+          this.borderBottomImage,
+          0,
+          this.totalHeight - this.paddingBottom,
+          this.totalWidth,
+          this.paddingBottom
+        );
+      };
+      this.borderBottomImage.src = bottomBorderImage;
+
+      this.leftRightBorderImage = new Image();
+      this.leftRightBorderImage.onload = () => {
+        this.canvas.drawImage(
+          this.leftRightBorderImage,
+          0,
+          this.paddingTop,
+          this.paddingLeft,
+          this.height
+        );
+        this.canvas.drawImage(
+          this.leftRightBorderImage,
+          this.totalWidth - this.paddingRight,
+          this.paddingTop,
+          this.paddingRight,
+          this.height
+        );
+      };
+      this.leftRightBorderImage.src = leftRightBorderImage;
+    }
   }
 
   /**
@@ -379,32 +548,32 @@ export class Board {
    */
   drawTigers() {
     this.tigers.forEach(element => {
-      if(element.drag){
+      if (element.drag) {
         return;
       }
-     this.drawTigerImage(element,this.canvas);
+      this.drawTigerImage(element, this.canvas);
     });
   }
 
-  drawTigerImage(point,canvas){
+  drawTigerImage(point, canvas) {
     if (this.tigerImage) {
       canvas.drawImage(
-          this.tigerImage,
-        point.x - 30,
-        point.y - 15,
-          60,
-          40
-        );
+        this.tigerImage,
+        point.x - this.tigerWidth / 2,
+        point.y - this.tigerHeight / 2,
+        this.tigerWidth,
+        this.tigerHeight
+      );
       return true;
     }
     this.tigerImage = new Image();
     this.tigerImage.onload = () => {
-    canvas.drawImage(
+      canvas.drawImage(
         this.tigerImage,
-       point.x - 30,
-       point.y - 15,
-        60,
-        40
+        point.x - this.tigerWidth / 2,
+        point.y - this.tigerHeight / 2,
+        this.tigerWidth,
+        this.tigerHeight
       );
       this.drawTigers();
     };
@@ -434,20 +603,20 @@ export class Board {
     if (this.goatImage) {
       canvas.drawImage(
         this.goatImage,
-       point.x - this.goatWidth,
-       point.y - this.goatHeight,
-        1.5 * this.goatWidth,
-        1.5 * this.goatHeight
+        point.x - this.goatWidth / 2,
+        point.y - this.goatHeight / 2,
+        this.goatWidth,
+        this.goatHeight
       );
     } else {
       this.goatImage = new Image();
       this.goatImage.onload = () => {
         canvas.drawImage(
           this.goatImage,
-         point.x - this.goatWidth,
-         point.y - this.goatHeight,
-          1.5 * this.goatWidth,
-          1.5 * this.goatHeight
+          point.x - this.goatWidth / 2,
+          point.y - this.goatHeight / 2,
+          this.goatWidth,
+          this.goatHeight
         );
       };
       this.goatImage.src = goatImage;
@@ -466,14 +635,10 @@ export class Board {
     this.canvas.beginPath();
     this.canvas.moveTo(x1, y1);
     this.canvas.lineTo(x2, y2);
-    this.canvas.strokeStyle = "#03a9f4";
-    this.canvas.lineWidth = 5;
+    this.canvas.strokeStyle = "#636363";
+    this.canvas.lineWidth = 1;
     this.canvas.lineCap = "round";
     this.canvas.stroke();
-    this.canvas.shadowOffsetX = 1;
-    this.canvas.shadowOffsetY = 1;
-    this.canvas.shadowBlur = 1;
-    this.canvas.shadowColor = "#000";
     this.canvas.closePath();
   }
 
@@ -531,14 +696,18 @@ export class Board {
       }
       let nextMovePossibleMoves = this.getNextPossibleMove(pointIndex);
       if (nextMovePossibleMoves.length > 0) {
-        avilableTigers.push({ tiger: i, point: pointIndex, possibleMoves: nextMovePossibleMoves });
+        avilableTigers.push({
+          tiger: i,
+          point: pointIndex,
+          possibleMoves: nextMovePossibleMoves
+        });
       }
     });
 
     if (avilableTigers.length > 0) {
-        // getting next best move for tiger, will be improved later
-        this.logic.getNextBestMove(TIGER, avilableTigers, this.goats);
-        const tigerCanEatGoat = avilableTigers.find(t =>
+      // getting next best move for tiger, will be improved later
+      // this.logic.getNextBestMove(TIGER, avilableTigers, this.goats);
+      const tigerCanEatGoat = avilableTigers.find(t =>
         t.possibleMoves.find(p => p.eatGoat)
       );
       if (tigerCanEatGoat) {
@@ -565,14 +734,14 @@ export class Board {
           .currentPoint;
         this.points[currentTigerIndex].item = null;
         this.points[currentTigerIndex].itemIndex = null;
-
-        this.tigers[tigerCanEatGoat.tiger] = {
-          x: tigerNewPoint.x,
-          y: tigerNewPoint.y,
+        this.showMoveAnimation(TIGER, {
+          prevPoint: this.tigers[tigerCanEatGoat.tiger],
+          nextPoint: tigerNewPoint,
           currentPoint: tigerEatPoint.point
-        };
+        });
+
         // add new reference of tiger to the points
-        this.points[tigerEatPoint.point].item = "tiger";
+        this.points[tigerEatPoint.point].item = TIGER;
         this.points[tigerEatPoint.point].itemIndex = tigerCanEatGoat.tiger;
       } else {
         let randomTiger = Math.floor(Math.random() * avilableTigers.length);
@@ -587,16 +756,16 @@ export class Board {
         this.points[currentTigerPoint].itemIndex = null;
 
         const tigerNewPoint = this.points[tigerMovePoint.point];
-        this.tigers[tigerToMove.tiger] = {
-          x: tigerNewPoint.x,
-          y: tigerNewPoint.y,
+        this.showMoveAnimation(TIGER, {
+          prevPoint: this.tigers[tigerToMove.tiger],
+          nextPoint: tigerNewPoint,
           currentPoint: tigerMovePoint.point
-        };
+        });
+
         // add new reference of tiger to the points
-        this.points[tigerMovePoint.point].item = "tiger";
+        this.points[tigerMovePoint.point].item = TIGER;
         this.points[tigerMovePoint.point].itemIndex = tigerToMove.tiger;
       }
-      this.render();
     } else {
       alert("Congratulations! You won the game! ");
     }
@@ -608,29 +777,39 @@ export class Board {
         tiger.possibleMoves.map(p => p.point)
       );
     });
-    const deatGoats = this.goats.filter(g => g.dead).length;
+    const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    mount(this.moveIndicator, el("p", `Dead Goats: ${deatGoats}`));
-    mount(this.moveIndicator, el("p", `Goats On Board: ${goatsInBoard}`));
+    this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
+    this.goatBoardIndicator.innerHTML = `Goats in Board: ${goatsInBoard}`;
   }
 
   /**
    * render goat after user moves tiger
    */
-  renderGoatMove(){
-    if(this.goats.length<20){
-      const availablePoints = this.points.filter(p=>!p.item);
-      const randPoint = Math.floor(Math.random()*availablePoints.length);
+  renderGoatMove() {
+    if (this.goats.length < 20) {
+      const availablePoints = this.points.filter(p => !p.item);
+      const randPoint = Math.floor(Math.random() * availablePoints.length);
       const point = availablePoints[randPoint];
-      this.points[point.index].item = 'goat';
+      this.points[point.index].item = GOAT;
       this.points[point.index].itemIndex = this.goats.length;
-      this.goats.push({x:point.x,y:point.y,dead: false,drag: false,index:this.goats.length,currentPoint:point.index});
-    }else{
-      const goatsInBoard = this.goats.filter(g=>!g.dead);
-      const randomGoat = Math.floor(Math.random() * goatInBoard.length);
+      this.showMoveAnimation(GOAT, {
+        type: "new",
+        pointData: {
+          x: point.x,
+          y: point.y,
+          dead: false,
+          drag: false,
+          index: this.goats.length,
+          currentPoint: point.index
+        }
+      });
+    } else {
+      const goatsInBoard = this.goats.filter(g => !g.dead);
+      const randomGoat = Math.floor(Math.random() * goatsInBoard.length);
       const goat = goatsInBoard[randomGoat];
       const avialableMoves = this.getNextPossibleMove(goat.currentPoint);
-      if(avialableMoves && avialableMoves.length>0){
+      if (avialableMoves && avialableMoves.length > 0) {
         const randMove = Math.floor(Math.random() * avialableMoves.length);
         const nextPoint = avialableMoves[randMove];
         const point = this.points[nextPoint];
@@ -642,17 +821,21 @@ export class Board {
         this.goats[goat.index].y = point.x;
         this.goats[goat.index].currentPoint = point.index;
         // add goat to new point
-        this.points[point.index].item = 'goat';
+        this.points[point.index].item = GOAT;
         this.points[point.index].itemIndex = goat.index;
       }
     }
     this.render();
+    const deadGoats = this.goats.filter(g => g.dead).length;
+    const goatsInBoard = this.goats.filter(g => !g.dead).length;
+    this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
+    this.goatBoardIndicator.innerHTML = `Goats in Board: ${goatsInBoard}`;
   }
   /**
    * get next possible moves of tiger/goat
    * @param {} pointIndex
    */
-  getNextPossibleMove(pointIndex, type = "tiger") {
+  getNextPossibleMove(pointIndex, type = TIGER) {
     pointIndex = Number(pointIndex);
     this.totalMoveAttempts++;
 
@@ -679,17 +862,19 @@ export class Board {
     } else {
       nextPossiblePoints.push(1, -1);
     }
-    let nextLegalPoints = nextPossiblePoints.map(el => {
+    let nextLegalPoints = [];
+    nextPossiblePoints.forEach(el => {
       const index = Number(el) + Number(pointIndex);
-      return index >= 0 && index < this.totalPoints ? index : null;
+      if (index >= 0 && index < this.totalPoints) {
+        nextLegalPoints.push(index);
+      }
     });
-    nextLegalPoints = nextLegalPoints.filter(el => el);
-    if (type === "goat") {
+    if (type === GOAT) {
       return nextLegalPoints.filter(p => !this.points[p].item);
     }
     nextLegalPoints = nextLegalPoints.map(p => {
       const point = this.points[p];
-      if (point.item==='goat') {
+      if (point.item === GOAT) {
         const tigerMoveDistance = p - pointIndex;
         const tigerEatPoint = Number(p) + Number(tigerMoveDistance);
         // get the distance between current position and next position
@@ -697,8 +882,8 @@ export class Board {
         if (
           tigerEatPoint < 0 ||
           tigerEatPoint > this.totalPoints ||
-          (tigerMoveDistance === 1 && p % 5 === 4) ||
-          (tigerMoveDistance === -1 && p % 5 === 0)
+          ([1, 4, 6].indexOf(Math.abs(tigerMoveDistance)) >= 0 &&
+            (p % 5 === 4 || p % 5 === 0))
         ) {
           // if next eat point is less than zero or greater thant totalPoint
           // or the goat is at right most point or goat is at left most point
@@ -706,12 +891,16 @@ export class Board {
         }
 
         const eatPoint = this.points[tigerEatPoint];
-        if ( eatPoint &&  !eatPoint.item ) {
-          return { point: tigerEatPoint, eatGoat: true, eatGoatIndex: point.itemIndex };
+        if (eatPoint && !eatPoint.item) {
+          return {
+            point: tigerEatPoint,
+            eatGoat: true,
+            eatGoatIndex: point.itemIndex
+          };
         }
         return null;
-      }else if(!point.item){
-          return { point: p, eatGoat: false };
+      } else if (!point.item) {
+        return { point: p, eatGoat: false };
       }
       return null;
     });
@@ -744,5 +933,99 @@ export class Board {
       side === "vertical" ? y - 10 : y
     );
     this.canvas.closePath();
+  }
+  /**
+   *
+   * @param {tiger/goat} item
+   * @param {{prevPoint:this.tigers[tigerToMove.tiger],nextPoint:tigerNewPoint,currentPoint:tigerMovePoint.point}} data
+   */
+  showMoveAnimation(item, data) {
+    const frameRate = 24;
+    this.animationInProgress = true;
+    if (item === TIGER) {
+      const prevPoint = data.prevPoint;
+      const nextPoint = data.nextPoint;
+      let frame = 0;
+      let x = prevPoint.x;
+      let y = prevPoint.y;
+      const dx = nextPoint.x - prevPoint.x;
+      const dy = nextPoint.y - prevPoint.y;
+      const absDx = Math.abs(dx);
+      const absDy = Math.abs(dy);
+      const xIncrement = dx / frameRate;
+      const yIncrement = dy / frameRate;
+      this.tigers[prevPoint.index] = {
+        x: -2000,
+        y: -2000,
+        currentPoint: data.currentPoint
+      };
+      const animationFrame = setInterval(() => {
+        if (frame < 10) {
+          this.showFakeCanvas();
+        }
+        this.fakeCanvas.clearRect(0, 0, this.width * 1.2, this.height * 1.2);
+        this.drawTigerImage({ x: x, y: y }, this.fakeCanvas);
+        if (absDx < 1) {
+          y += yIncrement;
+        } else if (absDy < 1) {
+          x += xIncrement;
+        } else {
+          x += xIncrement;
+          y = (dy / dx) * (x - prevPoint.x) + prevPoint.y;
+        }
+        if (frame > frameRate) {
+          this.animationInProgress = false;
+          this.tigers[prevPoint.index] = {
+            x: nextPoint.x,
+            y: nextPoint.y,
+            drag: false,
+            index: prevPoint.index,
+            currentPoint: data.currentPoint
+          };
+          this.render();
+          this.hideFakeCanvas();
+          clearInterval(animationFrame);
+        }
+        frame++;
+      }, 40);
+    } else {
+      if (data.type === "new") {
+        // {type:'new',pointData:{x:point.x,y:point.y,dead: false,drag: false,index:this.goats.length,currentPoint:point.index}
+        const pointData = data.pointData;
+        const midPoint = this.totalWidth / 2;
+        let x = midPoint;
+        let y = 0;
+        const dx = pointData.x - x;
+        const dy = pointData.y;
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+        const xIncrement = dx / frameRate;
+        const yIncrement = dy / frameRate;
+        let frame = 0;
+        const animationFrame = setInterval(() => {
+          if (frame < 10) {
+            this.showFakeCanvas();
+          }
+          this.fakeCanvas.clearRect(0, 0, this.width * 1.2, this.height * 1.2);
+          this.drawBoardGoat({ x: x, y: y }, this.fakeCanvas);
+          if (absDx < 1) {
+            y += yIncrement;
+          } else if (absDy < 1) {
+            x += xIncrement;
+          } else {
+            x += xIncrement;
+            y = (dy / dx) * (x - midPoint);
+          }
+          if (frame > frameRate) {
+            this.animationInProgress = false;
+            this.goats.push(pointData);
+            this.render();
+            this.hideFakeCanvas();
+            clearInterval(animationFrame);
+          }
+          frame++;
+        }, 40);
+      }
+    }
   }
 }
