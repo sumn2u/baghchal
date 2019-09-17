@@ -6,6 +6,7 @@
   "scripts": {
     "start": "npm run build && webpack-dev-server",
     "build": "webpack --mode=production --config webpack.config.js",
+    "build:fb": "webpack --mode=production --config webpack.config.js --env production",
     "test": "echo \"Error: no test specified\" && exit 1",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
@@ -51,8 +52,9 @@
     "sass-loader": "7.1.0",
     "style-loader": "^0.23.1",
     "url-loader": "1.1.2",
-    "webpack": "^4.29.1",
-    "webpack-cli": "3.2.3",
-    "webpack-dev-server": "^3.2.0"
+    "webpack": "^4.296",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.2.1",
+    "webpack-merge": "^4.2.1"
   }
 }

@@ -12,20 +12,24 @@
         <div id="game-container"></div>
     </div>
     <script src='../bundle.js'></script>
-    <script>
-    // FBInstant.initializeAsync().then(function () {
-        
-    //     FBInstant.setLoadingProgress(100);
-    // });
-    // FBInstant.startGameAsync().then(function () {
-    //     game.init({
-    //     container: "game-container"
-    //     });
-    // })
-     game.init({
-     container: "game-container"
-     });
-      
- </script>
+    <% if (htmlWebpackPlugin.options.env === "production") {%>
+    <script> 
+    FBInstant.initializeAsync().then(function () {
+        FBInstant.setLoadingProgress(100);
+    });
+    FBInstant.startGameAsync().then(function () {
+        game.init({
+        container: "game-container"
+        });
+    })
+    </script> 
+
+    <% } else{ %>
+    <script>   
+    game.init({
+        container: "game-container"
+    });
+    </script>
+    <% } %>
 </body>
 </html>
