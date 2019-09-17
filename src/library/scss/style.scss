@@ -40,7 +40,7 @@
  body{background:#fafafa;}
  .fake-canvas{
    position: absolute;
-   top:0;
+   top:40px;
    bottom:0;
    left:0;
    right:0;
@@ -59,4 +59,15 @@
  .pos-absolute{
    position:absolute;
    top:0;
+ }
+ .relative{
+   position: relative;
+ }
+ .width-500{
+   max-width: 500px;
+   margin: auto;
+ }
+ .info{
+   height:40px;
+   overflow: hidden;
  }
