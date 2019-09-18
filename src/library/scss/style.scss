@@ -146,3 +146,173 @@
  @media(max-width:1100px){
    .select-option{position: fixed;}
  }
+
+ /* -- Needed CSS -- */
+
+ .modal-wrapper {
+   display: none;
+   transition: all 0.3s ease-in-out;
+   background-color: transparent;
+ }
+
+ .modal-wrapper.is-open {
+   display: block;
+   position: fixed;
+   z-index: 1;
+   top: 0;
+   bottom: 0;
+   left: 0;
+   right: 0;
+   width: 100%;
+   height: 100%;
+   background-color: rgba(0, 0, 0, 0.5);
+   overflow-y: scroll;
+ }
+
+ .modal-body {
+   animation: pop 0.5s ease;
+   width: 90%;
+ }
+
+ header {
+   position: relative;
+ }
+
+ .close {
+   position: absolute;
+   top: 10px;
+   right: 10px;
+ }
+
+ @keyframes pop {
+   0% {
+     opacity: 0;
+     transform: scale(0.8);
+   }
+
+   90% {
+     transform: scale(1.02);
+   }
+
+   100% {
+     opacity: 1;
+     transform: scale(1);
+   }
+ }
+
+ /* -- CSS from here on is not needed -- */
+
+ $primary-color-dark: #FFA000;
+ $primary-color: #FFC107;
+ $primary-color-light: #FFECB3;
+ $primary-color-text: #212121;
+ $accent-color: #795548;
+ $primary-text-color: #212121;
+ $secondary-text-color: #727272;
+ $divider-color: #B6B6B6;
+
+ * {
+   box-sizing: border-box;
+ }
+
+ body {
+  //  background-color: $accent-color;
+   display: flex;
+   height: 100vh;
+   justify-content: center;
+   align-items: center;
+   flex-direction: column;
+ }
+
+ [data-modal-trigger] {
+   outline: 0;
+   color: #795548;
+   border: 1px solid $primary-color;
+   padding: 10px 20px;
+   background-color: transparent;
+   margin: 20px;
+   position: relative;
+
+   &:before {
+     z-index: -1;
+     transition: all 0.3s ease;
+     position: absolute;
+     top: 0;
+     bottom: 0;
+     left: 0;
+     width: 0%;
+     content: '';
+     background-color: $primary-color;
+   }
+
+   &:hover {
+     &:before {
+       width: 100%;
+     }
+   }
+ }
+
+ .modal-body {
+   margin: 30px auto;
+   background-color: #795548;
+   border-radius: 5px;
+   box-shadow: 10px 10px 40px 0px rgba(0, 0, 0, 0.35);
+
+   header {
+     margin: 0;
+     padding: 10px 10px;
+     border-top-left-radius: 5px;
+     border-top-right-radius: 5px;
+     color: $primary-color-light;
+   }
+
+   img {
+     max-width: 100%;
+   }
+
+   .modal-main {
+     color: white;
+    //  padding: 20px;
+    //  font-size: 1.4rem;
+   }
+
+   footer {
+     background-color: $primary-color;
+     margin: 0;
+     padding: 10px 10px;
+     border-bottom-left-radius: 5px;
+     border-bottom-right-radius: 5px;
+     color: $primary-color-light;
+   }
+
+   .close {
+     color: white;
+     background-color: transparent;
+     border: 0;
+     outline: 0;
+   }
+
+   p {
+     color: $primary-color-light;
+     text-align: center;
+   }
+
+   .cta {
+     background-color: $primary-color;
+     transition: background-color 0.3s ease;
+     color: $primary-color-light;
+     padding: 10px 20px;
+     text-decoration: none;
+     border-radius: 5px;
+     display: block;
+     width: 200px;
+     text-align: center;
+     margin: 20px auto;
+
+     &:hover,
+     &:active {
+       background-color: $primary-color-dark;
+     }
+   }
+ }
+

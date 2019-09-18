@@ -15,7 +15,7 @@ export class Board {
     this.dataContainer = dataContainer;
     this.realCanvasElement = realCanvasElement;
     this.fakeCanvasElement = fakeCanvasElement;
-    this.infoBox = infoBox;
+    this.infoBox = infoBox;  
     this.sound = new Howl({
       src: ["bagchal.mp3"],
       html5: true,
@@ -65,9 +65,11 @@ export class Board {
       element.addEventListener("click", event => {
         if (event.target.classList.contains(TIGER)) {
           this.chosenItem = TIGER;
+          this.sound.play('tiger')
           this.renderGoatMove();
         } else {
           this.chosenItem = GOAT;
+          this.sound.play('goat')
         }
         this.selectItem.classList.add("hide");
       });
@@ -323,6 +325,7 @@ export class Board {
                 };
                 this.sound.play('tiger');
               }
+              this.sound.play('goat')
               // computer turns to move goat
               this.renderGoatMove();
             }
@@ -748,7 +751,6 @@ export class Board {
         });
       }
     });
-
     if (avilableTigers.length > 0) {
       // getting next best move for tiger, will be improved later
       // this.logic.getNextBestMove(TIGER, avilableTigers, this.goats);
@@ -817,7 +819,8 @@ export class Board {
         this.points[tigerMovePoint.point].itemIndex = tigerToMove.tiger;
       }
     } else {
-      alert("Congratulations! You won the game! ");
+      //alert("Congratulations! You won the game! ");
+      window.game.modalService()
     }
     // this.moveIndicator.innerHTML = "";
 
@@ -832,7 +835,6 @@ export class Board {
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
   }
-
   /**
    * render goat after user moves tiger
    */
