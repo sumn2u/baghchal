@@ -5,9 +5,9 @@ class Game{
     constructor(config){
         this.container = document.getElementById(config.container);
         this.gameWrapper = el(
-            'div.pad-15',
-            this.canvasWrapper = el('div.relative',
-                this.infoBox = el('div.info'),
+            'div.game-box',
+            this.infoBox = el('div.info'),
+            this.canvasWrapper = el('div',{style: 'position: relative;'},
                 this.realCanvas = el(`canvas#real-canvas.real-canvas`),
                 this.fakeCanvas = el('canvas#fake-canvas.fake-canvas')
             ),

@@ -17,38 +17,37 @@ export class Board {
     this.infoBox = infoBox;
     mount(
       this.infoBox,
-      (this.selectItem = el(
-        'div.container-fluid',
-        el("div.row",
-          el("div.col-xs-6", el("p", "Choose Tiger or Goat")),
+      (this.selectItem = el('div.select-option',
+        el('div.container-fluid',
+           el("p", "Play as?"),
           el(
-            "div.col-xs-6 text-right",
+            "div.text-center",
             el(
               "button",
               {
-                class: "btn btn-danger btn-sm active tiger",
-                style: "margin-right:15px"
+                class: "tiger",
               },
-              TIGER
+              ''
             ),
-            el("button", { class: "btn btn-info btn-sm active goat" }, GOAT)
+            el("button", { class: "goat" },'')
           )
-      ))
+      )
+      )
     ));
     mount(
       this.infoBox,
-      (this.genralInfo = el(
-        "div.row.hide",
+      (this.genralInfo = el('div.container-fluid.goat-box', 
+        el( "div.row",
         el(
           "div.col-xs-6",
-          (this.goatBoardIndicator = el("p", `Goats in board: 0`))
+          (this.goatBoardIndicator = el("p", `Goats in board : 0`))
         ),
-        el("div.col-xs-6", (this.deadGoatIndicator = el("p", `Dead Goats: 0`)))
+        el("div.col-xs-6.text-right", (this.deadGoatIndicator = el("p", `Dead Goats: 0`)))
       ))
-    );
-    mount(this.dataContainer, (this.moveIndicator = el("div")));
+    ));
+    // mount(this.dataContainer, (this.moveIndicator = el("div")));
 
-    this.selectItem.querySelectorAll(".btn").forEach(element => {
+    this.selectItem.querySelectorAll("button").forEach(element => {
       element.addEventListener("click", event => {
         if (event.target.classList.contains(TIGER)) {
           this.chosenItem = TIGER;
@@ -57,7 +56,6 @@ export class Board {
           this.chosenItem = GOAT;
         }
         this.selectItem.classList.add("hide");
-        this.genralInfo.classList.remove("hide");
       });
     });
     this.goats = []; // Array<{x:number,y:number,dead:false, currentPoint,drag: false,index: number;}>
@@ -415,14 +413,14 @@ export class Board {
           element == "vertical"
             ? this.paddingTop + this.height
             : this.paddingTop + length;
-        this.drawText(
-          x1,
-          y1,
-          element,
-          element === "vertical"
-            ? this.horizontalIndicators[i]
-            : this.verticalIndicators[i]
-        );
+        // this.drawText(
+        //   x1,
+        //   y1,
+        //   element,
+        //   element === "vertical"
+        //     ? this.horizontalIndicators[i]
+        //     : this.verticalIndicators[i]
+        // );
         this.drawLine(x1, y1, x2, y2);
         i++;
       }
@@ -652,6 +650,7 @@ export class Board {
     let box = this.realCanvasElement.getBoundingClientRect();
     let scrollLeft = this.realCanvasElement.parentNode.scrollLeft;
     let scrollTop = this.realCanvasElement.parentNode.scrollTop;
+    console.log(scrollTop);
     let body = document.body;
     let docEl = document.documentElement;
 
@@ -772,18 +771,18 @@ export class Board {
     } else {
       alert("Congratulations! You won the game! ");
     }
-    this.moveIndicator.innerHTML = "";
+    // this.moveIndicator.innerHTML = "";
 
-    avilableTigers.forEach(tiger => {
-      this.displayPossibleMoves(
-        tiger.tiger,
-        tiger.possibleMoves.map(p => p.point)
-      );
-    });
+    // avilableTigers.forEach(tiger => {
+    //   this.displayPossibleMoves(
+    //     tiger.tiger,
+    //     tiger.possibleMoves.map(p => p.point)
+    //   );
+    // });
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
-    this.goatBoardIndicator.innerHTML = `Goats in Board: ${goatsInBoard}`;
+    this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
   }
 
   /**
@@ -832,7 +831,7 @@ export class Board {
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
-    this.goatBoardIndicator.innerHTML = `Goats in Board: ${goatsInBoard}`;
+    this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
   }
   /**
    * get next possible moves of tiger/goat
@@ -911,19 +910,19 @@ export class Board {
   }
 
   displayPossibleMoves(tigerIndex, possibleMoves) {
-    const moves = possibleMoves.map(el => {
-      return (
-        this.verticalIndicators[Math.floor(el / 5)].toString() +
-        this.horizontalIndicators[el % 5].toString()
-      );
-    });
-    mount(this.moveIndicator, el("h3", `Tiger ${tigerIndex + 1}`));
-    const tigerPossiblePointList = list(
-      `ul.tiger-possible-points`,
-      TigerPossibleMoveList
-    );
-    mount(this.moveIndicator, tigerPossiblePointList);
-    tigerPossiblePointList.update(moves);
+    // const moves = possibleMoves.map(el => {
+    //   return (
+    //     this.verticalIndicators[Math.floor(el / 5)].toString() +
+    //     this.horizontalIndicators[el % 5].toString()
+    //   );
+    // });
+    // mount(this.moveIndicator, el("h3", `Tiger ${tigerIndex + 1}`));
+    // const tigerPossiblePointList = list(
+    //   `ul.tiger-possible-points`,
+    //   TigerPossibleMoveList
+    // );
+    // mount(this.moveIndicator, tigerPossiblePointList);
+    // tigerPossiblePointList.update(moves);
   }
 
   drawText(x, y, side, text) {
