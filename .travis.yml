@@ -6,7 +6,7 @@ before_script:
   - npm install
   - npm run build
 script:
-
+  - echo "skipping tests"
 deploy:
   provider: firebase
   token:
