@@ -107,11 +107,11 @@ export class Board {
     this.canvas = this.realCanvasElement.getContext("2d");
     this.fakeCanvas = this.fakeCanvasElement.getContext("2d");
 
-    this.goatHeight = 60;
-    this.goatWidth = 58;
-    this.tigerWidth = 60;
-    this.tigerHeight = 58;
-    this.cirlceImageRad = 40;
+    this.goatHeight = this.totalWidth>=500 ? 60 : 40;
+    this.goatWidth = this.totalWidth>=500 ?58:38;
+    this.tigerWidth = this.totalWidth>=500 ?60:40;
+    this.tigerHeight = this.totalWidth>=500 ?58:38;
+    this.cirlceImageRad = this.totalWidth>=500 ? 40:24;
     this.points = this.calculatePoints(); // Array<{x:number,y:number,index: number,item:'tiger or goat', itemIndex: number (tiger goat Index)}>;
     this.fillTigerPoints();
     this.mouseDown = false;
@@ -193,13 +193,14 @@ export class Board {
     const pageY = event.type ==='mousedown' ? event.pageY : event.changedTouches[0].pageY;
     const x = pageX- this.canvasPosition.left;
     const y =pageY - this.canvasPosition.top;
-    console.log(x,y);
+    const goatWidth = event.type==='mousedown' ? Math.floor(this.goatWidth/2) : Math.floor(this.goatWidth/4);
+    const goatHeight = event.type==='mousedown' ? Math.floor(this.goatHeight/2) : Math.floor(this.goatHeight/4);
     const clickedPoint = this.points.find(point => {
       return (
-        x >= point.x - this.goatWidth &&
-        x <= point.x + this.goatWidth &&
-        y >= point.y - this.goatHeight &&
-        y <= point.y + this.goatHeight
+        x >= point.x - goatWidth &&
+        x <= point.x + goatWidth &&
+        y >= point.y - goatHeight &&
+        y <= point.y + goatHeight
       );
     });
     if (!clickedPoint) {
@@ -248,12 +249,14 @@ export class Board {
       const pageY = event.type ==='mouseup' ? event.pageY : event.changedTouches[0].pageY;
       const x = pageX- this.canvasPosition.left;
       const y =pageY - this.canvasPosition.top;
+      const goatWidth = event.type==='mousedown' ? Math.floor(this.goatWidth/2) : Math.floor(this.goatWidth/4);
+      const goatHeight = event.type==='mousedown' ? Math.floor(this.goatHeight/2) : Math.floor(this.goatHeight/4);
       const releasedPoint = this.points.find(point => {
         return (
-          x >= point.x - this.goatWidth &&
-          x <= point.x + this.goatWidth &&
-          y >= point.y - this.goatHeight &&
-          y <= point.y + this.goatHeight
+          x >= point.x - goatWidth &&
+          x <= point.x + goatWidth &&
+          y >= point.y - goatHeight &&
+          y <= point.y + goatHeight
         );
       });
       if (releasedPoint) {
@@ -288,9 +291,11 @@ export class Board {
             this.dragItem.point.index,
             TIGER
           );
+          console.log(possiblePoints);
           const validPoint = possiblePoints.find(
             p => p.point === releasedPoint.index
           );
+        
           if (validPoint) {
             const draggedTiger = this.tigers.find(t => t.drag);
             if (draggedTiger) {
@@ -305,6 +310,19 @@ export class Board {
               // add this tiger reference to points array
               this.points[releasedPoint.index].item = TIGER;
               this.points[releasedPoint.index].itemIndex = draggedTiger.index;
+              // if tiger eat the goat remove goat from goats
+              if(validPoint.eatGoat){
+                // remove eaten goat point index from points
+                const currentEatenGoatIndex = this.goats[validPoint.eatGoatIndex].currentPoint;
+                this.points[currentEatenGoatIndex].item = null;
+                this.points[currentEatenGoatIndex].itemIndex = null;
+                this.goats[validPoint.eatGoatIndex] = {
+                  x: 0,
+                  y: 0,
+                  dead: true,
+                  currentPoint: -currentEatenGoatIndex
+                };
+              }
               // computer turns to move goat
               this.renderGoatMove();
             }
