@@ -1,7 +1,7 @@
 {
   "name": "baghchal",
   "version": "1.0.0",
-  "description": "Baghchal in canvas",
+  "description": "Baghchal Game",
   "main": "server.js",
   "scripts": {
     "start": "npm run build && webpack-dev-server",
