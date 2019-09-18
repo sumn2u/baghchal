@@ -1,8 +1,11 @@
 language: node_js
 node_js:
   - "node"
-script:
+
+before_script:
   - npm install
+  - npm run build
+script:
   - npm run build
 deploy:
   provider: firebase
