@@ -35,7 +35,7 @@ export class Board {
         el('div.container-fluid',
            el("p", "Play as?"),
           el(
-            "div.text-center",
+            "div.pick-options",
             el(
               "button",
               {

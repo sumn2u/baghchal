@@ -77,6 +77,11 @@
    max-width: 500px;
    margin: auto;
  }
+ .pick-options{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+ }
  
  .game-box{
     padding: 10px;
@@ -125,7 +130,7 @@
  }
  .goat-box{
   margin-bottom: 10px;
-  padding: 8px 30px;
+  padding: 8px 17px;
   background: url(../images/bg.png);
   border-radius: 3px;
   p{
