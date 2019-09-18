@@ -1,5 +1,6 @@
 import { Logic } from "../ai/logic";
 import { TIGER, GOAT } from "../constants";
+import {Howl} from 'howler';
 import tigerImage from "../images/tiger.png";
 import goatImage from "../images/goat.png";
 import diamondCircle from "../images/diamond-circle.png";
@@ -15,6 +16,18 @@ export class Board {
     this.realCanvasElement = realCanvasElement;
     this.fakeCanvasElement = fakeCanvasElement;
     this.infoBox = infoBox;
+    this.sound = new Howl({
+      src: ["bagchal.mp3"],
+      preload: true,
+      autoplay: false,
+      loop: false,
+      volume: 1,
+      sprite: {
+        goat: [0, 2500],
+        tiger: [3000, 3002],
+        eating: [4000, 5500]
+      }
+    });
     mount(
       this.infoBox,
       (this.selectItem = el(
@@ -157,7 +170,6 @@ export class Board {
       this.handleMouseMoveEvent.bind(this)
     );
   }
-
   /**
    * method to handle mouse down event/touch start
    * @param {mouse event} event
@@ -714,6 +726,9 @@ export class Board {
         t.possibleMoves.find(p => p.eatGoat)
       );
       if (tigerCanEatGoat) {
+        // eats the goat
+      
+        this.sound.play('tiger')
         const tigerEatPoint = tigerCanEatGoat.possibleMoves.find(
           p => p.eatGoat
         );
@@ -746,7 +761,9 @@ export class Board {
         // add new reference of tiger to the points
         this.points[tigerEatPoint.point].item = TIGER;
         this.points[tigerEatPoint.point].itemIndex = tigerCanEatGoat.tiger;
+        
       } else {
+        this.sound.play('goat')
         let randomTiger = Math.floor(Math.random() * avilableTigers.length);
         let tigerToMove = avilableTigers[randomTiger];
         let randomMove = Math.floor(
