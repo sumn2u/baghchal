@@ -291,7 +291,6 @@ export class Board {
             this.dragItem.point.index,
             TIGER
           );
-          console.log(possiblePoints);
           const validPoint = possiblePoints.find(
             p => p.point === releasedPoint.index
           );
@@ -322,6 +321,7 @@ export class Board {
                   dead: true,
                   currentPoint: -currentEatenGoatIndex
                 };
+                this.sound.play('tiger');
               }
               // computer turns to move goat
               this.renderGoatMove();
