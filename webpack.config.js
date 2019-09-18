@@ -43,7 +43,7 @@ module.exports = (env) => {
                     ]
                 },
                 {
-                    test: /\.(woff|woff2|ttf|eot)$/,
+                    test: /\.(woff|woff2|ttf|eot|mp3)$/,
                     use: [
                         {
                         loader :'file-loader',
@@ -80,7 +80,11 @@ module.exports = (env) => {
             new CopyPlugin([{
                 from: 'fbapp-config.json',
                 to: 'fbapp-config.json'
-            }])
+            }]),
+             new CopyPlugin([{
+                 from: 'bagchal.mp3',
+                 to: 'bagchal.mp3'
+             }])
         ],  
     }  
 };
