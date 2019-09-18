@@ -817,6 +817,9 @@ export class Board {
         // add new reference of tiger to the points
         this.points[tigerMovePoint.point].item = TIGER;
         this.points[tigerMovePoint.point].itemIndex = tigerToMove.tiger;
+        if (this.goats.length >=20){
+          window.game.modalService()
+        }
       }
     } else {
       //alert("Congratulations! You won the game! ");
