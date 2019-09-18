@@ -75,7 +75,7 @@ export class Board {
     this.goats = []; // Array<{x:number,y:number,dead:false, currentPoint,drag: false,index: number;}>
     this.tigers = []; // Array<{x:number,y:number,currentPoint: number,drag: false,index: number}>
 
-    const totalWidth = window.innerWidth;
+    const totalWidth = this.realCanvasElement.parentNode.offsetWidth;
     const totalHeight = window.innerHeight;
     this.totalWidth = totalWidth> 500 ? 500: totalWidth;
     this.totalHeight = totalHeight>totalWidth ? totalWidth : (totalHeight>500?500: totalHeight);
@@ -129,7 +129,6 @@ export class Board {
    */
   mouseIntraction() {
     this.canvasPosition = this.getCanvasPosition();
-
     /**
      * Mouse down/ touch start event handlers
      */
@@ -168,12 +167,21 @@ export class Board {
       "mousemove",
       this.handleMouseMoveEvent.bind(this)
     );
+    this.fakeCanvasElement.addEventListener(
+      "touchmove",
+      this.handleMouseMoveEvent.bind(this)
+    );
+    this.realCanvasElement.addEventListener(
+      "touchmove",
+      this.handleMouseMoveEvent.bind(this)
+    );
   }
   /**
    * method to handle mouse down event/touch start
    * @param {mouse event} event
    */
   handelMouseDownEvent(event) {
+    event.preventDefault();
     if (!this.chosenItem) {
       return true;
     }
@@ -181,8 +189,11 @@ export class Board {
       return true;
     }
     this.mouseDown = true;
-    const x = event.pageX - this.canvasPosition.left;
-    const y = event.pageY - this.canvasPosition.top;
+    const pageX = event.type ==='mousedown' ? event.pageX : event.changedTouches[0].pageX;
+    const pageY = event.type ==='mousedown' ? event.pageY : event.changedTouches[0].pageY;
+    const x = pageX- this.canvasPosition.left;
+    const y =pageY - this.canvasPosition.top;
+    console.log(x,y);
     const clickedPoint = this.points.find(point => {
       return (
         x >= point.x - this.goatWidth &&
@@ -225,7 +236,6 @@ export class Board {
     this.showFakeCanvas();
     this.render();
   }
-
   /**
    * handle mouse down event
    * @param {mouse event} event
@@ -234,8 +244,10 @@ export class Board {
     this.mouseDown = false;
     this.hideFakeCanvas();
     if (this.dragItem) {
-      const x = event.pageX - this.canvasPosition.left;
-      const y = event.pageY - this.canvasPosition.top;
+      const pageX = event.type ==='mouseup' ? event.pageX : event.changedTouches[0].pageX;
+      const pageY = event.type ==='mouseup' ? event.pageY : event.changedTouches[0].pageY;
+      const x = pageX- this.canvasPosition.left;
+      const y =pageY - this.canvasPosition.top;
       const releasedPoint = this.points.find(point => {
         return (
           x >= point.x - this.goatWidth &&
@@ -272,12 +284,10 @@ export class Board {
             }
           }
         } else {
-          console.log(this.dragItem);
           const possiblePoints = this.getNextPossibleMove(
             this.dragItem.point.index,
             TIGER
           );
-          console.log(possiblePoints);
           const validPoint = possiblePoints.find(
             p => p.point === releasedPoint.index
           );
@@ -309,14 +319,17 @@ export class Board {
   }
 
   handleMouseMoveEvent(event) {
+    event.preventDefault();
     if (this.animationInProgress) {
       return true;
     }
     if (!(this.mouseDown && this.dragItem)) {
       return true;
     }
-    const x = event.pageX - this.canvasPosition.left;
-    const y = event.pageY - this.canvasPosition.top;
+    const pageX = event.type ==='mousemove' ? event.pageX : event.changedTouches[0].pageX;
+    const pageY = event.type ==='mousemove' ? event.pageY : event.changedTouches[0].pageY;
+    const x = pageX- this.canvasPosition.left;
+    const y =pageY - this.canvasPosition.top;
     this.fakeCanvas.clearRect(0, 0, this.width * 1.5, this.height * 1.5);
     if (this.dragItem.item === GOAT) {
       this.drawBoardGoat({ x, y }, this.fakeCanvas);
@@ -663,7 +676,6 @@ export class Board {
     let box = this.realCanvasElement.getBoundingClientRect();
     let scrollLeft = this.realCanvasElement.parentNode.scrollLeft;
     let scrollTop = this.realCanvasElement.parentNode.scrollTop;
-    console.log(scrollTop);
     let body = document.body;
     let docEl = document.documentElement;
 
