@@ -1,7 +1,7 @@
 {
   "name": "baghchal",
   "version": "1.0.0",
-  "description": "Baghchal in canvas",
+  "description": "Baghchal Game",
   "main": "server.js",
   "scripts": {
     "start": "npm run build && webpack-dev-server",
@@ -9,6 +9,7 @@
     "build:fb": "webpack --mode=production --config webpack.config.js --env production",
     "test": "echo \"Error: no test specified\" && exit 1",
     "predeploy": "npm run build",
+    "gernerate:sound": "node audiospirite.js",
     "deploy": "gh-pages -d dist"
   },
   "repository": {
@@ -27,7 +28,9 @@
   },
   "homepage": "https://github.com/sumn2u/baghchal#readme",
   "dependencies": {
+    "audiosprite": "^0.7.1",
     "express": "4.16.4",
+    "howler": "^2.1.2",
     "material-icons": "0.3.1",
     "npm": "6.7.0",
     "path": "0.12.7"

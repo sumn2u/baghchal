@@ -8,20 +8,22 @@
     <script src="https://connect.facebook.net/en_US/fbinstant.6.2.js"></script>
 </head>
 <body>
+    <script type="text/javascript" src="bundle.js"></script>
     <div class="container mt-1">
         <div id="game-container"></div>
     </div>
-    <script src='../bundle.js'></script>
     <% if (htmlWebpackPlugin.options.env === "production") {%>
     <script> 
-    FBInstant.initializeAsync().then(function () {
+     FBInstant.initializeAsync().then(function () {
+        FBInstant.setLoadingProgress(50);
         FBInstant.setLoadingProgress(100);
-    });
-    FBInstant.startGameAsync().then(function () {
-        game.init({
-        container: "game-container"
-        });
-    })
+        // start facebook game
+        FBInstant.startGameAsync().then(function () {
+            game.init({
+            container: "game-container"
+            });
+        })
+     });
     </script> 
 
     <% } else{ %>
