@@ -1,6 +1,6 @@
 import { Logic } from "../ai/logic";
 import { TIGER, GOAT } from "../constants";
-import {Howl} from 'howler';
+import { Howl } from "howler";
 import tigerImage from "../images/tiger.png";
 import goatImage from "../images/goat.png";
 import diamondCircle from "../images/diamond-circle.png";
@@ -12,11 +12,11 @@ import { TigerPossibleMoveList } from "./components/tiger-possible-move-list";
 export class Board {
   constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer) {
     this.chosenItem = null;
+    this.myTurn = false;
     this.dataContainer = dataContainer;
     this.realCanvasElement = realCanvasElement;
     this.fakeCanvasElement = fakeCanvasElement;
     this.infoBox = infoBox;
-    this.isAudioMuted = false;  
     this.sound = new Howl({
       src: ["bagchal.mp3"],
       html5: true,
@@ -32,74 +32,61 @@ export class Board {
     });
     mount(
       this.infoBox,
-      (this.selectItem = el('div.select-option',
-        el('div.container-fluid',
-           el("p", "Play as?"),
+      (this.selectItem = el(
+        "div.select-option",
+        el(
+          "div.container-fluid",
+          el("p", "Play as?"),
           el(
             "div.pick-options",
             el(
               "button",
               {
-                class: "tiger",
+                class: "tiger"
               },
-              ''
+              ""
             ),
-            el("button", { class: "goat" },'')
-          )
-      ),
-        el('div.sound-settings',
-         '',
-          el("p", "Sound"),
-          el(''),
-          el(
-            "div",
-            el(
-              "button",
-              {
-                id: "mutebtn",
-              },
-              ''
-            )
+            el("button", { class: "goat" }, "")
           )
         )
-      )
-    ));
+      ))
+    );
     mount(
       this.infoBox,
-      (this.genralInfo = el('div.container-fluid.goat-box', 
-        el( "div.row",
+      (this.genralInfo = el(
+        "div.container-fluid.goat-box",
         el(
-          "div.col-xs-6",
-          (this.goatBoardIndicator = el("p", `Goats in board : 0`))
-        ),
-        el("div.col-xs-6.text-right", (this.deadGoatIndicator = el("p", `Dead Goats: 0`)))
+          "div.row",
+          el(
+            "div.col-xs-4",
+            (this.goatBoardIndicator = el("p", `Goats in board : 0`))
+          ),
+          el(
+            "div.col-xs-4.text-center",
+            (this.displayChosenItem = el("p", "You Choose"))
+          ),
+          el(
+            "div.col-xs-4.text-right",
+            (this.deadGoatIndicator = el("p", `Dead Goats: 0`))
+          )
+        )
       ))
-    ));
+    );
     // mount(this.dataContainer, (this.moveIndicator = el("div")));
 
     this.selectItem.querySelectorAll("button").forEach(element => {
       element.addEventListener("click", event => {
         if (event.target.classList.contains(TIGER)) {
           this.chosenItem = TIGER;
-          this.sound.play('tiger')
-          this.renderGoatMove();
-          this.selectItem.classList.add("hide");
-        } else if (event.target.classList.contains(GOAT)) {
+          this.sound.play("tiger");
+          this.renderComputerGoatMove();
+        } else {
           this.chosenItem = GOAT;
-          this.sound.play('goat')
-          this.selectItem.classList.add("hide");
-        }else {
-          if (this.isAudioMuted){
-              this.isAudioMuted = false;
-              this.sound.mute(false)
-              event.target.style.background = "url(https://image.flaticon.com/icons/svg/204/204287.svg) no-repeat";
-          }else{
-            this.isAudioMuted = true;
-            this.sound.mute(true)
-            event.target.style.background = "url(https://image.flaticon.com/icons/svg/148/148757.svg) no-repeat";
-          }
+          this.sound.play("goat");
         }
-        
+        this.myTurn = this.chosenItem === "GOAT" ? true : false;
+        this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
+        this.selectItem.classList.add("hide");
       });
     });
     this.goats = []; // Array<{x:number,y:number,dead:false, currentPoint,drag: false,index: number;}>
@@ -107,13 +94,18 @@ export class Board {
 
     const totalWidth = this.realCanvasElement.parentNode.offsetWidth;
     const totalHeight = window.innerHeight;
-    this.totalWidth = totalWidth> 500 ? 500: totalWidth;
-    this.totalHeight = totalHeight>totalWidth ? totalWidth : (totalHeight>500?500: totalHeight);
+    this.totalWidth = totalWidth > 500 ? 500 : totalWidth;
+    this.totalHeight =
+      totalHeight > totalWidth
+        ? totalWidth
+        : totalHeight > 500
+        ? 500
+        : totalHeight;
     this.totalPoints = 24;
-    this.paddingLeft = this.totalWidth/10;
-    this.paddingRight = this.totalWidth/10;
-    this.paddingTop = this.totalWidth/10;
-    this.paddingBottom = this.totalWidth/10;
+    this.paddingLeft = this.totalWidth / 10;
+    this.paddingRight = this.totalWidth / 10;
+    this.paddingTop = this.totalWidth / 10;
+    this.paddingBottom = this.totalWidth / 10;
     this.height = this.totalHeight - (this.paddingTop + this.paddingBottom);
     this.width = this.totalWidth - (this.paddingLeft + this.paddingRight);
     this.steps = 4;
@@ -137,11 +129,11 @@ export class Board {
     this.canvas = this.realCanvasElement.getContext("2d");
     this.fakeCanvas = this.fakeCanvasElement.getContext("2d");
 
-    this.goatHeight = this.totalWidth>=500 ? 60 : 40;
-    this.goatWidth = this.totalWidth>=500 ?58:38;
-    this.tigerWidth = this.totalWidth>=500 ?60:40;
-    this.tigerHeight = this.totalWidth>=500 ?58:38;
-    this.cirlceImageRad = this.totalWidth>=500 ? 40:24;
+    this.goatHeight = this.totalWidth >= 500 ? 80 : 60;
+    this.goatWidth = this.totalWidth >= 500 ? 80 : 60;
+    this.tigerWidth = this.totalWidth >= 500 ? 80 : 60;
+    this.tigerHeight = this.totalWidth >= 500 ? 80 : 60;
+    this.cirlceImageRad = this.totalWidth >= 500 ? 40 : 24;
     this.points = this.calculatePoints(); // Array<{x:number,y:number,index: number,item:'tiger or goat', itemIndex: number (tiger goat Index)}>;
     this.fillTigerPoints();
     this.mouseDown = false;
@@ -219,12 +211,14 @@ export class Board {
       return true;
     }
     this.mouseDown = true;
-    const pageX = event.type ==='mousedown' ? event.pageX : event.changedTouches[0].pageX;
-    const pageY = event.type ==='mousedown' ? event.pageY : event.changedTouches[0].pageY;
-    const x = pageX- this.canvasPosition.left;
-    const y =pageY - this.canvasPosition.top;
-    const goatWidth =  Math.floor(this.goatWidth/2) ;
-    const goatHeight =  Math.floor(this.goatHeight/2);
+    const pageX =
+      event.type === "mousedown" ? event.pageX : event.changedTouches[0].pageX;
+    const pageY =
+      event.type === "mousedown" ? event.pageY : event.changedTouches[0].pageY;
+    const x = pageX - this.canvasPosition.left;
+    const y = pageY - this.canvasPosition.top;
+    const goatWidth = Math.floor(this.goatWidth / 2);
+    const goatHeight = Math.floor(this.goatHeight / 2);
     const clickedPoint = this.points.find(point => {
       return (
         x >= point.x - goatWidth &&
@@ -253,7 +247,7 @@ export class Board {
       // track goat point to all points array
       this.points[i].item = GOAT;
       this.points[i].itemIndex = this.goats.length - 1;
-      this.renderTigerMove();
+      this.renderComputerTigerMove();
     } else if (this.chosenItem === GOAT && this.goats.length === 20) {
       this.goats.forEach(g => (g.drag = g.currentPoint === i ? true : false));
       this.dragItem = { item: GOAT, point: clickedPoint };
@@ -275,12 +269,14 @@ export class Board {
     this.mouseDown = false;
     this.hideFakeCanvas();
     if (this.dragItem) {
-      const pageX = event.type ==='mouseup' ? event.pageX : event.changedTouches[0].pageX;
-      const pageY = event.type ==='mouseup' ? event.pageY : event.changedTouches[0].pageY;
-      const x = pageX- this.canvasPosition.left;
-      const y =pageY - this.canvasPosition.top;
-      const goatWidth =  Math.floor(this.goatWidth/2);
-      const goatHeight =  Math.floor(this.goatHeight/2);
+      const pageX =
+        event.type === "mouseup" ? event.pageX : event.changedTouches[0].pageX;
+      const pageY =
+        event.type === "mouseup" ? event.pageY : event.changedTouches[0].pageY;
+      const x = pageX - this.canvasPosition.left;
+      const y = pageY - this.canvasPosition.top;
+      const goatWidth = Math.floor(this.goatWidth / 2);
+      const goatHeight = Math.floor(this.goatHeight / 2);
       const releasedPoint = this.points.find(point => {
         return (
           x >= point.x - goatWidth &&
@@ -313,7 +309,7 @@ export class Board {
               this.points[releasedPoint.index].item = GOAT;
               this.points[releasedPoint.index].itemIndex = draggedGoat.index;
               // computer turn to move tiger
-              this.renderTigerMove();
+              this.renderComputerTigerMove();
             }
           }
         } else {
@@ -324,7 +320,7 @@ export class Board {
           const validPoint = possiblePoints.find(
             p => p.point === releasedPoint.index
           );
-        
+
           if (validPoint) {
             const draggedTiger = this.tigers.find(t => t.drag);
             if (draggedTiger) {
@@ -340,9 +336,11 @@ export class Board {
               this.points[releasedPoint.index].item = TIGER;
               this.points[releasedPoint.index].itemIndex = draggedTiger.index;
               // if tiger eat the goat remove goat from goats
-              if(validPoint.eatGoat){
+              if (validPoint.eatGoat) {
                 // remove eaten goat point index from points
-                const currentEatenGoatIndex = this.goats[validPoint.eatGoatIndex].currentPoint;
+                const currentEatenGoatIndex = this.goats[
+                  validPoint.eatGoatIndex
+                ].currentPoint;
                 this.points[currentEatenGoatIndex].item = null;
                 this.points[currentEatenGoatIndex].itemIndex = null;
                 this.goats[validPoint.eatGoatIndex] = {
@@ -351,11 +349,11 @@ export class Board {
                   dead: true,
                   currentPoint: -currentEatenGoatIndex
                 };
-                this.sound.play('tiger');
+                this.sound.play("tiger");
               }
-              this.sound.play('goat')
+              this.sound.play("goat");
               // computer turns to move goat
-              this.renderGoatMove();
+              this.renderComputerGoatMove();
             }
           }
         }
@@ -375,10 +373,12 @@ export class Board {
     if (!(this.mouseDown && this.dragItem)) {
       return true;
     }
-    const pageX = event.type ==='mousemove' ? event.pageX : event.changedTouches[0].pageX;
-    const pageY = event.type ==='mousemove' ? event.pageY : event.changedTouches[0].pageY;
-    const x = pageX- this.canvasPosition.left;
-    const y =pageY - this.canvasPosition.top;
+    const pageX =
+      event.type === "mousemove" ? event.pageX : event.changedTouches[0].pageX;
+    const pageY =
+      event.type === "mousemove" ? event.pageY : event.changedTouches[0].pageY;
+    const x = pageX - this.canvasPosition.left;
+    const y = pageY - this.canvasPosition.top;
     this.fakeCanvas.clearRect(0, 0, this.width * 1.5, this.height * 1.5);
     if (this.dragItem.item === GOAT) {
       this.drawBoardGoat({ x, y }, this.fakeCanvas);
@@ -756,7 +756,7 @@ export class Board {
   /**
    * move the tiger after user moves the goat
    */
-  renderTigerMove() {
+  renderComputerTigerMove() {
     let avilableTigers = [];
     this.tigers.forEach((tigerPoint, i) => {
       let pointIndex;
@@ -787,8 +787,8 @@ export class Board {
       );
       if (tigerCanEatGoat) {
         // eats the goat
-      
-        this.sound.play('tiger')
+
+        this.sound.play("tiger");
         const tigerEatPoint = tigerCanEatGoat.possibleMoves.find(
           p => p.eatGoat
         );
@@ -821,9 +821,8 @@ export class Board {
         // add new reference of tiger to the points
         this.points[tigerEatPoint.point].item = TIGER;
         this.points[tigerEatPoint.point].itemIndex = tigerCanEatGoat.tiger;
-        
       } else {
-        this.sound.play('goat')
+        this.sound.play("goat");
         let randomTiger = Math.floor(Math.random() * avilableTigers.length);
         let tigerToMove = avilableTigers[randomTiger];
         let randomMove = Math.floor(
@@ -845,13 +844,13 @@ export class Board {
         // add new reference of tiger to the points
         this.points[tigerMovePoint.point].item = TIGER;
         this.points[tigerMovePoint.point].itemIndex = tigerToMove.tiger;
-        if (this.goats.length >=20){
-          window.game.modalService()
+        if (this.goats.length >= 20) {
+          window.game.modalService();
         }
       }
     } else {
       //alert("Congratulations! You won the game! ");
-      window.game.modalService()
+      window.game.modalService();
     }
     // this.moveIndicator.innerHTML = "";
 
@@ -869,7 +868,7 @@ export class Board {
   /**
    * render goat after user moves tiger
    */
-  renderGoatMove() {
+  renderComputerGoatMove() {
     if (this.goats.length < 20) {
       const availablePoints = this.points.filter(p => !p.item);
       const randPoint = Math.floor(Math.random() * availablePoints.length);
@@ -1070,7 +1069,7 @@ export class Board {
           clearInterval(animationFrame);
         }
         frame++;
-      }, 40);
+      }, 20);
     } else {
       if (data.type === "new") {
         // {type:'new',pointData:{x:point.x,y:point.y,dead: false,drag: false,index:this.goats.length,currentPoint:point.index}
@@ -1107,7 +1106,7 @@ export class Board {
             clearInterval(animationFrame);
           }
           frame++;
-        }, 40);
+        }, 20);
       }
     }
   }
