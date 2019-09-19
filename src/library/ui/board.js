@@ -193,8 +193,8 @@ export class Board {
     const pageY = event.type ==='mousedown' ? event.pageY : event.changedTouches[0].pageY;
     const x = pageX- this.canvasPosition.left;
     const y =pageY - this.canvasPosition.top;
-    const goatWidth = event.type==='mousedown' ? Math.floor(this.goatWidth/2) : Math.floor(this.goatWidth/4);
-    const goatHeight = event.type==='mousedown' ? Math.floor(this.goatHeight/2) : Math.floor(this.goatHeight/4);
+    const goatWidth =  Math.floor(this.goatWidth/2) ;
+    const goatHeight =  Math.floor(this.goatHeight/2);
     const clickedPoint = this.points.find(point => {
       return (
         x >= point.x - goatWidth &&
@@ -249,8 +249,8 @@ export class Board {
       const pageY = event.type ==='mouseup' ? event.pageY : event.changedTouches[0].pageY;
       const x = pageX- this.canvasPosition.left;
       const y =pageY - this.canvasPosition.top;
-      const goatWidth = event.type==='mousedown' ? Math.floor(this.goatWidth/2) : Math.floor(this.goatWidth/4);
-      const goatHeight = event.type==='mousedown' ? Math.floor(this.goatHeight/2) : Math.floor(this.goatHeight/4);
+      const goatWidth =  Math.floor(this.goatWidth/2);
+      const goatHeight =  Math.floor(this.goatHeight/2);
       const releasedPoint = this.points.find(point => {
         return (
           x >= point.x - goatWidth &&
