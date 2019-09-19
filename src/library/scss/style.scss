@@ -316,3 +316,20 @@
    }
  }
 
+button {
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+button#mutebtn {
+  background: url(https://image.flaticon.com/icons/svg/204/204287.svg) no-repeat;
+  width: 10%;
+  height: 80px;
+  display: block;
+  margin: auto;
+}
+.sound-settings{
+  position: relative;
+  padding-top: 30px;
+}

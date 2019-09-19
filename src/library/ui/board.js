@@ -15,7 +15,8 @@ export class Board {
     this.dataContainer = dataContainer;
     this.realCanvasElement = realCanvasElement;
     this.fakeCanvasElement = fakeCanvasElement;
-    this.infoBox = infoBox;  
+    this.infoBox = infoBox;
+    this.isAudioMuted = false;  
     this.sound = new Howl({
       src: ["bagchal.mp3"],
       html5: true,
@@ -45,7 +46,22 @@ export class Board {
             ),
             el("button", { class: "goat" },'')
           )
-      )
+      ),
+        el('div.sound-settings',
+         '',
+          el("p", "Sound"),
+          el(''),
+          el(
+            "div",
+            el(
+              "button",
+              {
+                id: "mutebtn",
+              },
+              ''
+            )
+          )
+        )
       )
     ));
     mount(
@@ -67,11 +83,23 @@ export class Board {
           this.chosenItem = TIGER;
           this.sound.play('tiger')
           this.renderGoatMove();
-        } else {
+          this.selectItem.classList.add("hide");
+        } else if (event.target.classList.contains(GOAT)) {
           this.chosenItem = GOAT;
           this.sound.play('goat')
+          this.selectItem.classList.add("hide");
+        }else {
+          if (this.isAudioMuted){
+              this.isAudioMuted = false;
+              this.sound.mute(false)
+              event.target.style.background = "url(https://image.flaticon.com/icons/svg/204/204287.svg) no-repeat";
+          }else{
+            this.isAudioMuted = true;
+            this.sound.mute(true)
+            event.target.style.background = "url(https://image.flaticon.com/icons/svg/148/148757.svg) no-repeat";
+          }
         }
-        this.selectItem.classList.add("hide");
+        
       });
     });
     this.goats = []; // Array<{x:number,y:number,dead:false, currentPoint,drag: false,index: number;}>
