@@ -69,10 +69,9 @@ export class Logic {
 
         const bestAvailableMove = availableTigers[tigerIndex];
 
-        bestAvailableMove.possibleMoves = [{
-            point: this.bestMove.destinationPoint,
-            eatGoat: (typeof this.bestMove.eatGoatPoint === "object") ? false : true
-        }];
+        const bestPossibleMove = bestAvailableMove.possibleMoves.find(bestMove =>  bestMove.point == this.bestMove.destinationPoint);
+
+        bestAvailableMove.possibleMoves = [bestPossibleMove];
 
         return [bestAvailableMove];
     }
@@ -118,6 +117,7 @@ export class Logic {
         });
         this.movableTigers = totalMovableTigers;
         this.tigerClosedSpaceCount = moves.length;
+        console.log('                         tiger closed space count', this.tigerClosedSpaceCount);
         this.deadGoats = this.goatsDead(goats);
         return moves;
     }
@@ -130,7 +130,7 @@ export class Logic {
     }
 
     costEvaluation(depthLevel) {
-        console.log(this.consoleSpaces(depthLevel), 'score----------', this.movableTigers, this.deadGoats, this.tigerClosedSpaceCount, depthLevel);
+        console.log(this.consoleSpaces(depthLevel), 'tigerClosedSpaceCount----------', this.tigerClosedSpaceCount, depthLevel);
         const winner = this.getWinner();
         let score = 0;
         if(!winner) {
