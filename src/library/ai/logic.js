@@ -64,9 +64,18 @@ export class Logic {
 
         const bestPossibleMove = bestAvailableMove.possibleMoves.find(bestMove =>  bestMove.point == this.bestMove.destinationPoint);
 
-        bestAvailableMove.possibleMoves = [bestPossibleMove];
+        let eatGoatIndex = null;
+        if(bestPossibleMove.hasOwnProperty('eatGoatIndex') && typeof bestPossibleMove.eatGoatIndex !== "object" ) {
+            eatGoatIndex = bestPossibleMove.eatGoatIndex;
+        }
 
-        return [bestAvailableMove];
+        return {
+            tigerIndex: bestAvailableMove.tiger,
+            currentPointIndex: bestAvailableMove.point, 
+            nextPointIndex: bestPossibleMove.point, 
+            eatGoat: bestPossibleMove.eatGoat, 
+            eatGoatIndex
+        };
     }
 
     getMoveListsFromAvailableTigers(availableTigers) {
