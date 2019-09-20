@@ -87,29 +87,31 @@
     padding: 10px;
     max-width: 520px;
     margin: auto;
-    background: #ffffff;
+    background:url(../images/baghchal-bg.png);
+    background-size: cover;
     border: 1px solid #e0dede;
     border-radius: 3px;
     box-shadow: 0px 0px 1px 1px #f5eded;
     position: relative;
  }
  .select-option{
-   background:url(../images/bg.png);
+   background:url(../images/baghchal.png);
+   background-size: cover;
     button{
       &.tiger{
-        background: url(../images/tiger.png) no-repeat center;
+        background: url(../images/tiger1.png) no-repeat center;
         margin-right:50px;
       }
       &.goat{
-        background: url(../images/goat.png) no-repeat center;
+        background: url(../images/goat1.png) no-repeat center;
       }
       background-size:100%!important;
-      background-color:#ccc!important;
-      padding:40px;
+      background-color:none!important;
+      padding:50px;
       outline: none;
       border-radius: 4px;
       box-shadow: none;
-      border:1px solid #ccc;
+      border:none!important;
     }
   position: absolute;
   left: 0;
@@ -122,25 +124,32 @@
   z-index: 999;
   color: #fff;
   p{
-    font-size: 30px;
-    font-weight: 600;
+    font-size: 40px;
+    padding-top: 50px;
+    color: #51b673;
+    text-transform: uppercase;
+    font-weight: bold;
+    text-shadow: 1px 2px 1px #388664;
   }
   
 
  }
  .goat-box{
-  margin-bottom: 10px;
-  padding: 8px 17px;
-  background: url(../images/bg.png);
-  border-radius: 3px;
-  p{
-    margin:0;
-    font-style: italic;
-    text-transform: uppercase;
-    color:#fafafa;
-    font-size: 13px;
-    font-weight: 600;
-  }
+    margin-bottom: 10px;
+    padding: 10px 30px;
+    background: #398865;
+    border-radius: 3px;
+    box-shadow: 0px 0px 4px 1px #2d7355;
+    border: 1px solid #206d4b;
+    p{
+      margin: 0;
+      font-style: normal;
+      color: #fafafa;
+      font-size: 14px;
+      font-weight: 600;
+      color: #FFEB3B;
+      text-shadow: 1px 1px 1px #000;
+    }
  }
 
  @media(max-width:1100px){
@@ -332,4 +341,9 @@ button#mutebtn {
 .sound-settings{
   position: relative;
   padding-top: 30px;
+}
+
+.col-xs-4{
+  flex: 0 0 33.33%;
+  max-width: 33.33%;
 }
