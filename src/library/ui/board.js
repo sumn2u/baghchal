@@ -951,7 +951,7 @@ export class Board {
             y: nextPoint.y,
             drag: false,
             index: prevPoint.index,
-            currentPoint: data.currentPointIndex
+            currentPoint: nextPoint.index
           };
           this.render();
           this.hideFakeCanvas();
@@ -1060,7 +1060,6 @@ export class Board {
     }
 
     const tigerNewPoint = this.points[tigerData.nextPointIndex];
-    console.log(tigerNewPoint);
     // release prev tiger index from all points
     const currentTigerPointIndex = this.tigers[tigerData.tigerIndex]
       .currentPoint;
