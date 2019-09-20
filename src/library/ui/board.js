@@ -781,27 +781,7 @@ export class Board {
     });
     if (avilableTigers.length > 0) {
       // getting next best move for tiger, will be improved later
-      const bestMoves = this.logic.getNextBestMove(TIGER, avilableTigers);
-      this.tigerMoveLogic(bestMoves);
-    } else {
-      //alert("Congratulations! You won the game! ");
-      window.game.modalService()
-    }
-    // this.moveIndicator.innerHTML = "";
-
-    // avilableTigers.forEach(tiger => {
-    //   this.displayPossibleMoves(
-    //     tiger.tiger,
-    //     tiger.possibleMoves.map(p => p.point)
-    //   );
-    // });
-    const deadGoats = this.goats.filter(g => g.dead).length;
-    const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
-    this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
-  }
-
-  tigerMoveLogic(avilableTigers) {
+      // const bestMoves = this.logic.getNextBestMove(TIGER, avilableTigers);
       const tigerCanEatGoat = avilableTigers.find(t =>
         t.possibleMoves.find(p => p.eatGoat)
       );
@@ -868,6 +848,22 @@ export class Board {
           window.game.modalService();
         }
       }
+    } else {
+      //alert("Congratulations! You won the game! ");
+      window.game.modalService()
+    }
+    // this.moveIndicator.innerHTML = "";
+
+    // avilableTigers.forEach(tiger => {
+    //   this.displayPossibleMoves(
+    //     tiger.tiger,
+    //     tiger.possibleMoves.map(p => p.point)
+    //   );
+    // });
+    const deadGoats = this.goats.filter(g => g.dead).length;
+    const goatsInBoard = this.goats.filter(g => !g.dead).length;
+    this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
+    this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
   }
 
   /**
