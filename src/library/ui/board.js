@@ -781,81 +781,8 @@ export class Board {
     });
     if (avilableTigers.length > 0) {
       // getting next best move for tiger, will be improved later
-      const backups = {
-        goats: this.goats,
-        tigers: this.tigers,
-        points: this.points
-      };
-      this.logic.goatandtiger('aaaaaaaaaaaaaaa');
-      this.logic.getNextBestMove(TIGER, avilableTigers);
-      this.logic.goatandtiger('ddddddddddddd');
-      // const tigerCanEatGoat = avilableTigers.find(t =>
-      //   t.possibleMoves.find(p => p.eatGoat)
-      // );
-      // if (tigerCanEatGoat) {
-      //   // eats the goat
-      
-      //   this.sound.play('tiger')
-      //   const tigerEatPoint = tigerCanEatGoat.possibleMoves.find(
-      //     p => p.eatGoat
-      //   );
-      //   const currentEatenGoatIndex = this.goats[tigerEatPoint.eatGoatIndex]
-      //     .currentPoint;
-
-      //   // remove eaten goat point index from points
-      //   this.points[currentEatenGoatIndex].item = null;
-      //   this.points[currentEatenGoatIndex].itemIndex = null;
-      //   this.goats[tigerEatPoint.eatGoatIndex] = {
-      //     x: 0,
-      //     y: 0,
-      //     dead: true,
-      //     currentPoint: -currentEatenGoatIndex
-      //   };
-
-      //   const tigerNewPoint = this.points[tigerEatPoint.point];
-
-      //   // release prev tiger index from all points
-      //   const currentTigerIndex = this.tigers[tigerCanEatGoat.tiger]
-      //     .currentPoint;
-      //   this.points[currentTigerIndex].item = null;
-      //   this.points[currentTigerIndex].itemIndex = null;
-      //   this.showMoveAnimation(TIGER, {
-      //     prevPoint: this.tigers[tigerCanEatGoat.tiger],
-      //     nextPoint: tigerNewPoint,
-      //     currentPoint: tigerEatPoint.point
-      //   });
-
-      //   // add new reference of tiger to the points
-      //   this.points[tigerEatPoint.point].item = TIGER;
-      //   this.points[tigerEatPoint.point].itemIndex = tigerCanEatGoat.tiger;
-        
-      // } else {
-      //   this.sound.play('goat')
-      //   let randomTiger = Math.floor(Math.random() * avilableTigers.length);
-      //   let tigerToMove = avilableTigers[randomTiger];
-      //   let randomMove = Math.floor(
-      //     Math.random() * tigerToMove.possibleMoves.length
-      //   );
-      //   let tigerMovePoint = tigerToMove.possibleMoves[randomMove];
-      //   // release prev tiger index from all points
-      //   const currentTigerPoint = this.tigers[tigerToMove.tiger].currentPoint;
-      //   this.points[currentTigerPoint].item = null;
-      //   this.points[currentTigerPoint].itemIndex = null;
-
-      //   const tigerNewPoint = this.points[tigerMovePoint.point];
-      //   this.showMoveAnimation(TIGER, {
-      //     prevPoint: this.tigers[tigerToMove.tiger],
-      //     nextPoint: tigerNewPoint,
-      //     currentPoint: tigerMovePoint.point
-      //   });
-
-      //   // add new reference of tiger to the points
-      //   this.points[tigerMovePoint.point].item = TIGER;
-      //   this.points[tigerMovePoint.point].itemIndex = tigerToMove.tiger;
-      //   if (this.goats.length >=20){
-      //     window.game.modalService()
-      //   }
-      // }
+      const bestMoves = this.logic.getNextBestMove(TIGER, avilableTigers);
+      this.tigerMoveLogic(bestMoves);
     } else {
       //alert("Congratulations! You won the game! ");
       window.game.modalService()
@@ -872,8 +799,78 @@ export class Board {
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
-    this.logic.goatandtiger('now changed');
   }
+
+  tigerMoveLogic(avilableTigers) {
+      const tigerCanEatGoat = avilableTigers.find(t =>
+        t.possibleMoves.find(p => p.eatGoat)
+      );
+      if (tigerCanEatGoat) {
+        // eats the goat
+      
+        this.sound.play('tiger')
+        const tigerEatPoint = tigerCanEatGoat.possibleMoves.find(
+          p => p.eatGoat
+        );
+        const currentEatenGoatIndex = this.goats[tigerEatPoint.eatGoatIndex]
+          .currentPoint;
+
+        // remove eaten goat point index from points
+        this.points[currentEatenGoatIndex].item = null;
+        this.points[currentEatenGoatIndex].itemIndex = null;
+        this.goats[tigerEatPoint.eatGoatIndex] = {
+          x: 0,
+          y: 0,
+          dead: true,
+          currentPoint: -currentEatenGoatIndex
+        };
+
+        const tigerNewPoint = this.points[tigerEatPoint.point];
+
+        // release prev tiger index from all points
+        const currentTigerIndex = this.tigers[tigerCanEatGoat.tiger]
+          .currentPoint;
+        this.points[currentTigerIndex].item = null;
+        this.points[currentTigerIndex].itemIndex = null;
+        this.showMoveAnimation(TIGER, {
+          prevPoint: this.tigers[tigerCanEatGoat.tiger],
+          nextPoint: tigerNewPoint,
+          currentPoint: tigerEatPoint.point
+        });
+
+        // add new reference of tiger to the points
+        this.points[tigerEatPoint.point].item = TIGER;
+        this.points[tigerEatPoint.point].itemIndex = tigerCanEatGoat.tiger;
+        
+      } else {
+        this.sound.play('goat')
+        let randomTiger = Math.floor(Math.random() * avilableTigers.length);
+        let tigerToMove = avilableTigers[randomTiger];
+        let randomMove = Math.floor(
+          Math.random() * tigerToMove.possibleMoves.length
+        );
+        let tigerMovePoint = tigerToMove.possibleMoves[randomMove];
+        // release prev tiger index from all points
+        const currentTigerPoint = this.tigers[tigerToMove.tiger].currentPoint;
+        this.points[currentTigerPoint].item = null;
+        this.points[currentTigerPoint].itemIndex = null;
+
+        const tigerNewPoint = this.points[tigerMovePoint.point];
+        this.showMoveAnimation(TIGER, {
+          prevPoint: this.tigers[tigerToMove.tiger],
+          nextPoint: tigerNewPoint,
+          currentPoint: tigerMovePoint.point
+        });
+
+        // add new reference of tiger to the points
+        this.points[tigerMovePoint.point].item = TIGER;
+        this.points[tigerMovePoint.point].itemIndex = tigerToMove.tiger;
+        if (this.goats.length >=20){
+          window.game.modalService()
+        }
+      }
+  }
+
   /**
    * render goat after user moves tiger
    */
