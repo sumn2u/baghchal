@@ -759,40 +759,13 @@ export class Board {
     if (avilableTigers.length > 0) {
       let tigerData = null;
       // getting next best move for tiger, will be improved later
-      avilableTigers = this.logic.getNextBestMove(TIGER, avilableTigers);
-      const tigerCanEatGoat = avilableTigers.find(t =>
-        t.possibleMoves.find(p => p.eatGoat)
-      );
-      if (tigerCanEatGoat) {
+      const bestMove = this.logic.getNextBestMove(TIGER, avilableTigers)[0];
+     
+      if (bestMove.eatGoat) {
         // eats the goat
-
-        this.sound.play("tiger");
-        const tigerEatPoint = tigerCanEatGoat.possibleMoves.find(
-          p => p.eatGoat
-        );
-        tigerData = {
-          tigerIndex: tigerCanEatGoat.tiger,
-          tigerNextPointIndex:tigerEatPoint.point,
-          eatGoat: true,
-          eatGoatIndex: tigerEatPoint.eatGoatIndex
-        };
-      } else {
-        this.sound.play("goat");
-        let randomTiger = Math.floor(Math.random() * avilableTigers.length);
-        let tigerToMove = avilableTigers[randomTiger];
-        let randomMove = Math.floor(
-          Math.random() * tigerToMove.possibleMoves.length
-        );
-        let tigerMovePoint = tigerToMove.possibleMoves[randomMove];
-
-        tigerData =  {
-          tigerIndex: tigerToMove.tiger,
-          tigerNextPointIndex:tigerMovePoint.point,
-          eatGoat: false,
-          eatGoatIndex: null
-        };
-      }
-      this.moveTiger(tigerData);
+        this.sound.play("tiger");       
+      } 
+      this.moveTiger(bestMove);
     } else {
       window.game.modalService();
     }
