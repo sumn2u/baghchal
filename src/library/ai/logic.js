@@ -15,7 +15,7 @@ export class Logic {
 
         this.movableTigers = 4;
         this.deadGoats = 0;
-        this.tigerClosedSpaceCount = 0;
+        // this.tigerClosedSpaceCount = 0;
         this.moveLists = {};
 
         // what will be the next point index
@@ -44,13 +44,6 @@ export class Logic {
 
     goatandtiger(text, display=false) {
         if(display) {
-            console.log(`${text}======================================`);
-            this.board.goats.forEach(goat => console.log(goat));
-            console.log(`${text}======================================`);
-            this.board.tigers.forEach(tiger => console.log(tiger));
-            console.log(`${text}======================================`);
-            this.board.points.forEach(point => console.log(point));
-            console.log(`${text}======================================`);
         }
     }
 
@@ -116,8 +109,7 @@ export class Logic {
             }
         });
         this.movableTigers = totalMovableTigers;
-        this.tigerClosedSpaceCount = moves.length;
-        console.log('                         tiger closed space count', this.tigerClosedSpaceCount);
+        // this.tigerClosedSpaceCount = moves.length;
         this.deadGoats = this.goatsDead(goats);
         return moves;
     }
@@ -130,13 +122,13 @@ export class Logic {
     }
 
     costEvaluation(depthLevel) {
-        console.log(this.consoleSpaces(depthLevel), 'tigerClosedSpaceCount----------', this.tigerClosedSpaceCount, depthLevel);
+        const tigerClosedSpaceCount = this.tigerClosedSpaceCount();
         const winner = this.getWinner();
         let score = 0;
         if(!winner) {
-            score = (300 * this.movableTigers) + (700 * this.deadGoats) - (700 * this.tigerClosedSpaceCount) - (100 * depthLevel);
+            score = (200 * this.movableTigers) + (1000 * this.deadGoats) - (200 * tigerClosedSpaceCount) - (100 * depthLevel);
             if(typeof this.nextMove.eatGoatPoint !== "object"){ // NOT NULL
-                score += 5000;
+                score += 10000;
             }
             return score;
         }
@@ -146,6 +138,16 @@ export class Logic {
 
         else if(winner == TIGER)
             return largeLimit;
+    }
+
+    tigerClosedSpaceCount() {
+        let count = 0;
+        this.board.tigers.forEach(point => {
+            const possibleMoves = this.board.getNextPossibleMove(point.currentPoint);
+            count += possibleMoves.length;
+        });
+
+        return count;
     }
 
     // only to display logs with tabs based on level, more the level more space indent will be left, just for test, will be removed later
@@ -162,11 +164,8 @@ export class Logic {
         this.turn = (isMax)?TIGER:GOAT;
         const score = this.costEvaluation(depthLevel);
 
-        console.log(this.consoleSpaces(depthLevel), 'score', score, 'depth', depthLevel);
-
         // return the score from leaf node
         if((depthLevel > this.AILevel) || (Math.abs(score) == largeLimit)) {
-            console.log(`${this.consoleSpaces(depthLevel)} this.AILevel`, this.AILevel, 'score', score);
             return score;
         }
 
@@ -203,10 +202,11 @@ export class Logic {
                 // get from board
                 const availableTigers = [];
                 this.board.tigers.forEach(point => {
-                    availableTigers.push({
+                    const tigerMove = {
                         point: point.currentPoint,
                         possibleMoves: this.board.getNextPossibleMove(point.currentPoint)
-                    });
+                    };
+                    availableTigers.push(tigerMove);
                 });
 
                 moveLists = this.getMoveListsFromAvailableTigers(availableTigers);
@@ -215,10 +215,9 @@ export class Logic {
 
         let value = 100000000;
         if(isMax){
-            console.log(`${this.consoleSpaces(depthLevel)} if condition`, moveLists, minLimit, maxLimit, minLimit >= maxLimit); 
-            // if(minLimit >= maxLimit) {
-            //     return false;
-            // }
+            if(minLimit >= maxLimit) {
+                return false;
+            }
 
             value = -value;
             moveLists.forEach((move) => { 
@@ -228,17 +227,12 @@ export class Logic {
                 this.nextMove = move;
 
                 // go deeper in the search tree recursively
-                console.log(this.consoleSpaces(depthLevel), '================Max, Start==================', `${move.sourcePoint}-${move.destinationPoint}-${move.actionType}`);
                 const value_t = this.computeMinMax(depthLevel+1, false, minLimit, maxLimit);
-                console.log(this.consoleSpaces(depthLevel), '================Max, End==================', value, value_t, depthLevel);
-                console.log('');
 
                 if(value_t > value){
                     value = value_t;
                     minLimit = Math.max(minLimit, value);
                     if(depthLevel == 1){
-                        console.log(this.consoleSpaces(depthLevel), `Max, best move is ${move.sourcePoint}-${move.destinationPoint}`, 'the max value is:', value)
-                        console.log('');
                         this.bestMove = move;
                     }
                 }
@@ -246,18 +240,17 @@ export class Logic {
                 // revert the last change
                 this.revertBoard(backups);
 
-                if(minLimit >= maxLimit) {
-                    return false;
-                }
+                // if(minLimit >= maxLimit) {
+                //     return false;
+                // }
             });
 
             return value;
 
         } else {
-            console.log(`${this.consoleSpaces(depthLevel)}went to else`, moveLists, minLimit, maxLimit, minLimit >= maxLimit); 
-            // if(minLimit >= maxLimit){
-            //     return false;
-            // }
+            if(minLimit >= maxLimit){
+                return false;
+            }
             
             moveLists.forEach((move) => {
                 // backup the board before change
@@ -266,10 +259,7 @@ export class Logic {
                 this.nextMove = move;
 
                 // go deeper in the search tree recursively
-                console.log(this.consoleSpaces(depthLevel), '================Min, Start==================', `${move.sourcePoint}-${move.destinationPoint}-${move.actionType}`);
                 const value_t = this.computeMinMax(depthLevel+1, true, minLimit, maxLimit);
-                console.log(this.consoleSpaces(depthLevel), '================Min, End==================', value, value_t, depthLevel);
-                console.log('');
 
                 maxLimit = Math.min(maxLimit, value_t);
 
@@ -277,8 +267,6 @@ export class Logic {
                     value = value_t;
                     minLimit = Math.min(minLimit, value);
                     if(depthLevel == 1){
-                        console.log(this.consoleSpaces(depthLevel), `Min, best move is ${move.sourcePoint}-${move.destinationPoint}`, 'the max value is:', value)
-                        console.log('');
                         this.bestMove = move;
                     }
                 }
@@ -286,9 +274,9 @@ export class Logic {
                 // revert the last change
                 this.revertBoard(backups);
 
-                if(minLimit >= maxLimit) {
-                    return false;
-                }
+                // if(minLimit >= maxLimit) {
+                //     return false;
+                // }
             });
 
             return value;
@@ -319,7 +307,6 @@ export class Logic {
                 this.board.goats.push(newGoatMove);
             } else if(move.actionType == MOVE) {
                 // TODO: GOAT MOVE
-                console.log('--------------goat move--------------------')
             }
         } else {
             if(move.actionType == EAT){
