@@ -759,7 +759,7 @@ export class Board {
     if (avilableTigers.length > 0) {
       let tigerData = null;
       // getting next best move for tiger, will be improved later
-      const bestMove = this.logic.getNextBestMove(TIGER, avilableTigers)[0];
+      const bestMove = this.logic.getNextBestMove(TIGER, avilableTigers);
      
       if (bestMove.eatGoat) {
         // eats the goat
@@ -1059,7 +1059,8 @@ export class Board {
       };
     }
 
-    const tigerNewPoint = this.points[tigerData.tigerNextPointIndex];
+    const tigerNewPoint = this.points[tigerData.nextPointIndex];
+    console.log(tigerNewPoint);
     // release prev tiger index from all points
     const currentTigerPointIndex = this.tigers[tigerData.tigerIndex]
       .currentPoint;
@@ -1069,13 +1070,13 @@ export class Board {
     const animationTigerData = {
       prevPoint: this.tigers[tigerData.tigerIndex],
       nextPoint: tigerNewPoint,
-      currentPointIndex: tigerData.tigerNextPointIndex
+      currentPointIndex: tigerData.tigerIndex
     };
     this.showMoveAnimation(TIGER, animationTigerData);
 
     // add new reference of tiger to the points
-    this.points[tigerData.tigerNextPointIndex].item = TIGER;
-    this.points[tigerData.tigerNextPointIndex].itemIndex = tigerData.tiger;
+    this.points[tigerData.nextPointIndex].item = TIGER;
+    this.points[tigerData.nextPointIndex].itemIndex = tigerData.tiger;
   }
 
   /**
