@@ -87,7 +87,7 @@
     padding: 10px;
     max-width: 520px;
     margin: auto;
-    background:url(../images/baghchal-bg.png);
+    background:url(../images/baghchal.png);
     background-size: cover;
     border: 1px solid #e0dede;
     border-radius: 3px;
@@ -95,7 +95,12 @@
     position: relative;
  }
  .select-option{
-   background:url(../images/baghchal.png);
+   .sound-setting{
+     position: absolute;
+     bottom: 5%;
+     right: 30px;;
+   }
+   background:url(../images/baghchal.png) no-repeat center #388664;
    background-size: cover;
     button{
       &.tiger{
@@ -105,6 +110,7 @@
       &.goat{
         background: url(../images/goat1.png) no-repeat center;
       }
+      
       background-size:100%!important;
       background-color:none!important;
       padding:50px;
@@ -112,27 +118,37 @@
       border-radius: 4px;
       box-shadow: none;
       border:none!important;
+      &.play-sound{
+        background: url(../images/sound-unmute.png) no-repeat center;
+        padding:35px;
+      }
+      &.mute-sound{
+        background: url(../images/sound-mute.png) no-repeat center;
+        padding:35px;
+      }
     }
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  padding: 10em 40px;
-  text-align: center;
-  // background: rgba(10, 10, 10, 0.8);
-  z-index: 999;
-  color: #fff;
+    background-size: cover;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding: 66px 40px 0 40px;
+    text-align: center;
+    z-index: 999;
+    color: #fff;
   p{
     font-size: 40px;
-    padding-top: 50px;
     color: #51b673;
     text-transform: uppercase;
     font-weight: bold;
     text-shadow: 1px 2px 1px #388664;
   }
-  
-
+  .game-name{
+    padding:50px;
+    background: url(../images/baghchal-text.png) no-repeat center;
+    background-size: 100%;
+  }
  }
  .goat-box{
     margin-bottom: 10px;
@@ -346,4 +362,13 @@ button#mutebtn {
 .col-xs-4{
   flex: 0 0 33.33%;
   max-width: 33.33%;
+}
+
+@media(max-width: 450px){
+  .select-option{
+    padding: 50px 30px 0 30px;
+  }
+  .goat-box p{
+    font-size:11px;
+  }
 }

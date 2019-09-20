@@ -31,65 +31,10 @@ export class Board {
         eating: [4000, 5500]
       }
     });
-    mount(
-      this.infoBox,
-      (this.selectItem = el(
-        "div.select-option",
-        el(
-          "div.container-fluid",
-          el("p", "Play as?"),
-          el(
-            "div.pick-options",
-            el(
-              "button",
-              {
-                class: "tiger"
-              },
-              ""
-            ),
-            el("button", { class: "goat" }, "")
-          )
-        )
-      ))
-    );
-    mount(
-      this.infoBox,
-      (this.genralInfo = el(
-        "div.container-fluid.goat-box",
-        el(
-          "div.row",
-          el(
-            "div.col-xs-4",
-            (this.goatBoardIndicator = el("p", `Goats in board : 0`))
-          ),
-          el(
-            "div.col-xs-4.text-center",
-            (this.displayChosenItem = el("p", "You Choose"))
-          ),
-          el(
-            "div.col-xs-4.text-right",
-            (this.deadGoatIndicator = el("p", `Dead Goats: 0`))
-          )
-        )
-      ))
-    );
-    // mount(this.dataContainer, (this.moveIndicator = el("div")));
+   
+    // addRequiredDom ELEMENTS
+    this.addUIDOMToGame();
 
-    this.selectItem.querySelectorAll("button").forEach(element => {
-      element.addEventListener("click", event => {
-        if (event.target.classList.contains(TIGER)) {
-          this.chosenItem = TIGER;
-          this.sound.play("tiger");
-          this.renderComputerGoatMove();
-        } else {
-          this.chosenItem = GOAT;
-          this.sound.play("goat");
-        }
-        this.myTurn = this.chosenItem === "GOAT" ? true : false;
-        this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
-        this.selectItem.classList.add("hide");
-      });
-    });
     this.goats = []; // Array<{x:number,y:number,dead:false, currentPoint,drag: false,index: number;}>
     this.tigers = []; // Array<{x:number,y:number,currentPoint: number,drag: false,index: number}>
 
@@ -254,9 +199,8 @@ export class Board {
       }else{
         this.sendGoatMoveDataToFriend({
           type: 'new',
-          prevPointIndex: null,
-          currentPointIndex: null,
-          goat: clickedGoatData                  
+          nextPoint:null, 
+          goatPoint:clickedGoatData
         });   
       }
     } else if (this.chosenItem === GOAT && this.goats.length === 20) {
@@ -329,10 +273,9 @@ export class Board {
                 // send current data to friend
                 this.sendGoatMoveDataToFriend({
                   type: 'move',
-                  prevPointIndex,
-                  currentPointIndex,
-                  goat: draggedGoat                  
-                });
+                  nextPoint:currentPointIndex, 
+                  goatPoint:draggedGoat
+                });    
               }
             }
           }
@@ -382,10 +325,11 @@ export class Board {
                 this.renderComputerGoatMove();
               }else{
                 this.sendTigerMoveDataToFriend({
-                  prevPointIndex,
-                  nextPointIndex,
-                  tiger: draggedTiger
-                });
+                    tigerIndex: draggedTiger.index,
+                    tigerNextPointIndex: nextPointIndex,
+                    eatGoat: validPoint.eatGoat, 
+                    eatGoatIndex: validPoint.eatGoatIndex 
+                  });
               }
             }
           }
@@ -813,6 +757,7 @@ export class Board {
       }
     });
     if (avilableTigers.length > 0) {
+      let tigerData = null;
       // getting next best move for tiger, will be improved later
       // this.logic.getNextBestMove(TIGER, avilableTigers, this.goats);
       const tigerCanEatGoat = avilableTigers.find(t =>
@@ -825,35 +770,12 @@ export class Board {
         const tigerEatPoint = tigerCanEatGoat.possibleMoves.find(
           p => p.eatGoat
         );
-        const currentEatenGoatIndex = this.goats[tigerEatPoint.eatGoatIndex]
-          .currentPoint;
-
-        // remove eaten goat point index from points
-        this.points[currentEatenGoatIndex].item = null;
-        this.points[currentEatenGoatIndex].itemIndex = null;
-        this.goats[tigerEatPoint.eatGoatIndex] = {
-          x: 0,
-          y: 0,
-          dead: true,
-          currentPoint: -currentEatenGoatIndex
+        tigerData = { 
+          tigerIndex: tigerCanEatGoat.tiger,
+          tigerNextPointIndex:tigerEatPoint.point,
+          eatGoat: true,
+          eatGoatIndex: tigerEatPoint.eatGoatIndex 
         };
-
-        const tigerNewPoint = this.points[tigerEatPoint.point];
-
-        // release prev tiger index from all points
-        const currentTigerIndex = this.tigers[tigerCanEatGoat.tiger]
-          .currentPoint;
-        this.points[currentTigerIndex].item = null;
-        this.points[currentTigerIndex].itemIndex = null;
-        this.showMoveAnimation(TIGER, {
-          prevPoint: this.tigers[tigerCanEatGoat.tiger],
-          nextPoint: tigerNewPoint,
-          currentPoint: tigerEatPoint.point
-        });
-
-        // add new reference of tiger to the points
-        this.points[tigerEatPoint.point].item = TIGER;
-        this.points[tigerEatPoint.point].itemIndex = tigerCanEatGoat.tiger;
       } else {
         this.sound.play("goat");
         let randomTiger = Math.floor(Math.random() * avilableTigers.length);
@@ -862,37 +784,19 @@ export class Board {
           Math.random() * tigerToMove.possibleMoves.length
         );
         let tigerMovePoint = tigerToMove.possibleMoves[randomMove];
-        // release prev tiger index from all points
-        const currentTigerPoint = this.tigers[tigerToMove.tiger].currentPoint;
-        this.points[currentTigerPoint].item = null;
-        this.points[currentTigerPoint].itemIndex = null;
 
-        const tigerNewPoint = this.points[tigerMovePoint.point];
-        this.showMoveAnimation(TIGER, {
-          prevPoint: this.tigers[tigerToMove.tiger],
-          nextPoint: tigerNewPoint,
-          currentPoint: tigerMovePoint.point
-        });
-
-        // add new reference of tiger to the points
-        this.points[tigerMovePoint.point].item = TIGER;
-        this.points[tigerMovePoint.point].itemIndex = tigerToMove.tiger;
-        if (this.goats.length >= 20) {
-          window.game.modalService();
-        }
+        tigerData =  { 
+          tigerIndex: tigerToMove.tiger,
+          tigerNextPointIndex:tigerMovePoint.point,
+          eatGoat: false,
+          eatGoatIndex: null 
+        };
       }
+      this.moveTiger(tigerData);
     } else {
-      //alert("Congratulations! You won the game! ");
       window.game.modalService();
     }
-    // this.moveIndicator.innerHTML = "";
-
-    // avilableTigers.forEach(tiger => {
-    //   this.displayPossibleMoves(
-    //     tiger.tiger,
-    //     tiger.possibleMoves.map(p => p.point)
-    //   );
-    // });
+  
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
@@ -1073,7 +977,7 @@ export class Board {
             y: nextPoint.y,
             drag: false,
             index: prevPoint.index,
-            currentPoint: data.currentPoint
+            currentPoint: data.currentPointIndex
           };
           this.render();
           this.hideFakeCanvas();
@@ -1146,17 +1050,17 @@ export class Board {
       });
     } else {
       // here goatPoint is an element of the this.points[i]
-      this.points[goat.index].item = GOAT;
-      this.points[goat.index].itemIndex = this.goats.length;
+      this.points[goatPoint.index].item = GOAT;
+      this.points[goatPoint.index].itemIndex = this.goats.length;
       this.showMoveAnimation(GOAT, {
         type: "new",
         pointData: {
-          x: goat.x,
-          y: goat.y,
+          x: goatPoint.x,
+          y: goatPoint.y,
           dead: false,
           drag: false,
           index: this.goats.length,
-          currentPoint: goat.index
+          currentPoint: goatPoint.index
         }
       });
     }
@@ -1164,23 +1068,135 @@ export class Board {
 
   /**
    * method to move tiger for both computer or friends move
+   * @param tigerData { tigerIndex: index from tigers array, tigerNextPointIndex: tigerNextPointIndex,   eatGoat: boolean,  eatGoatIndex: number };
    */
-  moveTiger() {
-    
+  moveTiger(tigerData) {
+    if(tigerData.eatGoat){
+      const currentEatenGoatIndex = this.goats[
+        tigerData.eatGoatIndex
+      ].currentPoint;
+      this.points[currentEatenGoatIndex].item = null;
+      this.points[currentEatenGoatIndex].itemIndex = null;
+      this.goats[tigerData.eatGoatIndex] = {
+        x: 0,
+        y: 0,
+        dead: true,
+        currentPoint: -currentEatenGoatIndex
+      };      
+    }
+
+    const tigerNewPoint = this.points[tigerData.tigerNextPointIndex];
+    // release prev tiger index from all points
+    const currentTigerPointIndex = this.tigers[tigerData.tigerIndex]
+      .currentPoint;
+    this.points[currentTigerPointIndex].item = null;
+    this.points[currentTigerPointIndex].itemIndex = null;
+
+    const animationTigerData = {
+      prevPoint: this.tigers[tigerData.tigerIndex],
+      nextPoint: tigerNewPoint,
+      currentPointIndex: tigerData.tigerNextPointIndex
+    };
+    this.showMoveAnimation(TIGER, animationTigerData);
+
+    // add new reference of tiger to the points
+    this.points[tigerData.tigerNextPointIndex].item = TIGER;
+    this.points[tigerData.tigerNextPointIndex].itemIndex = tigerData.tiger;
   }
 
   /**
    * method to send current users goat move/add data to friend
-   * @param data {type: 'move', prevPointIndex, currentPointIndex,  goat: draggedGoat} ||
+   * @param data {nextPoint, goatPoint, type} 
    * 
    */
   sendGoatMoveDataToFriend(data){
+    
   }
   
+
   /**
    * send current user's tiger move data to friend
    * @param data {prevPointIndex,nextPointIndex,tiger: draggedTiger}
    */
   sendTigerMoveDataToFriend(data){
+    
+  }
+
+  addUIDOMToGame(){
+    mount(
+      this.infoBox,
+      (this.selectItem = el(
+        "div.select-option",
+        el(
+          "div.container-fluid",
+          el('div.game-name',''),
+          el("p", "Play as?"),
+          el(
+            "div.pick-options",
+            el(
+              "button",
+              {
+                class: "select-turn-btn tiger"
+              },
+              ""
+            ),
+            el("button", { class: "select-turn-btn goat" }, "")
+          ),
+          el('div.sound-setting.text-right',
+             this.playSoundButton = el('button.play-sound',''),
+          )
+        )
+      ))
+    );
+    mount(
+      this.infoBox,
+      (this.genralInfo = el(
+        "div.container-fluid.goat-box",
+        el(
+          "div.row",
+          el(
+            "div.col-xs-4",
+            (this.goatBoardIndicator = el("p", `Goats in board : 0`))
+          ),
+          el(
+            "div.col-xs-4.text-center",
+            (this.displayChosenItem = el("p", "You Choose"))
+          ),
+          el(
+            "div.col-xs-4.text-right",
+            (this.deadGoatIndicator = el("p", `Dead Goats: 0`))
+          )
+        )
+      ))
+    );
+    
+    // mute unmute sound button 
+    this.playSoundButton.addEventListener('click', ()=>{
+      if(this.playSoundButton.classList.contains('play-sound')){
+        this.playSoundButton.classList.remove('play-sound');
+        this.playSoundButton.classList.add('mute-sound');
+        this.sound.volume = -1;
+      }else{
+        this.playSoundButton.classList.add('play-sound');
+        this.playSoundButton.classList.remove('mute-sound');
+        this.sound.volume = 1;
+      }
+    })
+
+    this.selectItem.querySelectorAll(".select-turn-btn").forEach(element => {
+      element.addEventListener("click", event => {
+        if (event.target.classList.contains(TIGER)) {
+          this.chosenItem = TIGER;
+          this.sound.play("tiger");
+          this.renderComputerGoatMove();
+        } else {
+          this.chosenItem = GOAT;
+          this.sound.play("goat");
+        }
+        this.myTurn = this.chosenItem === "GOAT" ? true : false;
+        this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
+        this.selectItem.classList.add("hide");
+      });
+    });
   }
 }
