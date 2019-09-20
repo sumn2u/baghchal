@@ -759,7 +759,7 @@ export class Board {
     if (avilableTigers.length > 0) {
       let tigerData = null;
       // getting next best move for tiger, will be improved later
-      // const bestMoves = this.logic.getNextBestMove(TIGER, avilableTigers);
+      avilableTigers = this.logic.getNextBestMove(TIGER, avilableTigers);
       const tigerCanEatGoat = avilableTigers.find(t =>
         t.possibleMoves.find(p => p.eatGoat)
       );
