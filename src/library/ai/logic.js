@@ -47,38 +47,81 @@ export class Logic {
         }
     }
 
-    getNextBestMove(turn, availableTigers) {
+    getNextBestMove(turn, availableTigers = null) {
         this.turn = turn;
-        this.moveLists = this.getMoveListsFromAvailableTigers(availableTigers);
-
-        // this.computeMinMax(true, this.AILevel);
         if(turn == TIGER){
-            this.computeMinMax(this.depthLevel, true);
-        } else if(turn == GOAT) {
+            let bestAvailableMove = {};
+            let bestPossibleMove = {};
+
+            // if only one possible move then return without computing
+            if(availableTigers.length == 1 && availableTigers[0].possibleMoves.length == 1) {
+                bestAvailableMove = availableTigers[0];
+                bestPossibleMove = bestAvailableMove.possibleMoves[0];
+
+            } else {
+                this.moveLists = this.getTigerMoveListsFromAvailableTigers(availableTigers);
+                this.computeMinMax(this.depthLevel, true);
+
+                bestAvailableMove = availableTigers.find(tiger => tiger.point == this.bestMove.sourcePoint);
+                bestPossibleMove = bestAvailableMove.possibleMoves.find(bestMove =>  bestMove.point == this.bestMove.destinationPoint);
+            }
+
+            let eatGoatIndex = null;
+            if(bestPossibleMove.hasOwnProperty('eatGoatIndex') && typeof bestPossibleMove.eatGoatIndex !== "object" ) {
+                eatGoatIndex = bestPossibleMove.eatGoatIndex;
+            }
+
+            return {
+                tigerIndex: bestAvailableMove.tiger,
+                currentPointIndex: bestAvailableMove.point, 
+                nextPointIndex: bestPossibleMove.point, 
+                eatGoat: bestPossibleMove.eatGoat, 
+                eatGoatIndex
+            };
+
+        } else {
+            let availableMoves = [];
+            const goatsRemaining = this.goatsRemaining(this.board.goats);
+            console.log('-G-O-A-T-S--R-E-M-A-I-N-I-N-G-', goatsRemaining)
+            if(goatsRemaining > 0){ // PUT
+                availableMoves = this.board.points.filter(p => !p.item);
+            } else { // MOVE
+                console.log('going to move');
+                const goatsInBoard = this.board.goats.forEach(goat => {
+                    console.log(goat);
+                    if(!goat.dead){
+                        const possibleMove = this.board.getNextPossibleMove(goat.currentPoint);
+                        console.log('possible ogat move', possibleMove);
+                        availableMoves.push({
+
+                        });
+                    }
+                });
+                console.log('goats is 20', goatsInBoard);
+            }
+            
+            this.moveLists = this.getGoatMoveListsFromAvailableMoves(availableMoves);
+            if(!this.moveLists.length) {
+                return false;
+            }
             this.computeMinMax(this.depthLevel, false);
+
+            const bestMove = availableMoves.find(move => move.index == this.bestMove.destinationPoint);
+
+            if(!bestMove) {
+                return false;
+            }
+            
+            return bestMove;
+            
+            // // generate move randomly
+            // const randPoint = Math.floor(Math.random() * availablePoints.length);
+            // const point = availablePoints[randPoint];
+            // return point;
         }
-
-        const tigerIndex = availableTigers.findIndex(tiger => tiger.point == this.bestMove.sourcePoint);
-
-        const bestAvailableMove = availableTigers[tigerIndex];
-
-        const bestPossibleMove = bestAvailableMove.possibleMoves.find(bestMove =>  bestMove.point == this.bestMove.destinationPoint);
-
-        let eatGoatIndex = null;
-        if(bestPossibleMove.hasOwnProperty('eatGoatIndex') && typeof bestPossibleMove.eatGoatIndex !== "object" ) {
-            eatGoatIndex = bestPossibleMove.eatGoatIndex;
-        }
-
-        return {
-            tigerIndex: bestAvailableMove.tiger,
-            currentPointIndex: bestAvailableMove.point, 
-            nextPointIndex: bestPossibleMove.point, 
-            eatGoat: bestPossibleMove.eatGoat, 
-            eatGoatIndex
-        };
     }
 
-    getMoveListsFromAvailableTigers(availableTigers) {
+    getTigerMoveListsFromAvailableTigers(availableTigers) {
         const goats = this.board.goats;
         const turn = this.turn;
 
@@ -120,6 +163,38 @@ export class Logic {
         this.movableTigers = totalMovableTigers;
         // this.tigerClosedSpaceCount = moves.length;
         this.deadGoats = this.goatsDead(goats);
+        return moves;
+    }
+
+    getGoatMoveListsFromAvailableMoves(availableMoves) {
+        const goatsRemaining = this.goatsRemaining(this.board.goats);
+        let actionType = MOVE;
+        if(goatsRemaining > 0){
+            actionType = PUT;
+        }
+
+        const moves = [];
+        if (availableMoves && availableMoves.length > 0) {
+            availableMoves.forEach((object) => {
+
+                let sourcePoint = null;
+                if(actionType == MOVE) {
+                    // TODO: identify the sourcePoint
+                    sourcePoint = null;
+                }
+
+                moves.push({
+                    turn: GOAT,
+                    sourcePoint: this.convertToNumber(sourcePoint),
+                    destinationPoint: this.convertToNumber(object.index),
+                    actionType,
+                    eatGoatPoint: null
+                });
+            });
+            // this.movableTigers = totalMovableTigers;
+            // this.tigerClosedSpaceCount = moves.length;
+            // this.deadGoats = this.goatsDead(goats);
+        }
         return moves;
     }
 
@@ -180,33 +255,42 @@ export class Logic {
 
         let moveLists = []; 
         // level 1 move list has already been created by
-        if(depthLevel == 1)
+        if(depthLevel == 1) {
             moveLists = this.moveLists;
-        else {
+        } else {
             this.simulateMove(this.nextMove);
-            let nextMoves = [];
             let goatsRemaining = 0;
             if(this.turn == GOAT){
                 goatsRemaining = this.goatsRemaining(this.board.goats);
                 let actionType = MOVE;
                 if(goatsRemaining) {
-                    nextMoves = this.board.points.filter(point => !point.item);
-                    actionType = PUT;
-                } else {
-                    // TODO, GOAT MOVE LIST
-                    nextMoves = [];
-                }
-
-                nextMoves.forEach(nextMove => {
-                    let sourcePoint = (actionType == PUT)? null : this.nextMove.sourcePoint;
-                    moveLists.push({
-                        turn: this.turn,
-                        sourcePoint,
-                        destinationPoint: nextMove.index,
-                        actionType,
-                        eatGoatPoint: false
+                    const nextMoves = this.board.points.filter(point => !point.item);
+                    nextMoves.forEach(nextMove => {
+                        let sourcePoint = (actionType == PUT)? null : this.nextMove.sourcePoint;
+                        moveLists.push({
+                            turn: this.turn,
+                            sourcePoint,
+                            destinationPoint: nextMove.index,
+                            actionType: PUT,
+                            eatGoatPoint: null
+                        });
                     });
-                });
+                } else {
+                    this.board.goats.forEach(goat => {
+                        const possibleMovePoints = this.board.getNextPossibleMove(goat.currentPoint, GOAT);
+                        if(possibleMovePoints.length){
+                            possibleMovePoints.forEach(point => {
+                                moveLists.push({
+                                    turn: GOAT,
+                                    sourcePoint: goat.currentPoint,
+                                    destinationPoint: point,
+                                    actionType: MOVE,
+                                    eatGoatPoint: null
+                                });
+                            });
+                        }
+                    });
+                }
             } else {
                 // get from board
                 const availableTigers = [];
@@ -218,7 +302,7 @@ export class Logic {
                     availableTigers.push(tigerMove);
                 });
 
-                moveLists = this.getMoveListsFromAvailableTigers(availableTigers);
+                moveLists = this.getTigerMoveListsFromAvailableTigers(availableTigers);
             }
         }
 
@@ -315,7 +399,26 @@ export class Logic {
                 }); 
                 this.board.goats.push(newGoatMove);
             } else if(move.actionType == MOVE) {
-                // TODO: GOAT MOVE
+                const goatIndex = this.board.goats.findIndex(goat => goat.currentPoint == move.sourcePoint);
+                const goatMove = this.board.goats[goatIndex];
+
+                // updating goat and points
+                this.board.points.forEach((point) => {
+                    if(point.index == move.sourcePoint) {
+                        point.item = null;
+                        point.itemIndex = null; 
+                    }
+                    if(point.index == move.destinationPoint) {
+                        point.item = GOAT;
+                        point.itemIndex = goatIndex; 
+                        goatMove.x = point.x;
+                        goatMove.y = point.y;
+                        goatMove.currentPoint = move.destinationPoint;
+                    }
+                    return point;
+                }); 
+
+                this.board.goats[goatIndex] = goatMove;
             }
         } else {
             if(move.actionType == EAT){

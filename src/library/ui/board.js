@@ -780,21 +780,9 @@ export class Board {
    * render goat after user moves tiger
    */
   renderComputerGoatMove() {
-    if (this.goats.length < 20) {
-      const availablePoints = this.points.filter(p => !p.item);
-      const randPoint = Math.floor(Math.random() * availablePoints.length);
-      const point = availablePoints[randPoint];
-      this.moveGoat(null, point, "new");
-    } else {
-      const goatsInBoard = this.goats.filter(g => !g.dead);
-      const randomGoat = Math.floor(Math.random() * goatsInBoard.length);
-      const goat = goatsInBoard[randomGoat];
-      const avialableMoves = this.getNextPossibleMove(goat.currentPoint);
-      if (avialableMoves && avialableMoves.length > 0) {
-        const randMove = Math.floor(Math.random() * avialableMoves.length);
-        const nextPoint = avialableMoves[randMove];
-        this.moveGoat(nextPoint, goat, "move");
-      }
+    const bestMove = this.logic.getNextBestMove(GOAT);
+    if(bestMove) {
+      this.moveGoat(null, bestMove, "new");
     }
     this.render();
     const deadGoats = this.goats.filter(g => g.dead).length;
