@@ -79,45 +79,52 @@ export class Logic {
                 eatGoatIndex
             };
 
-        } else {
-            let availableMoves = [];
+        } else { // GOAT
+            let availableMoves = this.board.points.filter(p => !p.item);
             const goatsRemaining = this.goatsRemaining(this.board.goats);
-            console.log('-G-O-A-T-S--R-E-M-A-I-N-I-N-G-', goatsRemaining)
             if(goatsRemaining > 0){ // PUT
-                availableMoves = this.board.points.filter(p => !p.item);
+                this.moveLists = this.getGoatPutMoveListsFromAvailableMoves(availableMoves);
             } else { // MOVE
-                console.log('going to move');
-                const goatsInBoard = this.board.goats.forEach(goat => {
-                    console.log(goat);
+                const goatMoves = [];
+                this.board.goats.forEach(goat => {
                     if(!goat.dead){
-                        const possibleMove = this.board.getNextPossibleMove(goat.currentPoint);
-                        console.log('possible ogat move', possibleMove);
-                        availableMoves.push({
+                        const possibleMoves = this.board.getNextPossibleMove(goat.currentPoint, GOAT);
 
-                        });
+                        if(possibleMoves.length) {
+                            possibleMoves.forEach(destinationPoint => {
+                                goatMoves.push({
+                                    turn: GOAT,
+                                    sourcePoint: this.convertToNumber(goat.currentPoint),
+                                    destinationPoint: this.convertToNumber(destinationPoint),
+                                    actionType: MOVE,
+                                    eatGoatPoint: null
+                                });
+                            });
+                        }
                     }
                 });
-                console.log('goats is 20', goatsInBoard);
+                this.moveLists = goatMoves;
             }
-            
-            this.moveLists = this.getGoatMoveListsFromAvailableMoves(availableMoves);
+                        
             if(!this.moveLists.length) {
                 return false;
             }
             this.computeMinMax(this.depthLevel, false);
 
-            const bestMove = availableMoves.find(move => move.index == this.bestMove.destinationPoint);
-
-            if(!bestMove) {
+            if(!this.bestMove) {
                 return false;
             }
-            
-            return bestMove;
-            
-            // // generate move randomly
-            // const randPoint = Math.floor(Math.random() * availablePoints.length);
-            // const point = availablePoints[randPoint];
-            // return point;
+
+            const bestAvailableMove = availableMoves.find(move => move.index == this.bestMove.destinationPoint);
+            if(!bestAvailableMove)
+                return false;
+
+            return {
+                sourcePoint: this.bestMove.sourcePoint,
+                destinationPoint: this.bestMove.destinationPoint,
+                move: bestAvailableMove,
+                type: this.bestMove.actionType,
+            };
         }
     }
 
@@ -166,7 +173,7 @@ export class Logic {
         return moves;
     }
 
-    getGoatMoveListsFromAvailableMoves(availableMoves) {
+    getGoatPutMoveListsFromAvailableMoves(availableMoves) {
         const goatsRemaining = this.goatsRemaining(this.board.goats);
         let actionType = MOVE;
         if(goatsRemaining > 0){
@@ -176,16 +183,9 @@ export class Logic {
         const moves = [];
         if (availableMoves && availableMoves.length > 0) {
             availableMoves.forEach((object) => {
-
-                let sourcePoint = null;
-                if(actionType == MOVE) {
-                    // TODO: identify the sourcePoint
-                    sourcePoint = null;
-                }
-
                 moves.push({
                     turn: GOAT,
-                    sourcePoint: this.convertToNumber(sourcePoint),
+                    sourcePoint: null,
                     destinationPoint: this.convertToNumber(object.index),
                     actionType,
                     eatGoatPoint: null

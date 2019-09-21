@@ -1,5 +1,5 @@
 import { Logic } from "../ai/logic";
-import { TIGER, GOAT } from "../constants";
+import { TIGER, GOAT, EAT, PUT, MOVE } from "../constants";
 import { Howl } from "howler";
 import tigerImage from "../images/tiger.png";
 import goatImage from "../images/goat.png";
@@ -780,9 +780,21 @@ export class Board {
    * render goat after user moves tiger
    */
   renderComputerGoatMove() {
-    const bestMove = this.logic.getNextBestMove(GOAT);
-    if(bestMove) {
-      this.moveGoat(null, bestMove, "new");
+    const nextBestMove = this.logic.getNextBestMove(GOAT);
+    if(nextBestMove) {
+      // only used "new" and "move" because it was used in this file
+      let goatType = "new";
+      let nextPoint = null;
+      // in case of put, goatPoint is just a board point
+      let goatPoint = nextBestMove.move; 
+      if(nextBestMove.type == MOVE) {
+        goatType = "move";
+        nextPoint =  nextBestMove.destinationPoint;
+        // in case of move, goatPoint is a goat value from this.goats
+        goatPoint =  this.goats.filter(g => !g.dead).find(goat => goat.currentPoint == nextBestMove.sourcePoint);
+      }
+
+      this.moveGoat(nextPoint, goatPoint, goatType);
     }
     this.render();
     const deadGoats = this.goats.filter(g => g.dead).length;
@@ -998,13 +1010,13 @@ export class Board {
   moveGoat(nextPoint, goatPoint, type) {
     if (type === "move") {
       // here goatPoint is an element of this.goats[index]
-      const point = this.points[nextPoint];
+      const point = this.points.find(point => point.index == nextPoint);
       // release goat from prev point
       this.points[goatPoint.currentPoint].item = null;
       this.points[goatPoint.currentPoint].itemIndex = null;
       // map new goat position to points
       this.points[point.index].item = GOAT;
-      this.points[point.index].itemIndex = goat.index;
+      this.points[point.index].itemIndex = goatPoint.index;
       // show animation and change goat point
       this.showMoveAnimation(GOAT, {
         type: "move",
