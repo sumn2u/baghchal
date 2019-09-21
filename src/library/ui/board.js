@@ -793,7 +793,6 @@ export class Board {
         // in case of move, goatPoint is a goat value from this.goats
         goatPoint =  this.goats.filter(g => !g.dead).find(goat => goat.currentPoint == nextBestMove.sourcePoint);
       }
-
       this.moveGoat(nextPoint, goatPoint, goatType);
     }
     this.render();
@@ -963,15 +962,20 @@ export class Board {
       // {type:'new',pointData:{x:point.x,y:point.y,dead: false,drag: false,index:this.goats.length,currentPoint:point.index}
       const pointData = data.pointData;
       const midPoint = this.totalWidth / 2;
-      let x = data.type === "new" ? midPoint : pointData.x;
-      let y = data.type === "new" ? 0 : pointData.y;
+      let x = data.type === "new" ? midPoint : this.goats[pointData.index].x ;
+      let y = data.type === "new" ? 0 : this.goats[pointData.index].y ;
       const dx = pointData.x - x;
-      const dy = pointData.y;
+      const dy = pointData.y-y;
       const absDx = Math.abs(dx);
       const absDy = Math.abs(dy);
       const xIncrement = dx / frameRate;
       const yIncrement = dy / frameRate;
       let frame = 0;
+      if(data.type==='move'){
+        this.goats[pointData.index].x = -200;
+        this.goats[pointData.index].y = -200;
+        this.render();
+      }
       const animationFrame = setInterval(() => {
         if (frame < 10) {
           this.showFakeCanvas();
@@ -991,9 +995,9 @@ export class Board {
           if (data.type === "new") {
             this.goats.push(pointData);
           } else {
-            this.goats[pointData.index].x = point.x;
-            this.goats[pointData.index].y = point.x;
-            this.goats[pointData.index].currentPoint = point.index;
+            this.goats[pointData.index].x = pointData.x;
+            this.goats[pointData.index].y = pointData.y;
+            this.goats[pointData.index].currentPoint = pointData.currentPoint;
           }
           this.render();
           this.hideFakeCanvas();
@@ -1015,12 +1019,13 @@ export class Board {
       this.points[goatPoint.currentPoint].item = null;
       this.points[goatPoint.currentPoint].itemIndex = null;
       // map new goat position to points
-      this.points[point.index].item = GOAT;
-      this.points[point.index].itemIndex = goatPoint.index;
+      point.item = GOAT;
+      point.itemIndex = goatPoint.index;
       // show animation and change goat point
+
       this.showMoveAnimation(GOAT, {
         type: "move",
-        pointData: goatPoint
+        pointData: {x:point.x,y:point.y,currentPoint:point.index,index:goatPoint.index}
       });
     } else {
       // here goatPoint is an element of the this.points[i]
