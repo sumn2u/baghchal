@@ -126,6 +126,20 @@
         background: url(../images/sound-mute.png) no-repeat center;
         padding:35px;
       }
+      &.play-with-computer{
+        background: url(../images/computer.png) no-repeat center;
+        border: 8px solid #fff !important;
+        border-radius: 100%;
+        margin-right: 50px;
+        background-color: #efeded;
+      }
+      &.play-with-friend{
+        background: url(../images/friend.png) no-repeat center;
+        border: 8px solid #fff !important;
+        border-radius: 100%;
+        margin-right: 50px;
+        background-color: #efeded;
+      }
     }
     background-size: cover;
     position: absolute;
@@ -148,6 +162,19 @@
     padding:50px;
     background: url(../images/baghchal-text.png) no-repeat center;
     background-size: 100%;
+  }
+  .difficulty-levels{
+    button{
+      margin-right: 15px;
+      border-radius: 100%;
+      padding: 10px;
+      border: 6px solid #fff !important;
+      color: #ffffff;
+      width: 80px;
+      height: 80px;
+      font-weight: bold;
+      background: #51ad6a;
+    }
   }
  }
  .goat-box{

@@ -8,16 +8,17 @@ import topBorderImage from "../images/top-bar.png";
 import bottomBorderImage from "../images/bottom-bar.png";
 import leftRightBorderImage from "../images/left-right-bar.png";
 import { mount, el, list } from "../ui/dom";
-import { TigerPossibleMoveList } from "./components/tiger-possible-move-list";
 export class Board {
   constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer) {
     this.chosenItem = null;
     this.myTurn = false;
     this.friend = 'computer';
+    this.difficultyLevel = 5;
     this.dataContainer = dataContainer;
     this.realCanvasElement = realCanvasElement;
     this.fakeCanvasElement = fakeCanvasElement;
     this.infoBox = infoBox;
+    this.playSound = true;
     this.sound = new Howl({
       src: ["bagchal.mp3"],
       html5: true,
@@ -90,7 +91,7 @@ export class Board {
     this.animationInProgress = false;
 
     // AILevel = 3;
-    this.logic = new Logic(this, 3);
+    this.logic = new Logic(this, this.difficultyLevel);
   }
   /**
    * handle mouse intraction
@@ -317,9 +318,13 @@ export class Board {
                   dead: true,
                   currentPoint: -currentEatenGoatIndex
                 };
+               if(this.playSound){
                 this.sound.play("tiger");
+               }
               }
+             if(this.playSound){
               this.sound.play("goat");
+             }
               // computer turns to move goat
               if(this.friend==='computer'){
                 this.renderComputerGoatMove();
@@ -763,7 +768,9 @@ export class Board {
      
       if (bestMove.eatGoat) {
         // eats the goat
-        this.sound.play("tiger");       
+       if(this.playSound){
+        this.sound.play("tiger");
+       }       
       } 
       this.moveTiger(bestMove);
     } else {
@@ -1109,21 +1116,39 @@ export class Board {
         el(
           "div.container-fluid",
           el('div.game-name',''),
-          el("p", "Play as?"),
-          el(
-            "div.pick-options",
-            el(
-              "button",
-              {
-                class: "select-turn-btn tiger"
-              },
-              ""
-            ),
-            el("button", { class: "select-turn-btn goat" }, "")
-          ),
-          el('div.sound-setting.text-right',
-             this.playSoundButton = el('button.play-sound',''),
+          this.playWithInterface = el('div.play-with-interface',
+          el("p", "Play with?"),
+          el("div.play-options",
+            el( "button.play-with-computer", ""),
+            el( "button.play-with-friend", ""),
           )
+          ),
+          this.difficultyLevelInterface = el('div.difficulty-level-interface.hide',
+          el("p", "Level"),
+          el("div.difficulty-levels",
+            el( "button.easy", "Easy"),
+            el( "button.medium", "Medius"),
+            el( "button.hard", "Hard"),
+          )
+          ),
+          this.selectItemInterface = el('div.select-interface.hide',
+              el("p", "Play as?"),
+              el(
+                "div.pick-options",
+                el(
+                  "button",
+                  {
+                    class: "select-turn-btn tiger"
+                  },
+                  ""
+                ),
+                el("button", { class: "select-turn-btn goat" }, "")
+              ),
+              el('div.sound-setting.text-right',
+              this.playSoundButton = el('button.play-sound',''),
+           )
+            ),
+         
         )
       ))
     );
@@ -1154,11 +1179,11 @@ export class Board {
       if(this.playSoundButton.classList.contains('play-sound')){
         this.playSoundButton.classList.remove('play-sound');
         this.playSoundButton.classList.add('mute-sound');
-        this.sound.volume = -1;
+       this.playSound  = false;
       }else{
         this.playSoundButton.classList.add('play-sound');
         this.playSoundButton.classList.remove('mute-sound');
-        this.sound.volume = 1;
+        this.playSound  = true;
       }
     })
 
@@ -1166,15 +1191,49 @@ export class Board {
       element.addEventListener("click", event => {
         if (event.target.classList.contains(TIGER)) {
           this.chosenItem = TIGER;
-          this.sound.play("tiger");
+          if(this.playSound){
+            this.sound.play("tiger");
+          }
           this.renderComputerGoatMove();
         } else {
           this.chosenItem = GOAT;
-          this.sound.play("goat");
+          if(this.playSound){
+            this.sound.play("goat");
+          }
         }
         this.myTurn = this.chosenItem === "GOAT" ? true : false;
         this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
         this.selectItem.classList.add("hide");
+      });
+    });
+
+    this.playWithInterface.querySelectorAll("button").forEach(element => {
+      element.addEventListener("click", event => {
+        if (event.target.classList.contains('play-with-friend')) {
+          this.friend = 'friend';
+         
+        this.selectItemInterface.classList.remove('hide');   
+        } else {
+          this.difficultyLevelInterface.classList.remove('hide');
+         this.friend = 'computer';        
+        } 
+        this.playWithInterface.classList.add('hide');  
+      });
+    });
+    
+    this.difficultyLevelInterface.querySelectorAll('button').forEach(element =>{
+      element.addEventListener("click", event => {
+        if (event.target.classList.contains('easy')) {
+         this.difficultyLevel = 1;
+        } else if(event.target.classList.contains('medium')) {
+          this.difficultyLevel = 3;
+
+        }else{
+          this.difficultyLevel = 5;
+        } 
+        this.logic = new Logic(this, this.difficultyLevel);
+        this.difficultyLevelInterface.classList.add('hide');  
+        this.selectItemInterface.classList.remove('hide');    
       });
     });
   }
