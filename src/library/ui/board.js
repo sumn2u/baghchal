@@ -848,7 +848,7 @@ export class Board {
     });
     if (type === GOAT) {
       const goatLegalPoints = nextLegalPoints.map(p => {
-        if(!this.points[p]){
+        if(!this.points[p] || (this.points[p] && this.points[p].item)){
           return false;
         }
         const point = {
@@ -896,6 +896,8 @@ export class Board {
               possibleTigerPoint
             }
       });
+      goatLegalPoints = goatLegalPoints.filter(p=>p);
+      console.log(goatLegalPoints);
       return goatLegalPoints;
     }
     nextLegalPoints = nextLegalPoints.map(p => {

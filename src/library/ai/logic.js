@@ -284,7 +284,7 @@ export class Logic {
                                 moveLists.push({
                                     turn: GOAT,
                                     sourcePoint: goat.currentPoint,
-                                    destinationPoint: point,
+                                    destinationPoint: point.point,
                                     actionType: MOVE,
                                     eatGoatPoint: null
                                 });
