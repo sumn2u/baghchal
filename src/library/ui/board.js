@@ -847,7 +847,56 @@ export class Board {
       }
     });
     if (type === GOAT) {
-      return nextLegalPoints.filter(p => !this.points[p].item);
+      const goatLegalPoints = nextLegalPoints.map(p => {
+        if(!this.points[p]){
+          return false;
+        }
+        const point = {
+          point: p,
+          canDie: false,
+          tigerJumpPoint:null,
+          possibleTigerPoint: null
+        }
+        const goatMoveDistance = p - pointIndex;
+        const tigerJumpPoint = Number(p) + Number(goatMoveDistance);
+        // get the distance between current position and next position
+        // and double the distance is where tiger will jump to eat goat
+        if (
+          tigerJumpPoint < 0 ||
+          tigerJumpPoint > this.totalPoints ||
+           ([1, 4, 6].indexOf(Math.abs(goatMoveDistance)) >= 0 &&
+          (p % 5 === 4 || p % 5 === 0))){
+            return point;
+          }
+          const eatPoint = this.points[goatMoveDistance];
+          if(!eatPoint){
+            return point;
+          }
+          if (eatPoint.item) {
+            return point;
+          }
+
+          const possibleTigerPoint = Number(p) - Number(goatMoveDistance);
+          if (
+            possibleTigerPoint < 0 ||
+            possibleTigerPoint > this.totalPoints){
+              return point;
+            }
+            const tigerPoint = this.points[goatMoveDistance];
+            if(!tigerPoint){
+              return point;
+            }
+            if (tigerPoint.item!==TIGER) {
+              return point;
+            }
+            return {
+              point: p,
+              canDie: true,
+              tigerJumpPoint,
+              possibleTigerPoint
+            }
+      });
+      return goatLegalPoints;
     }
     nextLegalPoints = nextLegalPoints.map(p => {
       const point = this.points[p];
