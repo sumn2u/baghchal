@@ -40,6 +40,16 @@ https://bagh-chal-dd292.firebaseapp.com/
 
 ## Tests
 
+To test the application run the following command
+
+```javascript
+yarn run development
+
+```
+And open the following url
+
+https://www.facebook.com/embed/instantgames/375985399708837/player?game_url=https%3A%2F%2Flocalhost%3A5000
+
 You can run test by using following commands
 
 ```javascript
