@@ -55,13 +55,22 @@ import Game from "./game/game";
         //  });
       }
     }
+    const  getUrlParameter = function(name) {
+      name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+      var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      var results = regex.exec(location.search);
+      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    };
+
     const _init = (config)=>{
        return new Game(config);
      }
+
      window.game = {
        init:_init,
        modalService: _modalService,
-       closeGame: _closeGame
+       roomId: getUrlParameter('roomId'),
+       playerType: getUrlParameter('playerType')
      }
 
      
