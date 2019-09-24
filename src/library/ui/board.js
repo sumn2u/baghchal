@@ -1127,7 +1127,7 @@ export class Board {
           el("p", "Level"),
           el("div.difficulty-levels",
             el( "button.easy", "Easy"),
-            el( "button.medium", "Medius"),
+            el( "button.medium", "Medium"),
             el( "button.hard", "Hard"),
           )
           ),
