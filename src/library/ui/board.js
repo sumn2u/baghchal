@@ -8,9 +8,15 @@ import topBorderImage from "../images/top-bar.png";
 import bottomBorderImage from "../images/bottom-bar.png";
 import leftRightBorderImage from "../images/left-right-bar.png";
 import { mount, el, list } from "../ui/dom";
+const uuidv5 = require('uuid/v5');
+
+// roomId Id of the room in which the game is running on the server.
 export class Board {
-  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer, closeGame) {
+  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer,  socket, roomId, playerId, player) {
     this.chosenItem = null;
+    this.roomId = roomId;
+    this.playerId = playerId;
+    this.socket = socket;
     this.myTurn = false;
     this.friend = 'computer';
     this.difficultyLevel = 5;
@@ -18,6 +24,7 @@ export class Board {
     this.realCanvasElement = realCanvasElement;
     this.fakeCanvasElement = fakeCanvasElement;
     this.infoBox = infoBox;
+    this.player = player;
     this.playSound = true;
     this.closeGame = closeGame;
     this.sound = new Howl({
@@ -33,7 +40,7 @@ export class Board {
         eating: [4000, 5500]
       }
     });
-
+  
     // addRequiredDom ELEMENTS
     this.addUIDOMToGame();
 
@@ -93,7 +100,61 @@ export class Board {
 
     // AILevel = 3;
     this.logic = new Logic(this, this.difficultyLevel);
+
+    /**
+     * If player creates the game, he'll be P1(X) and has the first turn.
+     * This event is received when opponent connects to the room.
+     */
+    this.socket.on('player1', (data) => {
+      const message = `Hello, ${this.player.getPlayerName()}`;
+      // $('#userHello').html(message);
+      this.player.setCurrentTurn(true);
+    });
+
+     /**
+      * Joined the game, so player is P2(O). 
+      * This event is received when P2 successfully joins the game room. 
+      */
+     this.socket.on('player2', (data) => {
+       const message = `Hello, ${data.name}`;
+
+      // Create game for player 2
+      //  game = new Game(data.room);
+      //  game.displayBoard(message);
+       this.player.setCurrentTurn(false);
+     });
+
+
+       /**
+        * Opponent played his turn. Update UI.
+        * Allow the current player to play now. 
+        */
+       socket.on('turnPlayed', (data) => {
+        //  const row = data.tile.split('_')[1][0];
+        //  const col = data.tile.split('_')[1][1];
+         const opponentType = player.getPlayerType() === P1 ? P2 : P1;
+
+         //game.updateBoard(opponentType, row, col, data.tile);
+         player.setCurrentTurn(true);
+       });
+
+       // If the other player wins, this event is received. Notify user game has ended.
+       socket.on('gameEnd', (data) => {
+         game.endGame(data.message);
+         socket.leave(data.room);
+       });
+
+       /**
+        * End the game on any err event. 
+        */
+       socket.on('err', (data) => {
+         game.endGame(data.message);
+       });
   }
+
+
+
+  
   /**
    * handle mouse intraction
    */
@@ -146,6 +207,16 @@ export class Board {
       this.handleMouseMoveEvent.bind(this)
     );
   }
+
+  /**
+   * returns roomId
+   * 
+   */
+  getRoomId() {
+    return this.roomId;
+  }
+
+  
   /**
    * method to handle mouse down event/touch start
    * @param {mouse event} event
@@ -1193,6 +1264,21 @@ export class Board {
   sendTigerMoveDataToFriend(data){
 
   }
+  /**
+   * send palyer info through socket
+   */
+  setUserInfo(){
+    const user = {
+      name: this.playerId,
+      room: this.roomId,
+      avatar: this.chosenItem
+    }
+    if (this.playerId && this.roomId) {
+      this.socket.emit('createGame', {
+        user
+      });
+    }
+  }
 
   addUIDOMToGame(){
     mount(
@@ -1290,6 +1376,9 @@ export class Board {
             this.sound.play("goat");
           }
         }
+        if (this.playerId && this.roomId){
+          this.setUserInfo();
+        }
         this.myTurn = this.chosenItem === "GOAT" ? true : false;
         this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
         this.selectItem.classList.add("hide");
@@ -1300,7 +1389,8 @@ export class Board {
       element.addEventListener("click", event => {
         if (event.target.classList.contains('play-with-friend')) {
           this.friend = 'friend';
-         
+          this.playerId = uuidv5.DNS;
+          this.roomId = uuidv5.URL;
         this.selectItemInterface.classList.remove('hide');   
         } else {
           this.difficultyLevelInterface.classList.remove('hide');
