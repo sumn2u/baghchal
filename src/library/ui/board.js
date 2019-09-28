@@ -1226,10 +1226,10 @@ export class Board {
         if (event.target.classList.contains('easy')) {
          this.difficultyLevel = 1;
         } else if(event.target.classList.contains('medium')) {
-          this.difficultyLevel = 3;
+          this.difficultyLevel = 2;
 
         }else{
-          this.difficultyLevel = 5;
+          this.difficultyLevel = 3;
         } 
         this.logic = new Logic(this, this.difficultyLevel);
         this.difficultyLevelInterface.classList.add('hide');  
