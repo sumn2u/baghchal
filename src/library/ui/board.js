@@ -1120,7 +1120,7 @@ export class Board {
           el("p", "Play with?"),
           el("div.play-options",
             el( "button.play-with-computer", ""),
-            el( "button.play-with-friend", ""),
+            // el( "button.play-with-friend", ""),
           )
           ),
           this.difficultyLevelInterface = el('div.difficulty-level-interface.hide',
