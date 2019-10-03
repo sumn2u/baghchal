@@ -9,7 +9,7 @@ import bottomBorderImage from "../images/bottom-bar.png";
 import leftRightBorderImage from "../images/left-right-bar.png";
 import { mount, el, list } from "../ui/dom";
 export class Board {
-  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer) {
+  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer, closeGame) {
     this.chosenItem = null;
     this.myTurn = false;
     this.friend = 'computer';
@@ -19,6 +19,7 @@ export class Board {
     this.fakeCanvasElement = fakeCanvasElement;
     this.infoBox = infoBox;
     this.playSound = true;
+    this.closeGame = closeGame;
     this.sound = new Howl({
       src: ["bagchal.mp3"],
       html5: true,
@@ -1149,7 +1150,7 @@ export class Board {
                 ),
                 el("button", { class: "select-turn-btn goat" }, "")
               ),
-              el('div.sound-setting.text-right',
+              el('div.sound-settings.text-right',
               this.playSoundButton = el('button.play-sound',''),
            )
             ),
@@ -1178,7 +1179,10 @@ export class Board {
         )
       ))
     );
-
+    //close game 
+    this.closeGame.addEventListener('click', () => {
+      window.game.closeGame()
+    })
     // mute unmute sound button
     this.playSoundButton.addEventListener('click', ()=>{
       if(this.playSoundButton.classList.contains('play-sound')){

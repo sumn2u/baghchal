@@ -1,6 +1,17 @@
 import Game from "./game/game";
 (function(window){
+  /**
+   * 
+   * closes the game
+   */
 
+    const _closeGame = () => {
+      const previousGameBoard = document.getElementsByClassName('game-box')
+      if (previousGameBoard) previousGameBoard[0].remove()
+      game.init({
+        container: "game-container"
+      });
+    }
     /**
      * render congratulations modal
      */
@@ -32,11 +43,7 @@ import Game from "./game/game";
 
         gameResetButton.addEventListener('click', (e) => {
           modal.classList.remove('is-open');
-          const previousGameBoard = document.getElementsByClassName('game-box')
-          if (previousGameBoard) previousGameBoard[0].remove()
-           game.init({
-             container: "game-container"
-           });
+          _closeGame()
         })
 
        // Close modal when hitting escape
@@ -53,7 +60,8 @@ import Game from "./game/game";
      }
      window.game = {
        init:_init,
-       modalService: _modalService
+       modalService: _modalService,
+       closeGame: _closeGame
      }
 
      
