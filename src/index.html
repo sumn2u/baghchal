@@ -23,8 +23,12 @@
                 <button class="close">X</button>
             </header>
             <div class="modal-main">
-                <p>🎉 Congratulations!!</p>
-                <p> 🐐You won! 🐅</p>
+                 <div id="game-over">
+                     <h2 id="game-end-heading"> </h2>
+                     <h3 id="game-end-subheading">May they bathe their circuits in baghchal glory </h3>
+                         
+                         <button class="game-btn" id="game-reset-btn">&#8634; Play again</button>
+                 </div>
             </div>
             
         </article>
@@ -33,8 +37,8 @@
     <% if (htmlWebpackPlugin.options.env === "production") {%>
     <script> 
      FBInstant.initializeAsync().then(function () {
-        FBInstant.setLoadingProgress(50);
-        FBInstant.setLoadingProgress(100);
+        // FBInstant.setLoadingProgress(50);
+        // FBInstant.setLoadingProgress(100);
         // start facebook game
         FBInstant.startGameAsync().then(function () {
             game.init({

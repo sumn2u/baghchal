@@ -223,7 +223,7 @@
 
  .modal-body {
    animation: pop 0.5s ease;
-   width: 90%;
+   width:30%;
  }
 
  header {
@@ -305,8 +305,9 @@
  }
 
  .modal-body {
+   top: 20vh;
    margin: 30px auto;
-   background-color: #795548;
+   background-color: rgb(44, 62, 80);
    border-radius: 5px;
    box-shadow: 10px 10px 40px 0px rgba(0, 0, 0, 0.35);
 
@@ -324,6 +325,9 @@
 
    .modal-main {
      color: white;
+     p {
+       font-size: larger;
+     }
     //  padding: 20px;
     //  font-size: 1.4rem;
    }
@@ -398,4 +402,58 @@ button#mutebtn {
   .goat-box p{
     font-size:11px;
   }
+}
+#game-over {
+  color: #FFF;
+  font-family: 'Share Tech', sans-serif;
+
+  margin: 0 auto;
+  /* Break it out of the regular flow */
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  /* Set the bounds in which to center it, relative to its parent/container */
+
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  resize: both;
+  /* overflow: auto; */
+
+  max-width: 700px;
+  flex-direction: column;
+  text-align: center;
+}
+
+#game-end-heading {
+  font-size: 2em;
+  margin: 10px;
+}
+
+#game-end-subheading {
+  font-size: 1.5em;
+  margin: 10px;
+}
+
+#game-reset-btn {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 2em;
+  margin: 20px;
+
+  -webkit-border-radius: 8;
+  -moz-border-radius: 8;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 20px;
+  background-color: #d35400;
+  padding: 10px 20px 10px 20px;
+  border: solid #F89406 2px;
+  text-decoration: none;
+  &:hover {
+    background: #3cb0fd;
+    text-decoration: none;
+  }
+
 }
