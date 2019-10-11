@@ -2,10 +2,13 @@ Baghchal
 ======
 Bagh-Chal is a strategic, two-player board game that origniated in Nepal. The game is asymmetric in that one player controls four tigers and the other player controls up to twenty goats. The tigers 'hunt' the goats while the goats attempt to block the tigers' movements. This game is also seen in southern India with a different board, but the rules are the same.
 
+This project was initally build for [Community Challenge hackathon](https://developercircles2019.devpost.com) by Facebook Developers Community and submitted as a [baghchal-nepali-board-game](https://devpost.com/software/baghchal-nepali-board-game).
+
 ## Jump To
 * [Description](#description)
 * [Installation](#installation)
 * [Demos](#demos)
+* [Screenshots](#screenshots)
 * [Tests](#tests)
 * [Contributing](#contributing)
 * [License](#license)
@@ -29,12 +32,21 @@ Installing `bagh-chal` is easy.  You can clone the repo from here.
 yarn install && yarn start
 ```
 
+## Support the project ⭐
+
+If you feel awesome and want to support us in a small way, please consider starring and sharing the repo! This helps us get visability and allow the community to grow. 🙏
+
+<img alt="Botpress" width="250" src="./screenshots/star_us.gif">
 
 ## Demos
 
 https://bagh-chal-dd292.firebaseapp.com/
 
-
+## Screenshots
+<img alt="Botpress" width="250" src="./screenshots/game-home-screen.png">
+<img alt="Botpress" width="250" src="./screenshots/game-level-screen.png">
+<img alt="Botpress" width="250" src="./screenshots/game-player-screen.png">
+<img alt="Botpress" width="250" src="./screenshots/game-board-screen.png">
 
 
 
@@ -65,4 +77,4 @@ Feel free to pull and contribute!  If you do, please make a separate branch on y
 
 ## License
 
-
+MIT
