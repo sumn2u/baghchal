@@ -37,7 +37,11 @@
    font-feature-settings: 'liga';
  }
 
- body{background:#fafafa;}
+ body{
+    background:#fafafa;
+    background: url(../images/background.jpg);
+    background-size: cover;
+  }
  .fake-canvas{
    position: absolute;
    top:0;
@@ -89,7 +93,7 @@
     margin: auto;
     background:url(../images/baghchal.png);
     background-size: cover;
-    border: 1px solid #e0dede;
+    border: 2px solid #e0dede;
     border-radius: 3px;
     box-shadow: 0px 0px 1px 1px #f5eded;
     position: relative;
@@ -97,8 +101,8 @@
  .select-option{
    .sound-setting{
      position: absolute;
-     bottom: 5%;
-     right: 30px;;
+     bottom: 10vh;
+     right:10vw;;
    }
    background:url(../images/baghchal.png) no-repeat center #388664;
    background-size: cover;
@@ -130,14 +134,14 @@
         background: url(../images/computer.png) no-repeat center;
         border: 8px solid #fff !important;
         border-radius: 100%;
-        margin-right: 50px;
+        // margin-right: 50px;
         background-color: #efeded;
       }
       &.play-with-friend{
         background: url(../images/friend.png) no-repeat center;
         border: 8px solid #fff !important;
         border-radius: 100%;
-        margin-right: 50px;
+        // margin-right: 50px;
         background-color: #efeded;
       }
     }
@@ -170,7 +174,7 @@
       padding: 10px;
       border: 6px solid #fff !important;
       color: #ffffff;
-      width: 80px;
+      width: 90px;
       height: 80px;
       font-weight: bold;
       background: #51ad6a;
@@ -199,6 +203,7 @@
    .select-option{position: fixed;}
  }
 
+
  /* -- Needed CSS -- */
 
  .modal-wrapper {
@@ -223,18 +228,14 @@
 
  .modal-body {
    animation: pop 0.5s ease;
-   width: 90%;
+   width:33%;
  }
 
  header {
    position: relative;
  }
 
- .close {
-   position: absolute;
-   top: 10px;
-   right: 10px;
- }
+
 
  @keyframes pop {
    0% {
@@ -305,8 +306,9 @@
  }
 
  .modal-body {
+   top: 20vh;
    margin: 30px auto;
-   background-color: #795548;
+   background-color: rgb(44, 62, 80);
    border-radius: 5px;
    box-shadow: 10px 10px 40px 0px rgba(0, 0, 0, 0.35);
 
@@ -324,6 +326,9 @@
 
    .modal-main {
      color: white;
+     p {
+       font-size: larger;
+     }
     //  padding: 20px;
     //  font-size: 1.4rem;
    }
@@ -367,6 +372,71 @@
      }
    }
  }
+ .close {
+   position: absolute;
+   right: 0;
+   margin-right: 15px;
+   width: 32px;
+   height: 32px;
+   opacity: 1;
+   color: #6189b1;
+ }
+
+ .close:hover {
+   opacity: 1;
+ }
+
+ .close:before,
+ .close:after {
+   position: absolute;
+   left: 15px;
+   content: ' ';
+   height: 33px;
+   width: 2px;
+   background-color: #6189b1;
+ }
+
+ .close:before {
+   transform: rotate(45deg);
+ }
+
+ .close:after {
+   transform: rotate(-45deg);
+ }
+
+ .close-cross {
+   position: absolute;
+   right: 0;
+   top: -10vh;
+   margin-right: 15rem;
+   width: 32px;
+   height: 32px;
+   margin-right: 20vh;
+   opacity: 1;
+   color: #6189b1;
+ }
+
+ .close-cross:hover {
+   opacity: 1;
+ }
+
+ .close-cross:before,
+ .close-cross:after {
+   position: absolute;
+   left: 15px;
+   content: ' ';
+   height: 33px;
+   width: 2px;
+   background-color: #6189b1;
+ }
+
+ .close-cross:before {
+   transform: rotate(45deg);
+ }
+
+ .close-cross:after {
+   transform: rotate(-45deg);
+ }
 
 button {
   border: none;
@@ -383,7 +453,8 @@ button#mutebtn {
 }
 .sound-settings{
   position: relative;
-  padding-top: 30px;
+  padding-top: 80px;
+  margin-right: 18px;
 }
 
 .col-xs-4{
@@ -391,11 +462,96 @@ button#mutebtn {
   max-width: 33.33%;
 }
 
-@media(max-width: 450px){
-  .select-option{
+
+#game-over {
+  color: #FFF;
+  font-family: 'Share Tech', sans-serif;
+
+  margin: 0 auto;
+  /* Break it out of the regular flow */
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  /* Set the bounds in which to center it, relative to its parent/container */
+
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  resize: both;
+  /* overflow: auto; */
+
+  max-width: 700px;
+  flex-direction: column;
+  text-align: center;
+}
+
+#game-end-heading {
+  font-size: 2em;
+  margin: 10px;
+}
+
+#game-end-subheading {
+  font-size: 1.5em;
+  margin: 10px;
+}
+
+#game-reset-btn {
+  font-family: 'Share Tech', sans-serif;
+  font-size: 2em;
+  margin: 20px;
+
+  -webkit-border-radius: 8;
+  -moz-border-radius: 8;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 20px;
+  background-color: #d35400;
+  padding: 10px 20px 10px 20px;
+  border: solid #F89406 2px;
+  text-decoration: none;
+  &:hover {
+    background: #3cb0fd;
+    text-decoration: none;
+  }
+
+}
+.play-with-interface,
+.difficulty-level-interface,
+.select-interface {
+  margin-top: 5vh;
+}
+
+
+@media (min-width: 320px) and (max-width: 480px) {
+.close {
+     padding-bottom: 25px !important;
+   }
+}
+@media(max-width: 450px) {
+  .select-option {
     padding: 50px 30px 0 30px;
   }
-  .goat-box p{
-    font-size:11px;
+  .close-cross {
+    margin-right: 0px;
+  }
+ 
+  .goat-box p {
+    font-size: 11px;
+  }
+
+  #game-end-subheading {
+    font-size: 1em;
+  }
+
+  #game-end-heading {
+    font-size: 1.5em;
+  }
+  #game-reset-btn {
+    font-size: 1em;
+  }
+  .modal-body {
+    min-width: 320px;
   }
 }

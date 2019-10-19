@@ -9,7 +9,7 @@ import bottomBorderImage from "../images/bottom-bar.png";
 import leftRightBorderImage from "../images/left-right-bar.png";
 import { mount, el, list } from "../ui/dom";
 export class Board {
-  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer) {
+  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer, closeGame) {
     this.chosenItem = null;
     this.myTurn = false;
     this.friend = 'computer';
@@ -19,6 +19,7 @@ export class Board {
     this.fakeCanvasElement = fakeCanvasElement;
     this.infoBox = infoBox;
     this.playSound = true;
+    this.closeGame = closeGame;
     this.sound = new Howl({
       src: ["bagchal.mp3"],
       html5: true,
@@ -234,6 +235,7 @@ export class Board {
       const goatWidth = Math.floor(this.goatWidth / 2);
       const goatHeight = Math.floor(this.goatHeight / 2);
       const releasedPoint = this.points.find(point => {
+
         return (
           x >= point.x - goatWidth &&
           x <= point.x + goatWidth &&
@@ -241,7 +243,9 @@ export class Board {
           y <= point.y + goatHeight
         );
       });
+      
       if (releasedPoint) {
+       
         if (this.dragItem.item === GOAT) {
           const possiblePoints = this.getNextPossibleMove(
             this.dragItem.point.index,
@@ -260,8 +264,8 @@ export class Board {
               this.points[prevPointIndex].item = null;
               this.points[prevPointIndex].itemIndex = null;
               // update goat points
-              this.goats[draggedGoat.index].x = x;
-              this.goats[draggedGoat.index].y = y;
+              this.goats[draggedGoat.index].x = releasedPoint.x;
+              this.goats[draggedGoat.index].y = releasedPoint.y;
               this.goats[draggedGoat.index].currentPoint = currentPointIndex;
 
               // add new item to points
@@ -285,10 +289,10 @@ export class Board {
             this.dragItem.point.index,
             TIGER
           );
+          console.log(possiblePoints);
           const validPoint = possiblePoints.find(
             p => p.point === releasedPoint.index
           );
-
           if (validPoint) {
             const draggedTiger = this.tigers.find(t => t.drag);
             if (draggedTiger) {
@@ -297,8 +301,8 @@ export class Board {
               this.points[prevPointIndex].item = null;
               this.points[prevPointIndex].itemIndex = null;
               // update tiger point
-              this.tigers[draggedTiger.index].x = x;
-              this.tigers[draggedTiger.index].y = y;
+              this.tigers[draggedTiger.index].x = releasedPoint.x;
+              this.tigers[draggedTiger.index].y = releasedPoint.y;
               this.tigers[draggedTiger.index].currentPoint = releasedPoint.index;
               // add this tiger reference to points array
               const nextPointIndex =releasedPoint.index;
@@ -761,6 +765,11 @@ export class Board {
         });
       }
     });
+    const deadGoats = this.goats.filter(g => g.dead).length;
+    const goatsInBoard = this.goats.filter(g => !g.dead).length;
+    if (goatsInBoard === 20) window.game.modalService(GOAT);
+    if (deadGoats >= 5) window.game.modalService(TIGER);
+
     if (avilableTigers.length > 0) {
       let tigerData = null;
       // getting next best move for tiger, will be improved later
@@ -774,11 +783,10 @@ export class Board {
       } 
       this.moveTiger(bestMove);
     } else {
-      window.game.modalService();
+      window.game.modalService(this.chosenItem);
     }
 
-    const deadGoats = this.goats.filter(g => g.dead).length;
-    const goatsInBoard = this.goats.filter(g => !g.dead).length;
+    
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
   }
@@ -805,6 +813,8 @@ export class Board {
     this.render();
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
+    if (goatsInBoard === 20) window.game.modalService(GOAT);
+    if (deadGoats >= 5) window.game.modalService(TIGER);
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
   }
@@ -842,7 +852,7 @@ export class Board {
     let nextLegalPoints = [];
     nextPossiblePoints.forEach(el => {
       const index = Number(el) + Number(pointIndex);
-      if (index >= 0 && index < this.totalPoints) {
+      if (index >= 0 && index <= this.totalPoints) {
         nextLegalPoints.push(index);
       }
     });
@@ -1171,7 +1181,7 @@ export class Board {
           el("p", "Play with?"),
           el("div.play-options",
             el( "button.play-with-computer", ""),
-            el( "button.play-with-friend", ""),
+            // el( "button.play-with-friend", ""),
           )
           ),
           this.difficultyLevelInterface = el('div.difficulty-level-interface.hide',
@@ -1195,7 +1205,7 @@ export class Board {
                 ),
                 el("button", { class: "select-turn-btn goat" }, "")
               ),
-              el('div.sound-setting.text-right',
+              el('div.sound-settings.text-right',
               this.playSoundButton = el('button.play-sound',''),
            )
             ),
@@ -1224,7 +1234,10 @@ export class Board {
         )
       ))
     );
-
+    //close game 
+    this.closeGame.addEventListener('click', () => {
+      window.game.closeGame()
+    })
     // mute unmute sound button
     this.playSoundButton.addEventListener('click', ()=>{
       if(this.playSoundButton.classList.contains('play-sound')){
@@ -1277,10 +1290,10 @@ export class Board {
         if (event.target.classList.contains('easy')) {
          this.difficultyLevel = 1;
         } else if(event.target.classList.contains('medium')) {
-          this.difficultyLevel = 3;
+          this.difficultyLevel = 2;
 
         }else{
-          this.difficultyLevel = 5;
+          this.difficultyLevel = 3;
         } 
         this.logic = new Logic(this, this.difficultyLevel);
         this.difficultyLevelInterface.classList.add('hide');  
