@@ -1,5 +1,12 @@
 Baghchal
 ======
+[![Build Status](https://travis-ci.org/sumn2u/baghchal.svg?branch=master)](https://travis-ci.org/sumn2u/baghchal)
+[![GitHub issues](https://img.shields.io/github/issues/sumn2u/baghchal)](https://github.com/sumn2u/baghchal/issues) [![GitHub forks](https://img.shields.io/github/forks/sumn2u/baghchal)](https://github.com/sumn2u/baghchal/network)
+[![GitHub stars](https://img.shields.io/github/stars/sumn2u/baghchal)](https://github.com/sumn2u/baghchal/stargazers)
+[![GitHub license](https://img.shields.io/github/license/sumn2u/baghchal)](https://github.com/sumn2u/baghchal/blob/master/LICENSE)
+[![Twitter](https://img.shields.io/twitter/url?style=social)](https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2Fsumn2u%2Fbaghchal)
+
+
 Bagh-Chal is a strategic, two-player board game that origniated in Nepal. The game is asymmetric in that one player controls four tigers and the other player controls up to twenty goats. The tigers 'hunt' the goats while the goats attempt to block the tigers' movements. This game is also seen in southern India with a different board, but the rules are the same.
 
 This project was initally build for [Community Challenge hackathon](https://developercircles2019.devpost.com) by Facebook Developers Community and submitted as a [baghchal-nepali-board-game](https://devpost.com/software/baghchal-nepali-board-game).
