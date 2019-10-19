@@ -772,6 +772,32 @@ export class Board {
 
     if (avilableTigers.length > 0) {
       let tigerData = null;
+
+      // Filter out only eatable goats as first priority, start
+      const goatEatingTigers = [];
+      avilableTigers.forEach(tiger => {
+
+        const goatEatingMoves = [];
+        tiger.possibleMoves.forEach( possibleMove => {
+          // check if the move can eat goat
+          if(possibleMove.eatGoat){
+            goatEatingMoves.push(possibleMove);
+          }
+        });
+
+        // check if each tiger has goat eating moves
+        if(goatEatingMoves.length){
+          tiger.possibleMoves = goatEatingMoves;
+          goatEatingTigers.push(tiger);
+        }
+
+      });
+      // check if there are goat eating tigers
+      if(goatEatingTigers.length) {
+        avilableTigers = goatEatingTigers;
+      }
+      // Filter out only eatable goats as first priority, end
+
       // getting next best move for tiger, will be improved later
       const bestMove = this.logic.getNextBestMove(TIGER, avilableTigers);
      
