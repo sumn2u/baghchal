@@ -42,11 +42,16 @@ If you feel awesome and want to support us in a small way, please consider starr
 
 https://bagh-chal-dd292.firebaseapp.com/
 
+For Facebook Instant Games:
+https://fb.gg/play/375985399708837
+
 ## Screenshots
-<img alt="Botpress" width="250" src="./screenshots/game-home-screen.png">
-<img alt="Botpress" width="250" src="./screenshots/game-level-screen.png">
-<img alt="Botpress" width="250" src="./screenshots/game-player-screen.png">
-<img alt="Botpress" width="250" src="./screenshots/game-board-screen.png">
+<img alt="game-home-screen" width="350" src="./screenshots/game-home-screen.png">
+<img alt="game-level-screen" width="350" src="./screenshots/game-level-screen.png">
+<img alt="game-player-screen" width="350" src="./screenshots/game-player-screen.png">
+<img alt="game-board-screen" width="350" src="./screenshots/game-board-screen.png">
+<img alt="game-winner" width="350" src="./screenshots/game-winner.png">
+<img alt="game-in-fb" src="./screenshots/bagchal_fb.png">
 
 
 
