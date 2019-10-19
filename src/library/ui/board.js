@@ -235,6 +235,7 @@ export class Board {
       const goatWidth = Math.floor(this.goatWidth / 2);
       const goatHeight = Math.floor(this.goatHeight / 2);
       const releasedPoint = this.points.find(point => {
+
         return (
           x >= point.x - goatWidth &&
           x <= point.x + goatWidth &&
@@ -242,7 +243,9 @@ export class Board {
           y <= point.y + goatHeight
         );
       });
+      
       if (releasedPoint) {
+       
         if (this.dragItem.item === GOAT) {
           const possiblePoints = this.getNextPossibleMove(
             this.dragItem.point.index,
@@ -261,8 +264,8 @@ export class Board {
               this.points[prevPointIndex].item = null;
               this.points[prevPointIndex].itemIndex = null;
               // update goat points
-              this.goats[draggedGoat.index].x = x;
-              this.goats[draggedGoat.index].y = y;
+              this.goats[draggedGoat.index].x = releasedPoint.x;
+              this.goats[draggedGoat.index].y = releasedPoint.y;
               this.goats[draggedGoat.index].currentPoint = currentPointIndex;
 
               // add new item to points
@@ -286,10 +289,10 @@ export class Board {
             this.dragItem.point.index,
             TIGER
           );
+          console.log(possiblePoints);
           const validPoint = possiblePoints.find(
             p => p.point === releasedPoint.index
           );
-
           if (validPoint) {
             const draggedTiger = this.tigers.find(t => t.drag);
             if (draggedTiger) {
@@ -298,8 +301,8 @@ export class Board {
               this.points[prevPointIndex].item = null;
               this.points[prevPointIndex].itemIndex = null;
               // update tiger point
-              this.tigers[draggedTiger.index].x = x;
-              this.tigers[draggedTiger.index].y = y;
+              this.tigers[draggedTiger.index].x = releasedPoint.x;
+              this.tigers[draggedTiger.index].y = releasedPoint.y;
               this.tigers[draggedTiger.index].currentPoint = releasedPoint.index;
               // add this tiger reference to points array
               const nextPointIndex =releasedPoint.index;
@@ -849,7 +852,7 @@ export class Board {
     let nextLegalPoints = [];
     nextPossiblePoints.forEach(el => {
       const index = Number(el) + Number(pointIndex);
-      if (index >= 0 && index < this.totalPoints) {
+      if (index >= 0 && index <= this.totalPoints) {
         nextLegalPoints.push(index);
       }
     });
