@@ -252,7 +252,7 @@ export class Board {
             GOAT
           );
           const validPoint = possiblePoints.find(
-            p => p === releasedPoint.index
+            p => p.point === releasedPoint.index
           );
           if (validPoint) {
             const draggedGoat = this.goats.find(g => g.drag);
@@ -767,8 +767,8 @@ export class Board {
     });
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    if (goatsInBoard === 20) window.game.modalService(GOAT);
-    if (deadGoats >= 5) window.game.modalService(TIGER);
+    // if (goatsInBoard === 20) window.game.modalService(GOAT);
+    // if (deadGoats >= 5) window.game.modalService(TIGER);
 
     if (avilableTigers.length > 0) {
       let tigerData = null;
@@ -813,8 +813,8 @@ export class Board {
     this.render();
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    if (goatsInBoard === 20) window.game.modalService(GOAT);
-    if (deadGoats >= 5) window.game.modalService(TIGER);
+    // if (goatsInBoard === 20) window.game.modalService(GOAT);
+    // if (deadGoats >= 5) window.game.modalService(TIGER);
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
   }
@@ -857,7 +857,7 @@ export class Board {
       }
     });
     if (type === GOAT) {
-      const goatLegalPoints = nextLegalPoints.map(p => {
+      let goatLegalPoints = nextLegalPoints.map(p => {
         if(!this.points[p] || (this.points[p] && this.points[p].item)){
           return false;
         }
@@ -907,7 +907,6 @@ export class Board {
             }
       });
       goatLegalPoints = goatLegalPoints.filter(p=>p);
-      console.log(goatLegalPoints);
       return goatLegalPoints;
     }
     nextLegalPoints = nextLegalPoints.map(p => {
