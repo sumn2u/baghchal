@@ -134,7 +134,7 @@
         background: url(../images/computer.png) no-repeat center;
         border: 8px solid #fff !important;
         border-radius: 100%;
-        // margin-right: 50px;
+        margin-right: 20px;
         background-color: #efeded;
       }
       &.play-with-friend{
@@ -553,5 +553,122 @@ button#mutebtn {
   }
   .modal-body {
     min-width: 320px;
+  }
+}
+.input-user-name{
+  .form-control{
+    display: block;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    box-shadow: none;
+    background-image: none;
+    background:#fff!important;
+}
+.input-group-append, .input-group-prepend {
+  display: -ms-flexbox;
+  display: flex;
+}
+.btn.active{
+    color: #fff;
+    background-color: #0286c2!important;
+    border-color: #027db5!important;
+    padding:8px;
+    outline: none!important;
+    box-shadow: none!important;
+}
+p{
+  font-size: 18px;
+  color: #388765;
+  text-shadow: none;
+}
+}
+ .online-users{
+   list-style: none;
+   text-align: left;
+   overflow: auto;
+   height: 350px;
+   padding:5px 0;
+   li{
+    color: #ffffff;
+    margin-bottom: 2px;
+    background: #388765;
+    padding: 5px 15px;
+    border-radius: 4px;
+    &::after{
+      content:'';
+      display: block;
+      clear: both;
+    }
+    span{
+      display:block;
+      width: 50%;
+      float: left;
+      box-sizing: border-box;
+    }
+    .select-friend-span{
+      text-align: right;
+      .btn{
+        padding:5px 10px;
+        background:#FFC107;
+        margin:0;
+      }
+    }
+   }
+   
+ }
+ .friend-request-notification,.friend-request-wait-modal{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  .req-holder,.wait-wrapper{
+    background:#fff;
+    margin:10% auto 0 auto;
+    width:80%;
+    padding:15px;
+    border-radius: 4px;
+  }
+  p{
+    font-size: 16px;
+    text-shadow: none;
+    color: #5d5d5d
+  }
+ .btn{
+   padding:7px 10px;
+   background: #2196F3;
+    color: #fff;
+ }
+}
+.move-notification-modal{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  .wrapper{
+    background:#fff;
+    margin:10% auto 0 auto;
+    width:80%;
+    padding:15px;
+    border-radius: 4px;
+  }
+  p{
+    text-align: center;
+    font-size: 16px;
+    text-shadow: none;
+    color: #5d5d5d
   }
 }

@@ -1,5 +1,5 @@
 import { Logic } from "../ai/logic";
-import { TIGER, GOAT, EAT, PUT, MOVE } from "../constants";
+import { TIGER, GOAT, EAT, PUT, MOVE,COMPUTER,FRIEND } from "../constants";
 import { Howl } from "howler";
 import tigerImage from "../images/tiger.png";
 import goatImage from "../images/goat.png";
@@ -8,25 +8,20 @@ import topBorderImage from "../images/top-bar.png";
 import bottomBorderImage from "../images/bottom-bar.png";
 import leftRightBorderImage from "../images/left-right-bar.png";
 import { mount, el, list } from "../ui/dom";
-const uuidv5 = require('uuid/v5');
+import { Socket } from "../game/socket";
+import { OnlineUsersList } from "./components/online-users-list";
 
-// roomId Id of the room in which the game is running on the server.
 export class Board {
-  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer,  socket, roomId, playerId, player) {
+  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer) {
     this.chosenItem = null;
-    this.roomId = roomId;
-    this.playerId = playerId;
-    this.socket = socket;
     this.myTurn = false;
-    this.friend = 'computer';
+    this.friend = COMPUTER;
     this.difficultyLevel = 5;
     this.dataContainer = dataContainer;
     this.realCanvasElement = realCanvasElement;
     this.fakeCanvasElement = fakeCanvasElement;
     this.infoBox = infoBox;
-    this.player = player;
     this.playSound = true;
-    this.closeGame = closeGame;
     this.sound = new Howl({
       src: ["bagchal.mp3"],
       html5: true,
@@ -97,59 +92,11 @@ export class Board {
     // item ready for drag
     this.dragItem = null; //  {item:TIGER,itemData:clickedPoint}
     this.animationInProgress = false;
-
-    // AILevel = 3;
-    this.logic = new Logic(this, this.difficultyLevel);
-
-    /**
-     * If player creates the game, he'll be P1(X) and has the first turn.
-     * This event is received when opponent connects to the room.
-     */
-    this.socket.on('player1', (data) => {
-      const message = `Hello, ${this.player.getPlayerName()}`;
-      // $('#userHello').html(message);
-      this.player.setCurrentTurn(true);
-    });
-
-     /**
-      * Joined the game, so player is P2(O). 
-      * This event is received when P2 successfully joins the game room. 
-      */
-     this.socket.on('player2', (data) => {
-       const message = `Hello, ${data.name}`;
-
-      // Create game for player 2
-      //  game = new Game(data.room);
-      //  game.displayBoard(message);
-       this.player.setCurrentTurn(false);
-     });
-
-
-       /**
-        * Opponent played his turn. Update UI.
-        * Allow the current player to play now. 
-        */
-       socket.on('turnPlayed', (data) => {
-        //  const row = data.tile.split('_')[1][0];
-        //  const col = data.tile.split('_')[1][1];
-         const opponentType = player.getPlayerType() === P1 ? P2 : P1;
-
-         //game.updateBoard(opponentType, row, col, data.tile);
-         player.setCurrentTurn(true);
-       });
-
-       // If the other player wins, this event is received. Notify user game has ended.
-       socket.on('gameEnd', (data) => {
-         game.endGame(data.message);
-         socket.leave(data.room);
-       });
-
-       /**
-        * End the game on any err event. 
-        */
-       socket.on('err', (data) => {
-         game.endGame(data.message);
-       });
+    
+    this.logic = null;
+    this.socket = null;
+    this.player = null;
+    
   }
 
 
@@ -267,7 +214,7 @@ export class Board {
       // track goat point to all points array
       this.points[i].item = GOAT;
       this.points[i].itemIndex = this.goats.length - 1;
-      if(this.friend==='computer'){
+      if(this.friend===COMPUTER){
         this.renderComputerTigerMove();
       }else{
         this.sendGoatMoveDataToFriend({
@@ -343,7 +290,7 @@ export class Board {
               this.points[currentPointIndex].item = GOAT;
               this.points[currentPointIndex].itemIndex = draggedGoat.index;
               // computer turn to move tiger
-              if(this.friend==='computer'){
+              if(this.friend===COMPUTER){
                 this.renderComputerTigerMove();
               }else{
                 // send current data to friend
@@ -401,12 +348,12 @@ export class Board {
               this.sound.play("goat");
              }
               // computer turns to move goat
-              if(this.friend==='computer'){
+              if(this.friend===COMPUTER){
                 this.renderComputerGoatMove();
               }else{
                 this.sendTigerMoveDataToFriend({
                     tigerIndex: draggedTiger.index,
-                    tigerNextPointIndex: nextPointIndex,
+                    nextPointIndex,
                     eatGoat: validPoint.eatGoat,
                     eatGoatIndex: validPoint.eatGoatIndex
                   });
@@ -871,7 +818,6 @@ export class Board {
 
       // getting next best move for tiger, will be improved later
       const bestMove = this.logic.getNextBestMove(TIGER, avilableTigers);
-     
       if (bestMove.eatGoat) {
         // eats the goat
        if(this.playSound){
@@ -880,7 +826,8 @@ export class Board {
       } 
       this.moveTiger(bestMove);
     } else {
-      window.game.modalService(this.chosenItem);
+      // GOATS WINS the Game
+      // window.game.modalService(this.chosenItem);
     }
 
     
@@ -914,6 +861,9 @@ export class Board {
     // if (deadGoats >= 5) window.game.modalService(TIGER);
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
+    if (deadGoats >= 5){
+      // GOATS WINS THE GAME
+    }
   }
   /**
    * get next possible moves of tiger/goat
@@ -1041,21 +991,7 @@ export class Board {
     return nextLegalPoints.filter(p => p);
   }
 
-  displayPossibleMoves(tigerIndex, possibleMoves) {
-    // const moves = possibleMoves.map(el => {
-    //   return (
-    //     this.verticalIndicators[Math.floor(el / 5)].toString() +
-    //     this.horizontalIndicators[el % 5].toString()
-    //   );
-    // });
-    // mount(this.moveIndicator, el("h3", `Tiger ${tigerIndex + 1}`));
-    // const tigerPossiblePointList = list(
-    //   `ul.tiger-possible-points`,
-    //   TigerPossibleMoveList
-    // );
-    // mount(this.moveIndicator, tigerPossiblePointList);
-    // tigerPossiblePointList.update(moves);
-  }
+ 
 
   drawText(x, y, side, text) {
     this.canvas.beginPath();
@@ -1175,7 +1111,7 @@ export class Board {
   /**
    * method to move goat from both computer or friends move
    */
-  moveGoat(nextPoint, goatPoint, type) {
+  moveGoat(nextPoint, goatPoint, type='new') {
     if (type === "move") {
       // here goatPoint is an element of this.goats[index]
       const point = this.points.find(point => point.index == nextPoint);
@@ -1253,7 +1189,7 @@ export class Board {
    *
    */
   sendGoatMoveDataToFriend(data){
-
+    this.socket.sendMoveDataToFriend(data,GOAT);
   }
 
 
@@ -1262,37 +1198,47 @@ export class Board {
    * @param data {prevPointIndex,nextPointIndex,tiger: draggedTiger}
    */
   sendTigerMoveDataToFriend(data){
-
+    this.socket.sendMoveDataToFriend(data,TIGER);
   }
-  /**
-   * send palyer info through socket
-   */
-  setUserInfo(){
-    const user = {
-      name: this.playerId,
-      room: this.roomId,
-      avatar: this.chosenItem
-    }
-    if (this.playerId && this.roomId) {
-      this.socket.emit('createGame', {
-        user
-      });
-    }
-  }
+ 
 
   addUIDOMToGame(){
     mount(
       this.infoBox,
-      (this.selectItem = el(
+      (el('div',
+      this.moveNotificationModal = el('div.move-notification-modal.hide',el('div.wrapper',el('p','Test'))),
+
+        this.selectItem = el(
         "div.select-option",
         el(
           "div.container-fluid",
           el('div.game-name',''),
+          
           this.playWithInterface = el('div.play-with-interface',
-          el("p", "Play with?"),
-          el("div.play-options",
-            el( "button.play-with-computer", ""),
-            // el( "button.play-with-friend", ""),
+       
+            el("p", "Play with?"),
+            el("div.play-options",
+              el( "button.play-with-computer", ""),
+              el( "button.play-with-friend", ""),
+            )
+            
+          ),
+          this.inputNameInterface = el('div.input-user-name.hide',
+           
+            el('p','Enter your Name'),
+            el('div.input-group',
+            this.playerNameInput = el('input.form-control',{placeholder:'Enter Your Name'}),
+              this.submitInputName = el('div.input-group-append',
+                el('button.btn.btn-info.active','Submit')
+              )
+            )
+          ),
+          this.friendsListInterface = el('div.friends-list.hide'),
+          this.friendRequestWaitModal = el('div.friend-request-wait-modal.hide',el('div.wait-wrapper',el('p'))),
+          this.requestNotificationModal = el('div.friend-request-notification.hide',
+          el('div.req-holder',
+            el('p',''),
+            el('button.btn.accept-friend-request','Accept Request')
           )
           ),
           this.difficultyLevelInterface = el('div.difficulty-level-interface.hide',
@@ -1323,6 +1269,7 @@ export class Board {
          
         )
       ))
+      )
     );
     mount(
       this.infoBox,
@@ -1345,10 +1292,44 @@ export class Board {
         )
       ))
     );
-    //close game 
-    this.closeGame.addEventListener('click', () => {
-      window.game.closeGame()
+    
+    /**
+     * =============================================
+     * UI INTRACTION
+     * =============================================
+     */
+    // user selects with whom he want to play with (computer or friend)
+    this.playWithInterface.querySelectorAll("button").forEach(element => {
+      element.addEventListener("click", event => {
+        if (event.target.classList.contains('play-with-friend')) {
+          this.friend = FRIEND;
+          this.inputNameInterface.classList.remove('hide'); 
+        } else {
+          this.difficultyLevelInterface.classList.remove('hide');
+          this.friend = COMPUTER;   
+        } 
+        this.playWithInterface.classList.add('hide');  
+      });
+    });
+
+    // IF USER SELECT WITH FRIEND GET HIS NAME AND SEND TO SERVER
+
+    this.submitInputName.addEventListener('click',(event)=>{
+      event.preventDefault();
+      const userName = this.playerNameInput.value;
+      if(!userName){
+        alert('Enter Valid Name');
+        return false;
+      }
+      // HERE Initialise the Socket Object and Send User Name  to Server
+      this.socket = new Socket(userName);
+      // hide add name interface
+      this.inputNameInterface.classList.add('hide');
+      // handle events dispatched from socket
+      this.handleSocketEvents();
+      this.friendsListInterface.classList.remove('hide');
     })
+
     // mute unmute sound button
     this.playSoundButton.addEventListener('click', ()=>{
       if(this.playSoundButton.classList.contains('play-sound')){
@@ -1362,6 +1343,9 @@ export class Board {
       }
     })
 
+    /**
+     * USER SELECTS TIGER OR GOAT
+     */
     this.selectItem.querySelectorAll(".select-turn-btn").forEach(element => {
       element.addEventListener("click", event => {
         if (event.target.classList.contains(TIGER)) {
@@ -1369,37 +1353,31 @@ export class Board {
           if(this.playSound){
             this.sound.play("tiger");
           }
-          this.renderComputerGoatMove();
+          
         } else {
           this.chosenItem = GOAT;
           if(this.playSound){
             this.sound.play("goat");
           }
         }
-        if (this.playerId && this.roomId){
-          this.setUserInfo();
-        }
-        this.myTurn = this.chosenItem === "GOAT" ? true : false;
+        this.myTurn = this.chosenItem === GOAT ? true : false;
         this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
         this.selectItem.classList.add("hide");
+        // IF user is playing with computer
+        if(this.friend==COMPUTER){
+          this.renderComputerGoatMove();
+        }else{
+          // send item chosen info to friend
+          this.socket.friendChoseTigerGoat(this.chosenItem);
+          if(this.chosenItem===GOAT){
+            this.showMoveNotification(GOAT);
+          }
+        }
       });
     });
 
-    this.playWithInterface.querySelectorAll("button").forEach(element => {
-      element.addEventListener("click", event => {
-        if (event.target.classList.contains('play-with-friend')) {
-          this.friend = 'friend';
-          this.playerId = uuidv5.DNS;
-          this.roomId = uuidv5.URL;
-        this.selectItemInterface.classList.remove('hide');   
-        } else {
-          this.difficultyLevelInterface.classList.remove('hide');
-         this.friend = 'computer';        
-        } 
-        this.playWithInterface.classList.add('hide');  
-      });
-    });
     
+    // SELECT DIFFICULTY LEVEL FOR PLAYING WITH COMPUTER
     this.difficultyLevelInterface.querySelectorAll('button').forEach(element =>{
       element.addEventListener("click", event => {
         if (event.target.classList.contains('easy')) {
@@ -1410,10 +1388,104 @@ export class Board {
         }else{
           this.difficultyLevel = 3;
         } 
+        // initialise new logic object for playing with friend
         this.logic = new Logic(this, this.difficultyLevel);
         this.difficultyLevelInterface.classList.add('hide');  
         this.selectItemInterface.classList.remove('hide');    
       });
     });
+
+    // HANDLE CLICK ON ACCEPT FRIEND REQUEST
+    this.requestNotificationModal.querySelector('.accept-friend-request').addEventListener('click',()=>{
+      this.socket.acceptFriendRequest();
+      this.requestNotificationModal.classList.add('hide');
+      this.friendRequestWaitModal.classList.remove('hide');
+      this.friendRequestWaitModal.querySelector('p').innerHTML = 'Wait! Let your friend choose the tiger/goat';
+    })
+  }
+
+  /**
+   * Method to handle event dispatched from socket 
+   */
+  handleSocketEvents(){
+    this.socket.dispatcher.on('setUserInfo',this.setUserInfo.bind(this));
+    this.socket.dispatcher.on('updateOnlineUsers',this.updateOnlineUsers.bind(this));
+    this.socket.dispatcher.on('friendSendsRequest',this.showFriendRequestNotification.bind(this));
+    this.socket.dispatcher.on('requestAccepted',  this.friendRequestAccepted.bind(this));
+    this.socket.dispatcher.on('friendChoseItem', this.friendChooseItem.bind(this));
+    this.socket.dispatcher.on('friendMovedItem', this.handleFriendMove.bind(this));
+  }
+  setUserInfo(data){
+    this.player = data;
+    this.socket.requestForOnlineUsers();
+  }
+  updateOnlineUsers(data){
+    const users = data.filter(u=>u.socketId!=this.player.socketId);
+    const onlineUsers = list(
+        `ul.online-users`,
+        OnlineUsersList
+      );
+      this.friendsListInterface.innerHTML = '';
+      mount(this.friendsListInterface, onlineUsers);
+      onlineUsers.update(users);
+      this.friendsListInterface.querySelectorAll('.send-friend-req').forEach(el=>{
+        el.addEventListener('click',(evt)=>{
+          evt.preventDefault();
+          const friendId = el.getAttribute('socketId');
+          this.socket.sendRequestToFriend(friendId);
+          this.friendRequestWaitModal.classList.remove('hide');
+          this.friendRequestWaitModal.querySelector('p').innerHTML = 'Wait! Let your friend accept the request';
+        })
+      })
+  }
+  showFriendRequestNotification(data){
+    this.requestNotificationModal.classList.remove('hide');
+    this.requestNotificationModal.querySelector('p').innerHTML = `${data.name} Sends you request for playing game`;
+  }
+  friendRequestAccepted(data){
+    this.requestNotificationModal.classList.add('hide');
+    this.friendsListInterface.classList.add('hide');
+    this.friendRequestWaitModal.classList.add('hide');
+    this.selectItemInterface.classList.remove('hide');
+  }
+  
+  friendChooseItem(myItem){
+    this.selectItem.classList.add("hide");
+    this.requestNotificationModal.classList.add('hide');
+    this.friendsListInterface.classList.add('hide');
+    this.friendRequestWaitModal.classList.add('hide');
+    this.selectItemInterface.classList.remove('hide');
+    this.friendRequestWaitModal.classList.add('hide');
+    this.chosenItem = myItem;
+    this.myTurn = this.chosenItem === GOAT ? true : false;
+    this.showMoveNotification(this.chosenItem,`Your Friend Choose ${this.chosenItem===TIGER ? GOAT: TIGER}`);
+    if(this.chosenItem===GOAT){
+      setTimeout(()=>{
+        this.showMoveNotification(this.chosenItem);
+      },2100)
+    }else{
+      setTimeout(()=>{
+        this.showMoveNotification(this.chosenItem,'Please Wait.. Friends Turn')
+      },2100)
+    }
+  }
+
+  showMoveNotification(item,message=null){
+    this.moveNotificationModal.classList.remove('hide');
+    this.moveNotificationModal.querySelector('p').innerHTML = message ? message : `Its your turn to move ${item}.`;
+    setTimeout(()=>{
+      this.moveNotificationModal.classList.add('hide');
+    },2000);
+  }
+
+  handleFriendMove(data){
+    this.showMoveNotification(this.chosenItem);
+    setTimeout(() => {
+      if(data.movedItem===GOAT){
+        this.moveGoat(data.moveData.nextPoint,data.moveData.goatPoint);
+      }else{
+        this.moveTiger(data.moveData);
+      }
+    }, 2100);
   }
 }

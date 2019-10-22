@@ -1,49 +1,56 @@
 const express = require('express');
-
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-
+const users =[]; // {name,avatar}
 app.use(express.static('.'));
 
 
 io.on('connection', (socket) => {
     // Create a new game room and notify the creator of game.
-    socket.on('createGame', (data) => {
-        socket.join('room-1');
-        socket.emit('newGame', {
-            name: data.name,
-            room: 'room-1',
-            avatar: data.avatar
-        });
-    });
-
-    // Connect the Player 2 to the room he requested. Show error if room full.
     socket.on('joinGame', (data) => {
-        const room = io.nsps['/'].adapter.rooms[data.roomId];
-        if (room && room.length === 1) {
-            socket.join(data.roomId);
-            socket.broadcast.to(data.roomId).emit('player1', {});
-            socket.emit('player2', {
-                name: data.name,
-                room: data.roomId,
-                avatar: data.avatar,
-            });
-        } else {
-            socket.emit('err', {
-                message: 'Sorry, The room is full!'
-            });
-        }
+        const user = {name:data.name,avatar:data.avatar,socketId:socket.id,friendId: null,playingItem: null};
+        users.push(user);        
+        socket.emit('setUserInfo',user);
+    });
+    // send users list to all users when new user enters on the game
+    socket.on('requestForOnlineUsers',(data)=>{
+        io.emit('updateOnlineUsers',users);
+    });
+    // when user send request notify the friend
+    socket.on('sendRequestToFriend',data=>{
+        io.to(data.socketId).emit('friendSendsRequest',users.find(u=>u.socketId===socket.id));
     });
 
+    // accept friend request
+    socket.on('acceptFriendRequest', data=>{
+        const player = data.player;
+        const friend = data.friend;
+        const userPlayer = users.find(u=>u.socketId===player.socketId);
+        const userFriend = users.find(u=>u.socketId===friend.socketId);
+        userPlayer.friendId = userFriend.socketId;
+        userFriend.friendId = userPlayer.socketId;
+        io.to(friend.socketId).emit('requestAccepted',player);
+    });
+    // notify  friend that you  choose tiger or goat
+    socket.on('friendChoseItem', data=>{
+        const player = data.player;
+        const friend = data.friend;
+        const chosenItem = data.item;
+        const userPlayer = users.find(u=>u.socketId===player.socketId);
+        const userFriend = users.find(u=>u.socketId===friend.socketId);
+        userPlayer.item = chosenItem;
+        userFriend.item = data.friendItem;
+        io.to(friend.socketId).emit('friendChoseItem',{item: data.friendItem});
+    });
     /**
      * Handle the turn played by either player and notify the other.
      */
-    socket.on('playTurn', (data) => {
-        socket.broadcast.to(data.room).emit('turnPlayed', {
-            tile: data.tile,
-            room: data.room,
-        });
+    socket.on('friendMovedItem', data=>{
+        const friend = data.friend;
+        const moveData = data.data;
+        const movedItem = data.movedItem;
+        io.to(friend.socketId).emit('friendMovedItem',{moveData,movedItem});
     });
 
     /**
@@ -51,6 +58,13 @@ io.on('connection', (socket) => {
      */
     socket.on('gameEnded', (data) => {
         socket.broadcast.to(data.room).emit('gameEnd', data);
+    });
+    socket.on('disconnect', () => {
+        users.forEach((u,i)=>{
+            if(u.socketId===socket.id){
+                users.splice(i,1);
+            }
+        })
     });
 });
 
