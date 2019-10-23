@@ -169,6 +169,9 @@ export class Board {
    * @param {mouse event} event
    */
   handelMouseDownEvent(event) {
+    if(!this.myTurn){
+      return false;
+    }
     event.preventDefault();
     if (!this.chosenItem) {
       return true;
@@ -241,6 +244,9 @@ export class Board {
    * @param {mouse event} event
    */
   handleMouseUpEvent(event) {
+    if(!this.myTurn){
+      return false;
+    }
     this.mouseDown = false;
     this.hideFakeCanvas();
     if (this.dragItem) {
@@ -1190,6 +1196,9 @@ export class Board {
    */
   sendGoatMoveDataToFriend(data){
     this.socket.sendMoveDataToFriend(data,GOAT);
+    setTimeout(()=>{
+      this.myTurn = false;
+    },500);
   }
 
 
@@ -1199,6 +1208,9 @@ export class Board {
    */
   sendTigerMoveDataToFriend(data){
     this.socket.sendMoveDataToFriend(data,TIGER);
+    setTimeout(()=>{
+      this.myTurn = false;
+    },500);
   }
  
 
@@ -1450,6 +1462,7 @@ export class Board {
   }
   
   friendChooseItem(myItem){
+    console.log(myItem);
     this.selectItem.classList.add("hide");
     this.requestNotificationModal.classList.add('hide');
     this.friendsListInterface.classList.add('hide');
@@ -1457,6 +1470,7 @@ export class Board {
     this.selectItemInterface.classList.remove('hide');
     this.friendRequestWaitModal.classList.add('hide');
     this.chosenItem = myItem;
+    this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
     this.myTurn = this.chosenItem === GOAT ? true : false;
     this.showMoveNotification(this.chosenItem,`Your Friend Choose ${this.chosenItem===TIGER ? GOAT: TIGER}`);
     if(this.chosenItem===GOAT){
@@ -1479,13 +1493,15 @@ export class Board {
   }
 
   handleFriendMove(data){
-    this.showMoveNotification(this.chosenItem);
+    this.myTurn = true;
+    if(data.movedItem===GOAT){
+      this.moveGoat(data.moveData.nextPoint,data.moveData.goatPoint);
+      
+    }else{
+      this.moveTiger(data.moveData);
+    }
     setTimeout(() => {
-      if(data.movedItem===GOAT){
-        this.moveGoat(data.moveData.nextPoint,data.moveData.goatPoint);
-      }else{
-        this.moveTiger(data.moveData);
-      }
-    }, 2100);
+      this.showMoveNotification(this.chosenItem);
+    }, 1100);
   }
 }
