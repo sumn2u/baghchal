@@ -6,7 +6,7 @@ export class Socket{
         this.player = null;
         this.friend = null;
         this.dispatcher = new Dispatcher;
-        this.socket = io.connect('http://localhost:5000');
+        this.socket = io.connect('https://automatic-chili.glitch.me');
         this.socket.emit('joinGame',{name:userName});
         this.socket.on('setUserInfo',data=>{
             this.player = data;
