@@ -791,8 +791,8 @@ export class Board {
     });
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    // if (goatsInBoard === 20) window.game.modalService(GOAT);
-    // if (deadGoats >= 5) window.game.modalService(TIGER);
+    if (goatsInBoard === 20) this.gameCompleted(GOAT);
+    if (deadGoats >= 5) this.gameCompleted(TIGER);
 
     if (avilableTigers.length > 0) {
       let tigerData = null;
@@ -833,7 +833,7 @@ export class Board {
       this.moveTiger(bestMove);
     } else {
       // GOATS WINS the Game
-      // window.game.modalService(this.chosenItem);
+      this.gameCompleted(this.chosenItem)
     }
 
     
@@ -863,12 +863,13 @@ export class Board {
     this.render();
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    // if (goatsInBoard === 20) window.game.modalService(GOAT);
-    // if (deadGoats >= 5) window.game.modalService(TIGER);
+    if (goatsInBoard === 20) this.gameCompleted(GOAT);
+    if (deadGoats >= 5) this.gameCompleted(TIGER);
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
     if (deadGoats >= 5){
       // GOATS WINS THE GAME
+      this.gameCompleted(this.chosenItem)
     }
   }
   /**
@@ -1276,12 +1277,9 @@ export class Board {
               ),
               el('div.sound-settings.text-right',
               this.playSoundButton = el('button.play-sound',''),
-           )
-            ),
-         
+           ))
         )
-      ))
-      )
+      )))
     );
     mount(
       this.infoBox,
@@ -1318,7 +1316,7 @@ export class Board {
           this.inputNameInterface.classList.remove('hide'); 
         } else {
           this.difficultyLevelInterface.classList.remove('hide');
-          this.friend = COMPUTER;   
+          this.friend = COMPUTER; 
         } 
         this.playWithInterface.classList.add('hide');  
       });
@@ -1415,7 +1413,54 @@ export class Board {
       this.friendRequestWaitModal.querySelector('p').innerHTML = 'Wait! Let your friend choose the tiger/goat';
     })
   }
+  
 
+gameCompleted(avatar){
+  // debugger;
+    const d = document;
+    const body = d.querySelector('body');
+    const buttons = d.querySelectorAll('[data-modal-trigger]');
+
+    // attach click event to all modal triggers
+    for (let button of buttons) {
+      triggerEvent(button);
+    }
+
+    function triggerEvent(button) {
+      // button.addEventListener('click', () => {
+      const trigger = button.getAttribute('data-modal-trigger');
+      const modal = d.querySelector(`[data-modal=${trigger}]`);
+      const modalBody = modal.querySelector('.modal-body');
+      const closeBtn = modal.querySelector('.close');
+      document.getElementById('game-end-heading').innerHTML = ` Alas, the ${avatar ==='goat' ? "🐐" :"🐅" } has claimed victory!`
+      closeBtn.addEventListener('click', () => modal.classList.remove('is-open'))
+      modal.addEventListener('click', () => modal.classList.remove('is-open'))
+      const gameResetButton = document.getElementById('game-reset-btn');
+
+      modalBody.addEventListener('click', (e) => e.stopPropagation());
+
+      modal.classList.toggle('is-open');
+      const _this = this;
+      gameResetButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.classList.remove('is-open');
+        const previousGameBoard = document.getElementsByClassName('game-box')
+        if (previousGameBoard) previousGameBoard[0].remove();
+        window.game.init({
+          container: "game-container"
+        });
+      })
+
+      // Close modal when hitting escape
+      body.addEventListener('keydown', (e) => {
+        if (e.keyCode === 27) {
+          modal.classList.remove('is-open')
+        }
+      });
+      //  });
+    }
+  }
+ 
   /**
    * Method to handle event dispatched from socket 
    */
