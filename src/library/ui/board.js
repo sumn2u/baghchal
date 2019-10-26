@@ -289,7 +289,6 @@ export class Board {
             this.dragItem.point.index,
             TIGER
           );
-          console.log(possiblePoints);
           const validPoint = possiblePoints.find(
             p => p.point === releasedPoint.index
           );

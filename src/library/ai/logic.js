@@ -1,5 +1,4 @@
-import { TIGER, GOAT, EAT, PUT, MOVE, TOTAL_GOAT } from '../constants';
-
+import { TIGER, GOAT, EAT, PUT, MOVE, TOTAL_GOAT, GOAT_EATING_POINTS } from '../constants';
 const largeLimit = 1000000;
 const debug = false;
 export class Logic {
@@ -64,6 +63,7 @@ export class Logic {
                 this.computeMinMax(this.depthLevel, true);
 
                 bestAvailableMove = availableTigers.find(tiger => tiger.point == this.bestMove.sourcePoint);
+                console.log('bestAvailableMove', bestAvailableMove);
                 bestPossibleMove = bestAvailableMove.possibleMoves.find(bestMove =>  bestMove.point == this.bestMove.destinationPoint);
             }
 
@@ -90,6 +90,8 @@ export class Logic {
                 this.board.goats.forEach(goat => {
                     if(!goat.dead){
                         const possibleMoves = this.board.getNextPossibleMove(goat.currentPoint, GOAT);
+
+                        console.log('goat possible moves', possibleMoves);
 
                         if(possibleMoves.length) {
                             possibleMoves.forEach(destinationPoint => {
@@ -205,24 +207,89 @@ export class Logic {
 
         return Number(value);
     }
+    
+    checkGoatDiesAnywhere(destinationPoint) {
+        return this.board.tigers.some(tiger => {
+            const tigerPoint = tiger.currentPoint;
+            
+            const goatDiesInDestinationPoint = this.checkIfGoatDies(tigerPoint, destinationPoint);
+            if(goatDiesInDestinationPoint) {
+                return true;
+            }
+
+            return this.board.goats.some(goat => {
+                const goatPoint = goat.currentPoint;
+                return this.checkIfGoatDies(tigerPoint, goatPoint);
+            });
+        });
+    }
+
+    checkIfGoatDies(tigerPoint, goatPoint) {
+        if( GOAT_EATING_POINTS[tigerPoint].hasOwnProperty(goatPoint) && this.board.points.hasOwnProperty(goatPoint) ) {
+            const reachPoint = GOAT_EATING_POINTS[tigerPoint][goatPoint];
+            // check if reach Point is empty in board, if empty then return true
+            if ((typeof this.board.points[reachPoint].item === "object") && !this.board.points[reachPoint].item) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     costEvaluation(depthLevel) {
         const tigerClosedSpaceCount = this.tigerClosedSpaceCount();
+
+        if(debug)
+            console.log(this.consoleSpaces(depthLevel), '=================costEvaluation start===================');
+        if(debug)
+            console.log(this.consoleSpaces(depthLevel), this.nextMove.turn, this.nextMove.destinationPoint);
+        
         // const winner = this.getWinner();
         let score = 0;
         // if(!winner) {
-        score = (200 * this.movableTigers) + (1000 * this.deadGoats) - (200 * tigerClosedSpaceCount) - (100 * depthLevel);
-        if(typeof this.nextMove.eatGoatPoint !== "object"){ // NOT NULL
-            score += 10000;
+        score = (200 * this.movableTigers) + (1000 * this.deadGoats) - (100 * depthLevel);
+        let scoreString = `(200 * ${this.movableTigers}) + (1000 * ${this.deadGoats}) - (100 * ${depthLevel})`;
+        const tigerClosedSpaceCountScore = (200 * tigerClosedSpaceCount);
+
+        // if chosen goat to play, tiger closed space is good, so reduce the score
+        if(this.board.chosenItem == GOAT) {   
+            score -= tigerClosedSpaceCountScore;
+            scoreString += ` - (200 * ${tigerClosedSpaceCount})`;
+        } else {
+            score += tigerClosedSpaceCountScore;
+            scoreString += ` + (200 * ${tigerClosedSpaceCount})`;
         }
+
+        if(typeof this.nextMove.eatGoatPoint !== "object"){ // NOT NULL OBJECT(Only when played as goat)
+            if(debug)
+                console.log(this.consoleSpaces(depthLevel), 'NOT NULL OBJECT CHECK');
+            score += 10000;
+            scoreString += ` + 10000`;
+            
+            if(debug)
+                console.log(this.consoleSpaces(depthLevel), `eatGoatPoint score is ${score}`);
+        } 
+
+        if(this.nextMove.turn == GOAT) { // (when played as tiger)
+            const destinationPoint = (this.nextMove.destinationPoint) ? this.nextMove.destinationPoint : 0;
+            const goatDies = this.checkGoatDiesAnywhere(destinationPoint);
+
+            if(debug)
+                console.log(this.consoleSpaces(depthLevel), `GOAT DIES ANYWHERE? `, Boolean(goatDies));
+            
+            // when user is playing as a tiger, if tiger eats goat, then scores increases
+            if(goatDies) { 
+                score += 10000;
+                scoreString += ` + 10000`;
+            }
+        }
+
+        scoreString += ` = ${score}`;
+        if(debug)
+            console.log(this.consoleSpaces(depthLevel), `SCORE IS ${scoreString}`);
+        if(debug)
+            console.log(this.consoleSpaces(depthLevel), '=================costEvaluation ended===================');
+
         return score;
-        // }
-
-        // if(winner == GOAT)
-        //     return -largeLimit;
-
-        // else if(winner == TIGER)
-        //     return largeLimit;
     }
 
     tigerClosedSpaceCount() {
@@ -265,6 +332,8 @@ export class Logic {
                 goatsRemaining = this.goatsRemaining(this.board.goats);
                 let actionType = MOVE;
                 if(goatsRemaining) {
+                    // If goats remaining then put
+                    actionType = PUT;
                     const nextMoves = this.board.points.filter(point => !point.item);
                     nextMoves.forEach(nextMove => {
                         let sourcePoint = (actionType == PUT)? null : this.nextMove.sourcePoint;
@@ -272,13 +341,14 @@ export class Logic {
                             turn: this.turn,
                             sourcePoint,
                             destinationPoint: nextMove.index,
-                            actionType: PUT,
+                            actionType,
                             eatGoatPoint: null
                         });
                     });
                 } else {
                     this.board.goats.forEach(goat => {
                         const possibleMovePoints = this.board.getNextPossibleMove(goat.currentPoint, GOAT);
+                        console.log('possible moves points', possibleMovePoints);
                         if(possibleMovePoints.length){
                             possibleMovePoints.forEach(point => {
                                 moveLists.push({
