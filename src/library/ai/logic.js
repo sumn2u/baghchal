@@ -91,14 +91,12 @@ export class Logic {
                     if(!goat.dead){
                         const possibleMoves = this.board.getNextPossibleMove(goat.currentPoint, GOAT);
 
-                        console.log('goat possible moves', possibleMoves);
-
                         if(possibleMoves.length) {
                             possibleMoves.forEach(destinationPoint => {
                                 goatMoves.push({
                                     turn: GOAT,
                                     sourcePoint: this.convertToNumber(goat.currentPoint),
-                                    destinationPoint: this.convertToNumber(destinationPoint),
+                                    destinationPoint: this.convertToNumber(destinationPoint.point),
                                     actionType: MOVE,
                                     eatGoatPoint: null
                                 });
@@ -106,6 +104,7 @@ export class Logic {
                         }
                     }
                 });
+
                 this.moveLists = goatMoves;
             }
                         
@@ -264,7 +263,7 @@ export class Logic {
                 console.log(this.consoleSpaces(depthLevel), 'NOT NULL OBJECT CHECK');
             score += 10000;
             scoreString += ` + 10000`;
-            
+
             if(debug)
                 console.log(this.consoleSpaces(depthLevel), `eatGoatPoint score is ${score}`);
         } 
