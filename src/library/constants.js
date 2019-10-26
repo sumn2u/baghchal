@@ -5,6 +5,8 @@ export const PUT = 'put';
 export const MOVE = 'move';
 export const TOTAL_GOAT = 20;
 export const TOTAL_TIGER = 4;
+export const COMPUTER='computer';
+export const FRIEND = 'friend';
 export const GOAT_EATING_POINTS = {
   // first row
   0: {
