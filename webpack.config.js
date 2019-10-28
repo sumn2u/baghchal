@@ -5,11 +5,11 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 
-
+// html2canvas.min
 module.exports = (env) => {
     return {
         mode: env || 'development',
-        entry: ['./src/library/index.js', './src/library/scss/style.scss'],
+        entry: ['./src/library/js/data.js', './src/library/index.js', './src/library/scss/style.scss'],
         output: {
             path: path.resolve(__dirname, 'dist'),
             filename: 'bundle.js'

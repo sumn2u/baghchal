@@ -10,13 +10,15 @@ import leftRightBorderImage from "../images/left-right-bar.png";
 import { mount, el, list } from "../ui/dom";
 import { Socket } from "../game/socket";
 import { OnlineUsersList } from "./components/online-users-list";
-
+import html2canvas from 'html2canvas';
 export class Board {
-  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer) {
+  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer, FBInstant, matchData) {
     this.chosenItem = null;
     this.myTurn = false;
     this.friend = COMPUTER;
+    this.FBInstant = FBInstant;
     this.difficultyLevel = 5;
+    this.matchData = matchData;
     this.dataContainer = dataContainer;
     this.realCanvasElement = realCanvasElement;
     this.fakeCanvasElement = fakeCanvasElement;
@@ -38,7 +40,11 @@ export class Board {
   
     // addRequiredDom ELEMENTS
     this.addUIDOMToGame();
-
+    if(FBInstant){
+      console.log(window.game, 'window.game ==>')
+      console.log(window.game.FBCheck(), "fb game ==>")
+      // this.game.start();
+    }
     this.goats = []; // Array<{x:number,y:number,dead:false, currentPoint,drag: false,index: number;}>
     this.tigers = []; // Array<{x:number,y:number,currentPoint: number,drag: false,index: number}>
 
@@ -96,6 +102,7 @@ export class Board {
     this.logic = null;
     this.socket = null;
     this.player = null;
+    this.startGame = null;
     
   }
 
@@ -1196,13 +1203,167 @@ export class Board {
    *
    */
   sendGoatMoveDataToFriend(data){
-    this.socket.sendMoveDataToFriend(data,GOAT);
+    // this.socket.sendMoveDataToFriend(data,GOAT);
     setTimeout(()=>{
       this.myTurn = false;
     },500);
+
+    console.log(data, GOAT, 'Suman ===>')
+
+    // save this to backend
+    // console.log(this.game, 'this game ===>')
+    console.log(window.game.bagchal._matchData, ' window this game ===>')
+    let matcheData = window.game.bagchal._matchData
+    matcheData.moves = data;
+    matcheData.playerTurn ^= 1
+    this.saveDataAsync(matcheData)
+      .then(function () {
+        return this.getPlayerImageAsync()
+      }.bind(this))
+      .then(function (image) {
+        var updateConfig = this.getUpdateConfig(image)
+        return FBInstant.updateAsync(updateConfig)
+      }.bind(this))
+      .then(function () {
+        // closes the game after the update is posted.
+        // FBInstant.quit();
+      });
+    
   }
 
+  saveDataAsync(matchData) {
+    const backendClientL = new backendClient('https://wiggly-licorice.glitch.me/')
+    return new Promise(function (resolve, reject) {
+      console.log('going to save ==>', JSON.stringify(matchData));
+      FBInstant.player
+        .getSignedPlayerInfoAsync(JSON.stringify(matchData))
+        .then(function (result) {
+          return backendClientL.save(
+            FBInstant.context.getID(),
+            result.getPlayerID(),
+            result.getSignature()
+          )
+        })
+        .then(function () {
+          console.log("ilks")
+          resolve(matchData);
+        })
+        .catch(function (error) {
+          console.log(error, "error")
+          reject(error);
+        })
+    });
+  }
+  /**
+   * create image of the game to send it back to friend
+   */
+  getPlayerImageAsync() {
+    return new Promise(function (resolve, reject) {
+      var sceneRoot = document.getElementById('game-box');
+      var sceneWidth = sceneRoot.offsetWidth;
+      html2canvas(sceneRoot, {
+          width: sceneWidth * 3,
+          x: -(sceneWidth)
+        })
+        .then(function (canvas) {
+          resolve(canvas.toDataURL("image/png"));
+        })
+        .catch(function (err) {
+          reject(err);
+        })
+    })
 
+  }
+
+  getUpdateConfig (base64Picture) {
+
+    var isMatchWon = this.isMatchWon();
+    var isBoardFull = this.isBoardFull();
+    var updateData = null;
+    var playerName = FBInstant.player.getName();
+
+    if (isMatchWon) {
+      // Game over, player won
+      updateData = {
+        action: 'CUSTOM',
+        cta: 'Rematch!',
+        image: base64Picture,
+        text: {
+          default: playerName + ' has won!',
+          localizations: {
+            pt_BR: playerName + ' venceu!',
+            en_US: playerName + ' has won!',
+            de_DE: playerName + ' hat gewonnen'
+          }
+        },
+        template: 'match_won',
+        data: {
+          rematchButton: true
+        },
+        strategy: 'IMMEDIATE',
+        notification: 'NO_PUSH',
+      };
+
+    } else if (isBoardFull) {
+      // Game over, tie
+      updateData = {
+        action: 'CUSTOM',
+        cta: 'Rematch!',
+        image: base64Picture,
+        text: {
+          default: 'It\'s a tie!',
+          localizations: {
+            pt_BR: 'Deu empate!',
+            en_US: 'It\'s a tie!',
+            de_DE: 'Es ist ein unentschiedenes Spiel!'
+          }
+        },
+        template: 'match_tie',
+        data: {
+          rematchButton: true
+        },
+        strategy: 'IMMEDIATE',
+        notification: 'NO_PUSH',
+      };
+    } else {
+      // Next player's turn
+      updateData = {
+        action: 'CUSTOM',
+        cta: 'Play your turn!',
+        image: base64Picture,
+        text: {
+          default: playerName + ' has played. Now it\'s your turn',
+          localizations: {
+            pt_BR: playerName + ' jogou. Agora é sua vez!',
+            en_US: playerName + ' has played. Now it\'s your turn',
+            de_DE: playerName + ' hat gespielt. Jetzt bist du dran.'
+          }
+        },
+        template: 'play_turn',
+        data: {
+          rematchButton: false
+        },
+        strategy: 'IMMEDIATE',
+        notification: 'NO_PUSH',
+      };
+    }
+
+    return updateData;
+
+  }
+
+  isMatchWon(){
+    // match won conditions
+    return false;
+  }
+
+  isBoardFull(){
+    return false; 
+  }
+  /**
+   * 
+   * @param {*} data 
+   */
   /**
    * send current user's tiger move data to friend
    * @param data {prevPointIndex,nextPointIndex,tiger: draggedTiger}
@@ -1214,7 +1375,6 @@ export class Board {
     },500);
   }
  
-
   addUIDOMToGame(){
     mount(
       this.infoBox,
@@ -1227,7 +1387,7 @@ export class Board {
           "div.container-fluid",
           el('div.game-name',''),
           
-          this.playWithInterface = el('div.play-with-interface',
+          this.playWithInterface = el('div.play-with-interface#play-with-interface',
        
             el("p", "Play with?"),
             el("div.play-options",
@@ -1262,7 +1422,7 @@ export class Board {
             el( "button.hard", "Hard"),
           )
           ),
-          this.selectItemInterface = el('div.select-interface.hide',
+          this.selectItemInterface = el('div.select-interface.hide#select-interface',
               el("p", "Play as?"),
               el(
                 "div.pick-options",
@@ -1303,6 +1463,7 @@ export class Board {
       ))
     );
     
+    
     /**
      * =============================================
      * UI INTRACTION
@@ -1312,13 +1473,17 @@ export class Board {
     this.playWithInterface.querySelectorAll("button").forEach(element => {
       element.addEventListener("click", event => {
         if (event.target.classList.contains('play-with-friend')) {
-          this.friend = FRIEND;
-          this.inputNameInterface.classList.remove('hide'); 
+          this.friend = FRIEND
+             this.FBInstant.context.chooseAsync()
+               .then(function () {
+                   this.game.start()
+               })
+          // this.inputNameInterface.classList.remove('hide'); 
         } else {
           this.difficultyLevelInterface.classList.remove('hide');
           this.friend = COMPUTER; 
+          this.playWithInterface.classList.add('hide');
         } 
-        this.playWithInterface.classList.add('hide');  
       });
     });
 
@@ -1357,6 +1522,7 @@ export class Board {
      * USER SELECTS TIGER OR GOAT
      */
     this.selectItem.querySelectorAll(".select-turn-btn").forEach(element => {
+      // update info
       element.addEventListener("click", event => {
         if (event.target.classList.contains(TIGER)) {
           this.chosenItem = TIGER;
@@ -1378,7 +1544,23 @@ export class Board {
           this.renderComputerGoatMove();
         }else{
           // send item chosen info to friend
-          this.socket.friendChoseTigerGoat(this.chosenItem);
+          // logic happens here
+          let matchData = window.game.bagchal._matchData;
+          matchData.avatar = this.chosenItem;
+          console.log('macthed data', matchData);
+          this.saveDataAsync(matchData).then(function () {
+              // return this.getPlayerImageAsync()
+            }.bind(this))
+            .then(function (image) {
+              // var updateConfig = this.getUpdateConfig(image)
+              // return FBInstant.updateAsync(updateConfig)
+            }.bind(this))
+            .then(function () {
+              // closes the game after the update is posted.
+              // FBInstant.quit();
+            });
+
+          //this.socket.friendChoseTigerGoat(this.chosenItem);
           if(this.chosenItem===GOAT){
             this.showMoveNotification(GOAT);
           }
@@ -1536,8 +1718,10 @@ gameCompleted(avatar){
       this.moveNotificationModal.classList.add('hide');
     },2000);
   }
+  
 
   handleFriendMove(data){
+    console.log(" ia m here ==>")
     this.myTurn = true;
     if(data.movedItem===GOAT){
       this.moveGoat(data.moveData.nextPoint,data.moveData.goatPoint);
