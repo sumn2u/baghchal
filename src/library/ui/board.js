@@ -766,8 +766,8 @@ export class Board {
     });
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    // if (goatsInBoard === 20) window.game.modalService(GOAT);
-    // if (deadGoats >= 5) window.game.modalService(TIGER);
+    if (goatsInBoard === 20) window.game.modalService(GOAT);
+    if (deadGoats >= 5) window.game.modalService(TIGER);
 
     if (avilableTigers.length > 0) {
       let tigerData = null;
@@ -838,8 +838,8 @@ export class Board {
     this.render();
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    // if (goatsInBoard === 20) window.game.modalService(GOAT);
-    // if (deadGoats >= 5) window.game.modalService(TIGER);
+    if (goatsInBoard === 20) window.game.modalService(GOAT);
+    if (deadGoats >= 5) window.game.modalService(TIGER);
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
   }
