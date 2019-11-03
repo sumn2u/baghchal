@@ -9,6 +9,7 @@ import bottomBorderImage from "../images/bottom-bar.png";
 import leftRightBorderImage from "../images/left-right-bar.png";
 import { mount, el, list } from "../ui/dom";
 import { Socket } from "../game/socket";
+import { Backend } from "./backend";
 import { OnlineUsersList } from "./components/online-users-list";
 import html2canvas from 'html2canvas';
 export class Board {
@@ -41,8 +42,8 @@ export class Board {
     // addRequiredDom ELEMENTS
     this.addUIDOMToGame();
     if(FBInstant){
-      console.log(window.game, 'window.game ==>')
-      console.log(window.game.FBCheck(), "fb game ==>")
+      // console.log(window.game, 'window.game ==>')
+      // console.log(window.game.FBCheck(), "fb game ==>")
       // this.game.start();
     }
     this.goats = []; // Array<{x:number,y:number,dead:false, currentPoint,drag: false,index: number;}>
@@ -227,6 +228,7 @@ export class Board {
       if(this.friend===COMPUTER){
         this.renderComputerTigerMove();
       }else{
+        console.log("i lllll ===>")
         this.sendGoatMoveDataToFriend({
           type: 'new',
           nextPoint:null,
@@ -1203,49 +1205,53 @@ export class Board {
    *
    */
   sendGoatMoveDataToFriend(data){
-    // this.socket.sendMoveDataToFriend(data,GOAT);
+    this.socket.sendMoveDataToFriend(data,GOAT);
     setTimeout(()=>{
       this.myTurn = false;
     },500);
-
-    console.log(data, GOAT, 'Suman ===>')
-
-    // save this to backend
-    // console.log(this.game, 'this game ===>')
-    console.log(window.game.bagchal._matchData, ' window this game ===>')
+    this.persistDataMovement(data);
+    
+  }
+  /**
+   * 
+   * @param {*} matchData  persist data to backend 
+   */
+  persistDataMovement(data){
     let matcheData = window.game.bagchal._matchData
     matcheData.moves = data;
     matcheData.playerTurn ^= 1
+    const socket = this.socket;
+    matcheData.socketId = socket.player.socketId;
+    matcheData.friendSocketId = socket.friend.socketId;
+    console.log(this.socket, "i am ssss")
     this.saveDataAsync(matcheData)
       .then(function () {
         return this.getPlayerImageAsync()
       }.bind(this))
       .then(function (image) {
-        var updateConfig = this.getUpdateConfig(image)
-        return FBInstant.updateAsync(updateConfig)
+        // var updateConfig = this.getUpdateConfig(image)
+        // return FBInstant.updateAsync(updateConfig)
       }.bind(this))
       .then(function () {
-        // closes the game after the update is posted.
-        // FBInstant.quit();
-      });
-    
+         // closes the game after the update is posted.
+         // FBInstant.quit();
+    });
+
   }
 
   saveDataAsync(matchData) {
-    const backendClientL = new backendClient('https://wiggly-licorice.glitch.me/')
+    const backend = new Backend('https://wiggly-licorice.glitch.me/')
     return new Promise(function (resolve, reject) {
-      console.log('going to save ==>', JSON.stringify(matchData));
       FBInstant.player
         .getSignedPlayerInfoAsync(JSON.stringify(matchData))
         .then(function (result) {
-          return backendClientL.save(
+          return backend.save(
             FBInstant.context.getID(),
             result.getPlayerID(),
             result.getSignature()
           )
         })
         .then(function () {
-          console.log("ilks")
           resolve(matchData);
         })
         .catch(function (error) {
@@ -1327,25 +1333,25 @@ export class Board {
       };
     } else {
       // Next player's turn
-      updateData = {
-        action: 'CUSTOM',
-        cta: 'Play your turn!',
-        image: base64Picture,
-        text: {
-          default: playerName + ' has played. Now it\'s your turn',
-          localizations: {
-            pt_BR: playerName + ' jogou. Agora é sua vez!',
-            en_US: playerName + ' has played. Now it\'s your turn',
-            de_DE: playerName + ' hat gespielt. Jetzt bist du dran.'
-          }
-        },
-        template: 'play_turn',
-        data: {
-          rematchButton: false
-        },
-        strategy: 'IMMEDIATE',
-        notification: 'NO_PUSH',
-      };
+      // updateData = {
+      //   action: 'CUSTOM',
+      //   cta: 'Play your turn!',
+      //   image: base64Picture,
+      //   text: {
+      //     default: playerName + ' has played. Now it\'s your turn',
+      //     localizations: {
+      //       pt_BR: playerName + ' jogou. Agora é sua vez!',
+      //       en_US: playerName + ' has played. Now it\'s your turn',
+      //       de_DE: playerName + ' hat gespielt. Jetzt bist du dran.'
+      //     }
+      //   },
+      //   template: 'play_turn',
+      //   data: {
+      //     rematchButton: false
+      //   },
+      //   strategy: 'IMMEDIATE',
+      //   notification: 'NO_PUSH',
+      // };
     }
 
     return updateData;
@@ -1369,10 +1375,12 @@ export class Board {
    * @param data {prevPointIndex,nextPointIndex,tiger: draggedTiger}
    */
   sendTigerMoveDataToFriend(data){
+    // send tiger moved data 
     this.socket.sendMoveDataToFriend(data,TIGER);
     setTimeout(()=>{
       this.myTurn = false;
     },500);
+    this.persistDataMovement(data);
   }
  
   addUIDOMToGame(){
@@ -1382,7 +1390,7 @@ export class Board {
       this.moveNotificationModal = el('div.move-notification-modal.hide',el('div.wrapper',el('p','Test'))),
 
         this.selectItem = el(
-        "div.select-option",
+        "div.select-option#select-option",
         el(
           "div.container-fluid",
           el('div.game-name',''),
@@ -1411,7 +1419,7 @@ export class Board {
           this.requestNotificationModal = el('div.friend-request-notification.hide',
           el('div.req-holder',
             el('p',''),
-            el('button.btn.accept-friend-request','Accept Request')
+            el('button.btn.accept-friend-request','Start Game')
           )
           ),
           this.difficultyLevelInterface = el('div.difficulty-level-interface.hide',
@@ -1463,7 +1471,23 @@ export class Board {
       ))
     );
     
-    
+    this.emitSocket = () =>{
+      console.log("illl =========>")
+        let name = FBInstant.player.getName();
+       // HERE Initialise the Socket Object and Send User Name  to Server
+         console.log(this, 'this ==>')
+         this.socket = new Socket(name);
+         console.log(this.socket, 'liks=====>')
+       // hide add name interface
+         this.inputNameInterface.classList.add('hide');
+        //handle events dispatched from socket
+         this.handleSocketEvents();
+
+      return this.socket;
+    }
+    this.getSocketId = () => {
+      return this.socket.player.socketId();
+    }
     /**
      * =============================================
      * UI INTRACTION
@@ -1472,11 +1496,13 @@ export class Board {
     // user selects with whom he want to play with (computer or friend)
     this.playWithInterface.querySelectorAll("button").forEach(element => {
       element.addEventListener("click", event => {
+        var _this = this;
         if (event.target.classList.contains('play-with-friend')) {
           this.friend = FRIEND
              this.FBInstant.context.chooseAsync()
                .then(function () {
-                   this.game.start()
+                  this.game.start();
+                
                })
           // this.inputNameInterface.classList.remove('hide'); 
         } else {
@@ -1523,7 +1549,7 @@ export class Board {
      */
     this.selectItem.querySelectorAll(".select-turn-btn").forEach(element => {
       // update info
-      element.addEventListener("click", event => {
+      element.addEventListener("click", (event) => {
         if (event.target.classList.contains(TIGER)) {
           this.chosenItem = TIGER;
           if(this.playSound){
@@ -1537,6 +1563,7 @@ export class Board {
           }
         }
         this.myTurn = this.chosenItem === GOAT ? true : false;
+        
         this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
         this.selectItem.classList.add("hide");
         // IF user is playing with computer
@@ -1548,19 +1575,19 @@ export class Board {
           let matchData = window.game.bagchal._matchData;
           matchData.avatar = this.chosenItem;
           console.log('macthed data', matchData);
-          this.saveDataAsync(matchData).then(function () {
-              // return this.getPlayerImageAsync()
-            }.bind(this))
-            .then(function (image) {
-              // var updateConfig = this.getUpdateConfig(image)
-              // return FBInstant.updateAsync(updateConfig)
-            }.bind(this))
-            .then(function () {
-              // closes the game after the update is posted.
-              // FBInstant.quit();
-            });
-
-          //this.socket.friendChoseTigerGoat(this.chosenItem);
+          // this.saveDataAsync(matchData).then(function () {
+          //     // return this.getPlayerImageAsync()
+          //   }.bind(this))
+          //   .then(function (image) {
+          //     // var updateConfig = this.getUpdateConfig(image)
+          //     // return FBInstant.updateAsync(updateConfig)
+          //   }.bind(this))
+          //   .then(function () {
+          //     // closes the game after the update is posted.
+          //     // FBInstant.quit();
+          //   });
+          console.log(this.socket, 'this socket ==>')
+          this.socket.friendChoseTigerGoat(this.chosenItem);
           if(this.chosenItem===GOAT){
             this.showMoveNotification(GOAT);
           }
@@ -1653,12 +1680,29 @@ gameCompleted(avatar){
     this.socket.dispatcher.on('requestAccepted',  this.friendRequestAccepted.bind(this));
     this.socket.dispatcher.on('friendChoseItem', this.friendChooseItem.bind(this));
     this.socket.dispatcher.on('friendMovedItem', this.handleFriendMove.bind(this));
+    this.socket.dispatcher.on('closeGame', this.closeGame.bind(this));
   }
   setUserInfo(data){
     this.player = data;
-    this.socket.requestForOnlineUsers();
+    //this.socket.requestForOnlineUsers();
+  }
+  closeGame(data) {
+   // data.friendId, data.socketId
+    const backend = new Backend('https://wiggly-licorice.glitch.me')
+    console.log(data.person, " data ====>")
+    backend.delete(data.person.friendId, data.person.socketId);
+    // const previousGameBoard = document.getElementsByClassName('game-box')
+    // if (previousGameBoard) previousGameBoard[0].remove();
+    // window.game.init({
+    //   container: "game-container"
+    // });
+
+    
+    
+
   }
   updateOnlineUsers(data){
+    console.log(data, "data ==>")
     const users = data.filter(u=>u.socketId!=this.player.socketId);
     const onlineUsers = list(
         `ul.online-users`,
@@ -1678,10 +1722,18 @@ gameCompleted(avatar){
       })
   }
   showFriendRequestNotification(data){
+    console.log(data, 'data ===>')
     this.requestNotificationModal.classList.remove('hide');
     this.requestNotificationModal.querySelector('p').innerHTML = `${data.name} Sends you request for playing game`;
   }
+  showPlayerJoinGame(){
+  this.friendRequestWaitModal.classList.remove('hide');
+  this.friendRequestWaitModal.querySelector('p').innerHTML = 'Wait! Let your friend start the game';
+  }
   friendRequestAccepted(data){
+    this.friend = FRIEND;
+    console.log(data, ' friendRequestAccepted data ====>')
+    console.log(this.friend, 'this friend')
     this.requestNotificationModal.classList.add('hide');
     this.friendsListInterface.classList.add('hide');
     this.friendRequestWaitModal.classList.add('hide');

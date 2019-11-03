@@ -21,6 +21,7 @@ export class Socket{
         });
         this.socket.on('requestAccepted', friend=>{
             this.friend = friend;
+            console.log("friend", friend)
             this.dispatcher.dispatch('requestAccepted',friend);
         });
         this.socket.on('friendChoseItem', data=>{
@@ -30,6 +31,9 @@ export class Socket{
         this.socket.on('friendMovedItem', data=>{
             this.dispatcher.dispatch('friendMovedItem',data);
         });
+        this.socket.on('closeGame', data => {
+            this.dispatcher.dispatch('closeGame', data);
+        })
     }
     requestForOnlineUsers(){
         this.socket.emit('requestForOnlineUsers');
