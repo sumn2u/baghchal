@@ -8,6 +8,7 @@ import topBorderImage from "../images/top-bar.png";
 import bottomBorderImage from "../images/bottom-bar.png";
 import leftRightBorderImage from "../images/left-right-bar.png";
 import { mount, el, list } from "../ui/dom";
+import { SIMULATEDTIGERS, SIMULATEDGOATS, SIMULATEDPOINTS } from '../simulation';
 export class Board {
   constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer, closeGame) {
     this.chosenItem = null;
@@ -90,6 +91,10 @@ export class Board {
     // item ready for drag
     this.dragItem = null; //  {item:TIGER,itemData:clickedPoint}
     this.animationInProgress = false;
+
+    // this.tigers = SIMULATEDTIGERS;
+    // this.goats = SIMULATEDGOATS;
+    // this.points = SIMULATEDPOINTS;
 
     // AILevel = 3;
     this.logic = new Logic(this, this.difficultyLevel);
@@ -763,12 +768,17 @@ export class Board {
           possibleMoves: nextMovePossibleMoves
         });
       }
+      // console.log("TIGER", JSON.stringify(this.tigers));
+      // console.log("GOAT", JSON.stringify(this.goats));
+      // console.log("POINTS", JSON.stringify(this.points));
     });
-    const deadGoats = this.goats.filter(g => g.dead).length;
-    const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    if (goatsInBoard === 20) window.game.modalService(GOAT);
-    if (deadGoats >= 5) window.game.modalService(TIGER);
 
+    const deadGoats = this.goats.filter(g => g.dead).length;
+    // TIGER WINS
+    if (deadGoats >= 5) window.game.modalService(TIGER);
+    
+    const goatsInBoard = this.goats.filter(g => !g.dead).length;
+    
     if (avilableTigers.length > 0) {
       let tigerData = null;
 
@@ -808,6 +818,7 @@ export class Board {
       } 
       this.moveTiger(bestMove);
     } else {
+      // GOAT WINS
       window.game.modalService(this.chosenItem);
     }
 
@@ -834,11 +845,16 @@ export class Board {
         goatPoint =  this.goats.filter(g => !g.dead).find(goat => goat.currentPoint == nextBestMove.sourcePoint);
       }
       this.moveGoat(nextPoint, goatPoint, goatType);
+    } else {
+      // console.log('====================================');
+      // console.log('no at all move', nextBestMove);
+      // console.log('====================================');
     }
     this.render();
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    if (goatsInBoard === 20) window.game.modalService(GOAT);
+    const tigerClosedSpaceCount = this.logic.tigerClosedSpaceCount();
+    if (tigerClosedSpaceCount < 1) window.game.modalService(GOAT);
     if (deadGoats >= 5) window.game.modalService(TIGER);
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;

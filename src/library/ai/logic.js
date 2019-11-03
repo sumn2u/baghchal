@@ -60,10 +60,12 @@ export class Logic {
 
             } else {
                 this.moveLists = this.getTigerMoveListsFromAvailableTigers(availableTigers);
+
+                // if(this.moveLists.length < 1)
+                //     // return null;
                 this.computeMinMax(this.depthLevel, true);
 
                 bestAvailableMove = availableTigers.find(tiger => tiger.point == this.bestMove.sourcePoint);
-                console.log('bestAvailableMove', bestAvailableMove);
                 bestPossibleMove = bestAvailableMove.possibleMoves.find(bestMove =>  bestMove.point == this.bestMove.destinationPoint);
             }
 
@@ -376,6 +378,10 @@ export class Logic {
             }
         }
 
+        // if no movelist, return the previous score
+        if(!moveLists.length)
+            return score;
+            
         let value = 100000000;
         if(isMax){
             if(debug)
