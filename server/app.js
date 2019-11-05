@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-const users = []; // {name,avatar}
+let users = []; // {name,avatar,socketId,friendId,playingItem}
 app.use(express.static('.'));
 
 
@@ -33,7 +33,6 @@ io.on('connection', (socket) => {
 
         const player = data.player;
         const friend = data.friend;
-        console.log(users, 'users ==>')
         const userPlayer = users.find(u => u.socketId === player.socketId);
         const userFriend = users.find(u => u.socketId === friend.socketId);
         userPlayer.friendId = userFriend.socketId;
@@ -73,15 +72,17 @@ io.on('connection', (socket) => {
     socket.on('gameEnded', (data) => {
         socket.broadcast.to(data.room).emit('gameEnd', data);
     });
-    socket.on('disconnect', () => {
-        users.forEach((u, i) => {
-            if (u.socketId === socket.id) {
-                users.splice(i, 1);
-                io.to(socket.id).emit('closeGame', {
-                    socketId: socket.id
-                });
-            }
-        })
+
+
+    socket.on('disconnect', (reason) => {
+        let person = users.find(user => user.socketId === socket.id);
+        if (person) {
+            users = users.filter(user => user.socketId !== socket.id);
+            io.to(person.friendId).emit('closeGame', {
+                person: person
+            });
+        }
+
     });
 });
 
