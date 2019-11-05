@@ -10,12 +10,6 @@ import Game from "./game/game";
       },
       start: function(){
         this.bagchal.startFBGame();
-      },
-      sendGameRequest: function(){
-        this.bagchal.sendGameRequest();
-      },
-      FBCheck: function(){
-        this.bagchal.checkFBBack();
       }
      }
 })(window);

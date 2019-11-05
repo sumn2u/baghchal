@@ -21,7 +21,6 @@ export class Socket{
         });
         this.socket.on('requestAccepted', friend=>{
             this.friend = friend;
-            console.log("friend", friend)
             this.dispatcher.dispatch('requestAccepted',friend);
         });
         this.socket.on('friendChoseItem', data=>{

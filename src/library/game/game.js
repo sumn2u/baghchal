@@ -112,7 +112,6 @@ class Game {
     this._matchData = JSON.parse(matchData.data || '{}');
     let playerId = _this.FBInstant.player.getID();
 
-    console.log(this._matchData, 'this._matchData ===>')
     // if there is already players
     if (this._matchData.players) {
       if (
@@ -195,7 +194,6 @@ this.saveDataAsync = () => {
     setTimeout(function () {
       const socketId = _this.socket.player.socketId;
       const friendSocketId = _this.socket.friend ? _this.socket.friend.socketId :'';
-      console.log(friendSocketId, 'friendSocketId ===>')
       FBInstant.player
         .getSignedPlayerInfoAsync(JSON.stringify(matchData))
         .then(function (result) {
@@ -236,7 +234,7 @@ this.checkFBBack = () => {
     .then(
       function (backendData) {
         if (backendData) {
-          console.log(backendData, 'backendData ===>');
+          
           // example {"moves":{"type":"new","nextPoint":null,"goatPoint":{"x":167,"y":33.4,"dead":false,"drag":false,"currentPoint":2,"index":0}},"playerTurn":1,"avatar":"goat","players":["2402026286512125"]}
           // start game for next player using that config
         }

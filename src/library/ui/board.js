@@ -41,11 +41,6 @@ export class Board {
   
     // addRequiredDom ELEMENTS
     this.addUIDOMToGame();
-    if(FBInstant){
-      // console.log(window.game, 'window.game ==>')
-      // console.log(window.game.FBCheck(), "fb game ==>")
-      // this.game.start();
-    }
     this.goats = []; // Array<{x:number,y:number,dead:false, currentPoint,drag: false,index: number;}>
     this.tigers = []; // Array<{x:number,y:number,currentPoint: number,drag: false,index: number}>
 
@@ -228,7 +223,6 @@ export class Board {
       if(this.friend===COMPUTER){
         this.renderComputerTigerMove();
       }else{
-        console.log("i lllll ===>")
         this.sendGoatMoveDataToFriend({
           type: 'new',
           nextPoint:null,
@@ -322,7 +316,6 @@ export class Board {
             this.dragItem.point.index,
             TIGER
           );
-          console.log(possiblePoints);
           const validPoint = possiblePoints.find(
             p => p.point === releasedPoint.index
           );
@@ -1221,15 +1214,14 @@ export class Board {
     matcheData.moves = data;
     matcheData.playerTurn ^= 1
     const socket = this.socket;
-    matcheData.socketId = socket.player.socketId;
-    matcheData.friendSocketId = socket.friend.socketId;
-    console.log(this.socket, "i am ssss")
-    this.saveDataAsync(matcheData)
+    const playerSocketId = socket.player.socketId;
+    const friendSocketId = socket.friend.socketId;
+    this.saveDataAsync(matcheData, playerSocketId, friendSocketId)
       .then(function () {
         return this.getPlayerImageAsync()
       }.bind(this))
       .then(function (image) {
-        // var updateConfig = this.getUpdateConfig(image)
+        // let updateConfig = this.getUpdateConfig(image)
         // return FBInstant.updateAsync(updateConfig)
       }.bind(this))
       .then(function () {
@@ -1239,7 +1231,7 @@ export class Board {
 
   }
 
-  saveDataAsync(matchData) {
+  saveDataAsync(matchData, playerSocketId, friendSocketId) {
     const backend = new Backend('https://wiggly-licorice.glitch.me/')
     return new Promise(function (resolve, reject) {
       FBInstant.player
@@ -1248,14 +1240,16 @@ export class Board {
           return backend.save(
             FBInstant.context.getID(),
             result.getPlayerID(),
-            result.getSignature()
+            result.getSignature(),
+            playerSocketId,
+            friendSocketId
           )
         })
         .then(function () {
           resolve(matchData);
         })
         .catch(function (error) {
-          console.log(error, "error")
+          console.error(error, "error")
           reject(error);
         })
     });
@@ -1472,12 +1466,9 @@ export class Board {
     );
     
     this.emitSocket = () =>{
-      console.log("illl =========>")
-        let name = FBInstant.player.getName();
+       let name = FBInstant.player.getName();
        // HERE Initialise the Socket Object and Send User Name  to Server
-         console.log(this, 'this ==>')
          this.socket = new Socket(name);
-         console.log(this.socket, 'liks=====>')
        // hide add name interface
          this.inputNameInterface.classList.add('hide');
         //handle events dispatched from socket
@@ -1574,19 +1565,6 @@ export class Board {
           // logic happens here
           let matchData = window.game.bagchal._matchData;
           matchData.avatar = this.chosenItem;
-          console.log('macthed data', matchData);
-          // this.saveDataAsync(matchData).then(function () {
-          //     // return this.getPlayerImageAsync()
-          //   }.bind(this))
-          //   .then(function (image) {
-          //     // var updateConfig = this.getUpdateConfig(image)
-          //     // return FBInstant.updateAsync(updateConfig)
-          //   }.bind(this))
-          //   .then(function () {
-          //     // closes the game after the update is posted.
-          //     // FBInstant.quit();
-          //   });
-          console.log(this.socket, 'this socket ==>')
           this.socket.friendChoseTigerGoat(this.chosenItem);
           if(this.chosenItem===GOAT){
             this.showMoveNotification(GOAT);
@@ -1684,25 +1662,16 @@ gameCompleted(avatar){
   }
   setUserInfo(data){
     this.player = data;
-    //this.socket.requestForOnlineUsers();
   }
   closeGame(data) {
    // data.friendId, data.socketId
     const backend = new Backend('https://wiggly-licorice.glitch.me')
-    console.log(data.person, " data ====>")
-    backend.delete(data.person.friendId, data.person.socketId);
-    // const previousGameBoard = document.getElementsByClassName('game-box')
-    // if (previousGameBoard) previousGameBoard[0].remove();
-    // window.game.init({
-    //   container: "game-container"
-    // });
-
+    backend.delete(data.person.friendId, data.person.socketId).then(()=> {
+      location.reload();
+    })
     
-    
-
   }
   updateOnlineUsers(data){
-    console.log(data, "data ==>")
     const users = data.filter(u=>u.socketId!=this.player.socketId);
     const onlineUsers = list(
         `ul.online-users`,
@@ -1722,7 +1691,6 @@ gameCompleted(avatar){
       })
   }
   showFriendRequestNotification(data){
-    console.log(data, 'data ===>')
     this.requestNotificationModal.classList.remove('hide');
     this.requestNotificationModal.querySelector('p').innerHTML = `${data.name} Sends you request for playing game`;
   }
@@ -1732,8 +1700,6 @@ gameCompleted(avatar){
   }
   friendRequestAccepted(data){
     this.friend = FRIEND;
-    console.log(data, ' friendRequestAccepted data ====>')
-    console.log(this.friend, 'this friend')
     this.requestNotificationModal.classList.add('hide');
     this.friendsListInterface.classList.add('hide');
     this.friendRequestWaitModal.classList.add('hide');
@@ -1741,7 +1707,6 @@ gameCompleted(avatar){
   }
   
   friendChooseItem(myItem){
-    console.log(myItem);
     this.selectItem.classList.add("hide");
     this.requestNotificationModal.classList.add('hide');
     this.friendsListInterface.classList.add('hide');
@@ -1773,7 +1738,6 @@ gameCompleted(avatar){
   
 
   handleFriendMove(data){
-    console.log(" ia m here ==>")
     this.myTurn = true;
     if(data.movedItem===GOAT){
       this.moveGoat(data.moveData.nextPoint,data.moveData.goatPoint);

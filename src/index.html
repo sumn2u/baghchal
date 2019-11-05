@@ -19,21 +19,17 @@
     <% if (htmlWebpackPlugin.options.env === "production") {%>
     <script>
     FBInstant.initializeAsync().then(function () {
-        // FBInstant.setLoadingProgress(50);
-        // FBInstant.setLoadingProgress(100);
         // start facebook game
         FBInstant.startGameAsync().then(function () {
-        // if (FBInstant.context.getType() !== 'SOLO') {
                 game.init({
                     container: "game-container",
                     FBInstant: FBInstant,
                     backendClient: ''
                 }).createBoard();
-
+        // check fb instant type and start game 
         if (FBInstant.context.getType() !== 'SOLO') {
                 game.start();
         }
-            // }
            
         })
      });
