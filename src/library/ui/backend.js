@@ -44,6 +44,14 @@ export class Backend {
         };
         return this.request(url, method, payload);
     };
+    this.clear = (contextId)=> {
+        const url = this.backendUrl + '/clear-match';
+        const method = 'POST';
+        const payload = {
+            'contextId': contextId
+        };
+        return this.request(url, method, payload);
+    }
 
     this.load =  (signature) => {
         const url = this.backendUrl + '/get-match';

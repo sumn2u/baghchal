@@ -80,9 +80,11 @@ class Game {
   this.startFBGame =() => {
     let _this= this;
     let contextId = _this.FBInstant.context.getID();
-
+    _this.backend.clear(contextId).then(function(){
+     
+    
     // emit socket
-    _this.socket = _this.board.emitSocket()
+    _this.socket = _this.board.emitSocket();
     _this.FBInstant.player
       .getSignedPlayerInfoAsync(contextId)
       .then(function(signedPlayerInfo) {
@@ -105,6 +107,7 @@ class Game {
           console.log(error, 'error')
         }.bind(this)
       );
+      });
   };
   this.populateFromBackend = (matchData) => {
     let _this = this;
