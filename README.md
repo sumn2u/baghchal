@@ -14,6 +14,7 @@ This project was initally build for [Community Challenge hackathon](https://deve
 ## Jump To
 * [Description](#description)
 * [Installation](#installation)
+* [Instructions](#instructions)
 * [Demos](#demos)
 * [Screenshots](#screenshots)
 * [Tests](#tests)
@@ -38,6 +39,9 @@ Installing `bagh-chal` is easy.  You can clone the repo from here.
 ```
 yarn install && yarn start
 ```
+
+## Instructions
+<img alt="Instructions"  src="./screenshots/Instructions.png">
 
 ## Support the project ⭐
 
