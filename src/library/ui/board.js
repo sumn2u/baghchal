@@ -13,7 +13,7 @@ import { Backend } from "./backend";
 import { OnlineUsersList } from "./components/online-users-list";
 import html2canvas from 'html2canvas';
 export class Board {
-  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer, FBInstant, matchData) {
+  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer,moveIndicator, FBInstant, matchData) {
     this.chosenItem = null;
     this.myTurn = false;
     this.friend = COMPUTER;
@@ -21,6 +21,7 @@ export class Board {
     this.difficultyLevel = 5;
     this.matchData = matchData;
     this.dataContainer = dataContainer;
+    this.moveIndicator = moveIndicator;
     this.realCanvasElement = realCanvasElement;
     this.fakeCanvasElement = fakeCanvasElement;
     this.infoBox = infoBox;
@@ -1019,108 +1020,112 @@ export class Board {
    * @param {{prevPoint:this.tigers[tigerToMove.tiger],nextPoint:tigerNewPoint,currentPoint:tigerMovePoint.point}} data
    */
   showMoveAnimation(item, data) {
-    const frameRate = 24;
-    this.animationInProgress = true;
-    if (item === TIGER) {
-      const prevPoint = data.prevPoint;
-      const nextPoint = data.nextPoint;
-      let frame = 0;
-      let x = prevPoint.x;
-      let y = prevPoint.y;
-      const dx = nextPoint.x - prevPoint.x;
-      const dy = nextPoint.y - prevPoint.y;
-      const absDx = Math.abs(dx);
-      const absDy = Math.abs(dy);
-      const xIncrement = dx / frameRate;
-      const yIncrement = dy / frameRate;
-      this.tigers[prevPoint.index] = {
-        x: -2000,
-        y: -2000,
-        currentPoint: data.currentPoint
-      };
-      const animationFrame = setInterval(() => {
-        if (frame < 10) {
-          this.showFakeCanvas();
-        }
-        this.fakeCanvas.clearRect(0, 0, this.width * 1.2, this.height * 1.2);
-        this.drawTigerImage({ x: x, y: y }, this.fakeCanvas);
-        if (absDx < 1) {
-          y += yIncrement;
-        } else if (absDy < 1) {
-          x += xIncrement;
-        } else {
-          x += xIncrement;
-          y = (dy / dx) * (x - prevPoint.x) + prevPoint.y;
-        }
-        if (frame > frameRate) {
-          this.animationInProgress = false;
-          this.tigers[prevPoint.index] = {
-            x: nextPoint.x,
-            y: nextPoint.y,
-            drag: false,
-            index: prevPoint.index,
-            currentPoint: nextPoint.index
-          };
-          this.render();
-          this.hideFakeCanvas();
-          clearInterval(animationFrame);
-        }
-        frame++;
-      }, 20);
-    } else {
-      // {type:'new',pointData:{x:point.x,y:point.y,dead: false,drag: false,index:this.goats.length,currentPoint:point.index}
-      const pointData = data.pointData;
-      const midPoint = this.totalWidth / 2;
-      let x = data.type === "new" ? midPoint : this.goats[pointData.index].x ;
-      let y = data.type === "new" ? 0 : this.goats[pointData.index].y ;
-      const dx = pointData.x - x;
-      const dy = pointData.y-y;
-      const absDx = Math.abs(dx);
-      const absDy = Math.abs(dy);
-      const xIncrement = dx / frameRate;
-      const yIncrement = dy / frameRate;
-      let frame = 0;
-      if(data.type==='move'){
-        this.goats[pointData.index].x = -200;
-        this.goats[pointData.index].y = -200;
-        this.render();
-      }
-      const animationFrame = setInterval(() => {
-        if (frame < 10) {
-          this.showFakeCanvas();
-        }
-        this.fakeCanvas.clearRect(0, 0, this.width * 1.2, this.height * 1.2);
-        this.drawBoardGoat({ x: x, y: y }, this.fakeCanvas);
-        if (absDx < 1) {
-          y += yIncrement;
-        } else if (absDy < 1) {
-          x += xIncrement;
-        } else {
-          x += xIncrement;
-          y = (dy / dx) * (x - midPoint);
-        }
-        if (frame > frameRate) {
-          this.animationInProgress = false;
-          if (data.type === "new") {
-            this.goats.push(pointData);
-          } else {
-            this.goats[pointData.index].x = pointData.x;
-            this.goats[pointData.index].y = pointData.y;
-            this.goats[pointData.index].currentPoint = pointData.currentPoint;
+    return new Promise((resolve,reject)=>{
+      const frameRate = 24;
+      this.animationInProgress = true;
+      if (item === TIGER) {
+        const prevPoint = data.prevPoint;
+        const nextPoint = data.nextPoint;
+        let frame = 0;
+        let x = prevPoint.x;
+        let y = prevPoint.y;
+        const dx = nextPoint.x - prevPoint.x;
+        const dy = nextPoint.y - prevPoint.y;
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+        const xIncrement = dx / frameRate;
+        const yIncrement = dy / frameRate;
+        this.tigers[prevPoint.index] = {
+          x: -2000,
+          y: -2000,
+          currentPoint: data.currentPoint
+        };
+        const animationFrame = setInterval(() => {
+          if (frame < 10) {
+            this.showFakeCanvas();
           }
+          this.fakeCanvas.clearRect(0, 0, this.width * 1.2, this.height * 1.2);
+          this.drawTigerImage({ x: x, y: y }, this.fakeCanvas);
+          if (absDx < 1) {
+            y += yIncrement;
+          } else if (absDy < 1) {
+            x += xIncrement;
+          } else {
+            x += xIncrement;
+            y = (dy / dx) * (x - prevPoint.x) + prevPoint.y;
+          }
+          if (frame > frameRate) {
+            this.animationInProgress = false;
+            this.tigers[prevPoint.index] = {
+              x: nextPoint.x,
+              y: nextPoint.y,
+              drag: false,
+              index: prevPoint.index,
+              currentPoint: nextPoint.index
+            };
+            this.render();
+            this.hideFakeCanvas();
+            clearInterval(animationFrame);
+            return resolve(item);
+          }
+          frame++;
+        }, 20);
+      } else {
+        // {type:'new',pointData:{x:point.x,y:point.y,dead: false,drag: false,index:this.goats.length,currentPoint:point.index}
+        const pointData = data.pointData;
+        const midPoint = this.totalWidth / 2;
+        let x = data.type === "new" ? midPoint : this.goats[pointData.index].x ;
+        let y = data.type === "new" ? 0 : this.goats[pointData.index].y ;
+        const dx = pointData.x - x;
+        const dy = pointData.y-y;
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+        const xIncrement = dx / frameRate;
+        const yIncrement = dy / frameRate;
+        let frame = 0;
+        if(data.type==='move'){
+          this.goats[pointData.index].x = -200;
+          this.goats[pointData.index].y = -200;
           this.render();
-          this.hideFakeCanvas();
-          clearInterval(animationFrame);
         }
-        frame++;
-      }, 20);
-    }
+        const animationFrame = setInterval(() => {
+          if (frame < 10) {
+            this.showFakeCanvas();
+          }
+          this.fakeCanvas.clearRect(0, 0, this.width * 1.2, this.height * 1.2);
+          this.drawBoardGoat({ x: x, y: y }, this.fakeCanvas);
+          if (absDx < 1) {
+            y += yIncrement;
+          } else if (absDy < 1) {
+            x += xIncrement;
+          } else {
+            x += xIncrement;
+            y = (dy / dx) * (x - midPoint);
+          }
+          if (frame > frameRate) {
+            this.animationInProgress = false;
+            if (data.type === "new") {
+              this.goats.push(pointData);
+            } else {
+              this.goats[pointData.index].x = pointData.x;
+              this.goats[pointData.index].y = pointData.y;
+              this.goats[pointData.index].currentPoint = pointData.currentPoint;
+            }
+            this.render();
+            this.hideFakeCanvas();
+            clearInterval(animationFrame);
+            return resolve(item);
+          }
+          frame++;
+        }, 20);
+      }
+    });
   }
 
   /**
    * method to move goat from both computer or friends move
    */
-  moveGoat(nextPoint, goatPoint, type='new') {
+   moveGoat(nextPoint, goatPoint, type='new') {
     if (type === "move") {
       // here goatPoint is an element of this.goats[index]
       const point = this.points.find(point => point.index == nextPoint);
@@ -1132,15 +1137,20 @@ export class Board {
       point.itemIndex = goatPoint.index;
       // show animation and change goat point
 
-      this.showMoveAnimation(GOAT, {
+       this.showMoveAnimation(GOAT, {
         type: "move",
         pointData: {x:point.x,y:point.y,currentPoint:point.index,index:goatPoint.index}
-      });
+      }).then(result=>{
+        if(this.friend===COMPUTER){
+          this.showMoveNotification(this.chosenItem);
+        }
+      })
+     
     } else {
       // here goatPoint is an element of the this.points[i]
       this.points[goatPoint.index].item = GOAT;
       this.points[goatPoint.index].itemIndex = this.goats.length;
-      this.showMoveAnimation(GOAT, {
+       this.showMoveAnimation(GOAT, {
         type: "new",
         pointData: {
           x: goatPoint.x,
@@ -1150,8 +1160,13 @@ export class Board {
           index: this.goats.length,
           currentPoint: goatPoint.index
         }
-      });
+      }).then(result=>{
+        if(this.friend===COMPUTER){
+          this.showMoveNotification(this.chosenItem);
+        }
+      })
     }
+   
   }
 
   /**
@@ -1185,8 +1200,11 @@ export class Board {
       nextPoint: tigerNewPoint,
       currentPointIndex: tigerData.tigerIndex
     };
-    this.showMoveAnimation(TIGER, animationTigerData);
-
+    this.showMoveAnimation(TIGER, animationTigerData).then(result=>{
+      if(this.friend===COMPUTER){
+        this.showMoveNotification(this.chosenItem);
+      }
+    });
     // add new reference of tiger to the points
     this.points[tigerData.nextPointIndex].item = TIGER;
     this.points[tigerData.nextPointIndex].itemIndex = tigerData.tiger;
@@ -1568,7 +1586,10 @@ export class Board {
         this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
         this.selectItem.classList.add("hide");
         // IF user is playing with computer
-        if(this.friend==COMPUTER){
+        if(this.chosenItem===GOAT){
+          this.showMoveNotification(GOAT);
+        }
+        if(this.friend==COMPUTER && this.chosenItem===TIGER){
           this.renderComputerGoatMove();
         }else{
           // send item chosen info to friend
@@ -1576,10 +1597,8 @@ export class Board {
           let matchData = window.game.bagchal._matchData;
           matchData.avatar = this.chosenItem;
           this.socket.friendChoseTigerGoat(this.chosenItem);
-          if(this.chosenItem===GOAT){
-            this.showMoveNotification(GOAT);
-          }
         }
+       
       });
     });
 
@@ -1751,6 +1770,13 @@ gameCompleted(avatar){
     setTimeout(()=>{
       this.moveNotificationModal.classList.add('hide');
     },2000);
+    if(!message && item){
+      if(this.myTurn){
+        this.moveIndicator.innerHTML = `Its your turn to move ${this.chosenItem}`;
+      }else{
+        this.moveIndicator.innerHTML = `Wait! Its ${this.friend===COMPUTER ? 'Computer\'s' : 'friend\'s' } turn to move ${this.chosenItem===TIGER?GOAT: TIGER}`;
+      }
+    }
   }
   
 
@@ -1758,7 +1784,6 @@ gameCompleted(avatar){
     this.myTurn = true;
     if(data.movedItem===GOAT){
       this.moveGoat(data.moveData.nextPoint,data.moveData.goatPoint);
-      
     }else{
       this.moveTiger(data.moveData);
     }
@@ -1766,4 +1791,6 @@ gameCompleted(avatar){
       this.showMoveNotification(this.chosenItem);
     }, 1100);
   }
+  
+  
 }

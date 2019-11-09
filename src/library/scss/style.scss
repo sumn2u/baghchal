@@ -673,3 +673,18 @@ p{
     color: #5d5d5d
   }
 }
+
+.move-indicator{
+    position: relative;
+    padding: 5px 15px;
+    color: #FFEB3B;
+    background: #398865;
+    border-radius: 3px;
+    box-shadow: 0px 0px 4px 1px #2d7355;
+    border: 1px solid #206d4b;
+    min-height: 30px;
+    text-align: center;
+    text-transform: capitalize;
+    font-size: 13px;
+    font-weight: bold;
+}

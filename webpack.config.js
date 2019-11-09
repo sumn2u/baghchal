@@ -19,7 +19,7 @@ module.exports = (env) => {
             compress: true,
             open: true,
             hot: true,
-            port: 3002||process.env.port,
+            port: 5000||process.env.port,
             writeToDisk:true
         },
         module: {
