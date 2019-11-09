@@ -227,7 +227,7 @@ export class Board {
         this.sendGoatMoveDataToFriend({
           type: 'new',
           nextPoint:null,
-          goatPoint:clickedGoatData
+          clickedPoint
         });
       }
     } else if (this.chosenItem === GOAT && this.goats.length === 20) {
@@ -306,8 +306,9 @@ export class Board {
                 // send current data to friend
                 this.sendGoatMoveDataToFriend({
                   type: 'move',
+                  prevPoint: prevPointIndex,
                   nextPoint:currentPointIndex,
-                  goatPoint:draggedGoat
+                  type: 'new'
                 });
               }
             }
@@ -1783,14 +1784,29 @@ gameCompleted(avatar){
   handleFriendMove(data){
     this.myTurn = true;
     if(data.movedItem===GOAT){
-      this.moveGoat(data.moveData.nextPoint,data.moveData.goatPoint);
+      let goatMovePoint= null;
+      if(data.moveData.type==='new'){
+        const friendClickedPoint = data.moveData.clickedPoint;
+        const myClickedPoint = this.points[friendClickedPoint.index];
+        goatMovePoint = {
+          x: myClickedPoint.x,
+          y: myClickedPoint.y,
+          dead: false,
+          drag: false,
+          currentPoint: myClickedPoint.index,
+          index: this.goats.length
+        }
+      }else{
+        goatMovePoint = this.goats[prevPoint];
+      }
+      this.moveGoat(data.moveData.nextPoint,goatMovePoint,data.moveData.type);
     }else{
       this.moveTiger(data.moveData);
     }
+
     setTimeout(() => {
       this.showMoveNotification(this.chosenItem);
     }, 1100);
+    this.render();
   }
-  
-  
 }
