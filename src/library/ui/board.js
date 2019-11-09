@@ -200,6 +200,7 @@ export class Board {
         y <= point.y + goatHeight
       );
     });
+    console.log(clickedPoint);
     if (!clickedPoint) {
       return true;
     }
@@ -248,6 +249,7 @@ export class Board {
    * @param {mouse event} event
    */
   handleMouseUpEvent(event) {
+    console.log(this.myTurn);
     if(!this.myTurn){
       return false;
     }
@@ -357,6 +359,7 @@ export class Board {
              if(this.playSound){
               this.sound.play("goat");
              }
+             console.log('Its Computer Turn', this.friend);
               // computer turns to move goat
               if(this.friend===COMPUTER){
                 this.renderComputerGoatMove();
@@ -875,6 +878,7 @@ export class Board {
       // GOATS WINS THE GAME
       this.gameCompleted(this.chosenItem)
     }
+    this.myTurn = true;
   }
   /**
    * get next possible moves of tiger/goat
