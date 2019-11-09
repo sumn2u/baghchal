@@ -80,8 +80,8 @@ class Game {
   this.startFBGame =() => {
     let _this= this;
     let contextId = _this.FBInstant.context.getID();
-    _this.backend.clear(contextId).then(function(){
-     
+   
+    
     
     // emit socket
     _this.socket = _this.board.emitSocket();
@@ -92,9 +92,14 @@ class Game {
       })
       .then(function(result) {
         if (result.empty) {
-          return _this.createNewGameAsync();
+          //  _this.backend.clear(contextId).then(function () {
+                return _this.createNewGameAsync();
+          //  });
         } else {
-          return Promise.resolve(result);
+          _this.backend.clear(contextId).then(function () {
+              return _this.createNewGameAsync();
+            // return Promise.resolve(result);
+          });
         }
         }.bind(this)
       )
@@ -107,7 +112,7 @@ class Game {
           console.log(error, 'error')
         }.bind(this)
       );
-      });
+     
   };
   this.populateFromBackend = (matchData) => {
     let _this = this;

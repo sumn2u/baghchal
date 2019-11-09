@@ -27,7 +27,7 @@
                     backendClient: ''
                 }).createBoard();
         // check fb instant type and start game 
-        if (FBInstant.context.getType() !== 'SOLO') {
+        if(FBInstant.context.getType() !== 'SOLO' &&  FBInstant.context.getType() !=='THREAD') {
                 game.start();
         }
            

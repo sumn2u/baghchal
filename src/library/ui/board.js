@@ -1665,10 +1665,17 @@ gameCompleted(avatar){
   }
   closeGame(data) {
    // data.friendId, data.socketId
+   let _this = this;
+   let contextId = this.FBInstant.context.getID();
+  //  console.log(contextId,"~sd")
     const backend = new Backend('https://wiggly-licorice.glitch.me')
-    backend.delete(data.person.friendId, data.person.socketId).then(()=> {
-      location.reload();
-    })
+    backend.clear(contextId).then(function () {
+           _this.FBInstant.quit();
+           location.reload();
+      });
+    // backend.delete(data.person.friendId, data.person.socketId).then(()=> {
+    //   location.reload();
+    // })
     
   }
   updateOnlineUsers(data){
