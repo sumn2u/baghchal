@@ -1490,11 +1490,21 @@ export class Board {
         var _this = this;
         if (event.target.classList.contains('play-with-friend')) {
           this.friend = FRIEND
-             this.FBInstant.context.chooseAsync()
-               .then(function () {
-                  this.game.start();
-                
-               })
+          let contextId = this.FBInstant.context.getID();
+          const backend = new Backend('https://wiggly-licorice.glitch.me');
+            FBInstant.context.chooseAsync()
+              .then(function () {
+              let game = this.game;
+               backend.clear(FBInstant.context.getID()).then(function () {
+                // console.log(FBInstant.context.getID())
+                // setTimeout(function(){
+                     game.start();
+                // }, 1000)
+               
+
+              })
+          });
+             
           // this.inputNameInterface.classList.remove('hide'); 
         } else {
           this.difficultyLevelInterface.classList.remove('hide');

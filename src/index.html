@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title><%= htmlWebpackPlugin.options.title %></title>
-    <link rel="icon" href="https://humanassistai.com/humanassitai.ico">
     <script src="https://connect.facebook.net/en_US/fbinstant.6.2.js"></script>
 </head>
 <body>
@@ -27,8 +26,9 @@
                     backendClient: ''
                 }).createBoard();
         // check fb instant type and start game 
-        if(FBInstant.context.getType() !== 'SOLO' &&  FBInstant.context.getType() !=='THREAD') {
-                game.start();
+        console.log(FBInstant.context.getType(), 'FBInstant.context.getType()')
+        if(FBInstant.context.getType() !== 'SOLO') {
+         game.start();
         }
            
         })

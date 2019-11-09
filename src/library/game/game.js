@@ -96,10 +96,9 @@ class Game {
                 return _this.createNewGameAsync();
           //  });
         } else {
-          _this.backend.clear(contextId).then(function () {
-              return _this.createNewGameAsync();
-            // return Promise.resolve(result);
-          });
+          
+            return Promise.resolve(result);
+         
         }
         }.bind(this)
       )
@@ -144,6 +143,12 @@ class Game {
       document.getElementById("select-interface").classList.remove("hide");
 
     } else {
+
+      //  _this.backend.clear(_this.FBInstant.context.getID()).then(function () {
+
+      //    return _this.createNewGameAsync();
+      // //    return Promise.resolve(result);
+      //  });
       //_this.socket.sendRequestToFriend(matchData.socketId);
       // document.getElementById("play-with-interface").classList.add("hide");
       // document.getElementById("select-interface").classList.remove("hide");
