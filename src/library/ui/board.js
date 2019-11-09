@@ -1667,9 +1667,10 @@ gameCompleted(avatar){
         modal.classList.remove('is-open');
         const previousGameBoard = document.getElementsByClassName('game-box')
         if (previousGameBoard) previousGameBoard[0].remove();
-        window.game.init({
-          container: "game-container"
-        });
+        location.reload();
+        // window.game.init({
+        //   container: "game-container"
+        // });
       })
 
       // Close modal when hitting escape
