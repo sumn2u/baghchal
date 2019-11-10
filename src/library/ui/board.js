@@ -12,6 +12,7 @@ import { Socket } from "../game/socket";
 import { Backend } from "./backend";
 import { OnlineUsersList } from "./components/online-users-list";
 import html2canvas from 'html2canvas';
+import { SIMULATEDTIGERS, SIMULATEDGOATS, SIMULATEDPOINTS } from '../simulation';
 export class Board {
   constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer,moveIndicator, FBInstant, matchData) {
     this.chosenItem = null;
@@ -39,7 +40,7 @@ export class Board {
         eating: [4000, 5500]
       }
     });
-  
+
     // addRequiredDom ELEMENTS
     this.addUIDOMToGame();
     this.goats = []; // Array<{x:number,y:number,dead:false, currentPoint,drag: false,index: number;}>
@@ -95,17 +96,24 @@ export class Board {
     // item ready for drag
     this.dragItem = null; //  {item:TIGER,itemData:clickedPoint}
     this.animationInProgress = false;
-    
+
     this.logic = null;
     this.socket = null;
     this.player = null;
     this.startGame = null;
-    
+
+
+    // this.tigers = SIMULATEDTIGERS;
+    // this.goats = SIMULATEDGOATS;
+    // this.points = SIMULATEDPOINTS;
+
+    // AILevel = 3;
+    this.logic = new Logic(this, this.difficultyLevel);
   }
 
 
 
-  
+
   /**
    * handle mouse intraction
    */
@@ -161,13 +169,13 @@ export class Board {
 
   /**
    * returns roomId
-   * 
+   *
    */
   getRoomId() {
     return this.roomId;
   }
 
-  
+
   /**
    * method to handle mouse down event/touch start
    * @param {mouse event} event
@@ -795,8 +803,15 @@ export class Board {
           possibleMoves: nextMovePossibleMoves
         });
       }
+      // console.log("TIGER", JSON.stringify(this.tigers));
+      // console.log("GOAT", JSON.stringify(this.goats));
+      // console.log("POINTS", JSON.stringify(this.points));
     });
+
     const deadGoats = this.goats.filter(g => g.dead).length;
+    // TIGER WINS
+    if (deadGoats >= 5) window.game.modalService(TIGER);
+
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
     if (goatsInBoard === 20) this.gameCompleted(GOAT);
     if (deadGoats >= 5) this.gameCompleted(TIGER);
@@ -866,11 +881,17 @@ export class Board {
         goatPoint =  this.goats.filter(g => !g.dead).find(goat => goat.currentPoint == nextBestMove.sourcePoint);
       }
       this.moveGoat(nextPoint, goatPoint, goatType);
+    } else {
+      // console.log('====================================');
+      // console.log('no at all move', nextBestMove);
+      // console.log('====================================');
     }
     this.render();
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    if (goatsInBoard === 20) this.gameCompleted(GOAT);
+    const tigerClosedSpaceCount = this.logic.tigerClosedSpaceCount();
+    if (tigerClosedSpaceCount < 1) this.gameCompleted(GOAT);
+    // if (goatsInBoard === 20) this.gameCompleted(GOAT);
     if (deadGoats >= 5) this.gameCompleted(TIGER);
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
@@ -1006,7 +1027,7 @@ export class Board {
     return nextLegalPoints.filter(p => p);
   }
 
- 
+
 
   drawText(x, y, side, text) {
     this.canvas.beginPath();
@@ -1150,7 +1171,7 @@ export class Board {
           this.showMoveNotification(this.chosenItem);
         }
       })
-     
+
     } else {
       // here goatPoint is an element of the this.points[i]
       this.points[goatPoint.index].item = GOAT;
@@ -1171,7 +1192,7 @@ export class Board {
         }
       })
     }
-   
+
   }
 
   /**
@@ -1226,11 +1247,11 @@ export class Board {
       this.myTurn = false;
     },500);
     this.persistDataMovement(data);
-    
+
   }
   /**
-   * 
-   * @param {*} matchData  persist data to backend 
+   *
+   * @param {*} matchData  persist data to backend
    */
   persistDataMovement(data){
     let matcheData = window.game.bagchal._matchData
@@ -1381,25 +1402,25 @@ export class Board {
   }
 
   isBoardFull(){
-    return false; 
+    return false;
   }
   /**
-   * 
-   * @param {*} data 
+   *
+   * @param {*} data
    */
   /**
    * send current user's tiger move data to friend
    * @param data {prevPointIndex,nextPointIndex,tiger: draggedTiger}
    */
   sendTigerMoveDataToFriend(data){
-    // send tiger moved data 
+    // send tiger moved data
     this.socket.sendMoveDataToFriend(data,TIGER);
     setTimeout(()=>{
       this.myTurn = false;
     },500);
     this.persistDataMovement(data);
   }
- 
+
   addUIDOMToGame(){
     mount(
       this.infoBox,
@@ -1411,18 +1432,18 @@ export class Board {
         el(
           "div.container-fluid",
           el('div.game-name',''),
-          
+
           this.playWithInterface = el('div.play-with-interface#play-with-interface',
-       
+
             el("p", "Play with?"),
             el("div.play-options",
               el( "button.play-with-computer", ""),
               el( "button.play-with-friend", ""),
             )
-            
+
           ),
           this.inputNameInterface = el('div.input-user-name.hide',
-           
+
             el('p','Enter your Name'),
             el('div.input-group',
             this.playerNameInput = el('input.form-control',{placeholder:'Enter Your Name'}),
@@ -1487,7 +1508,7 @@ export class Board {
         )
       ))
     );
-    
+
     this.emitSocket = () =>{
        let name = FBInstant.player.getName();
        // HERE Initialise the Socket Object and Send User Name  to Server
@@ -1523,17 +1544,17 @@ export class Board {
                 // setTimeout(function(){
                      game.start();
                 // }, 1000)
-               
+
 
               })
           });
-             
-          // this.inputNameInterface.classList.remove('hide'); 
+
+          // this.inputNameInterface.classList.remove('hide');
         } else {
           this.difficultyLevelInterface.classList.remove('hide');
-          this.friend = COMPUTER; 
+          this.friend = COMPUTER;
           this.playWithInterface.classList.add('hide');
-        } 
+        }
       });
     });
 
@@ -1579,7 +1600,7 @@ export class Board {
           if(this.playSound){
             this.sound.play("tiger");
           }
-          
+
         } else {
           this.chosenItem = GOAT;
           if(this.playSound){
@@ -1587,7 +1608,7 @@ export class Board {
           }
         }
         this.myTurn = this.chosenItem === GOAT ? true : false;
-        
+
         this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
         this.selectItem.classList.add("hide");
         // IF user is playing with computer
@@ -1603,11 +1624,11 @@ export class Board {
           matchData.avatar = this.chosenItem;
           this.socket.friendChoseTigerGoat(this.chosenItem);
         }
-       
+
       });
     });
 
-    
+
     // SELECT DIFFICULTY LEVEL FOR PLAYING WITH COMPUTER
     this.difficultyLevelInterface.querySelectorAll('button').forEach(element =>{
       element.addEventListener("click", event => {
@@ -1634,7 +1655,7 @@ export class Board {
       this.friendRequestWaitModal.querySelector('p').innerHTML = 'Wait! Let your friend choose the tiger/goat';
     })
   }
-  
+
 
 gameCompleted(avatar){
   // debugger;
@@ -1682,9 +1703,9 @@ gameCompleted(avatar){
       //  });
     }
   }
- 
+
   /**
-   * Method to handle event dispatched from socket 
+   * Method to handle event dispatched from socket
    */
   handleSocketEvents(){
     this.socket.dispatcher.on('setUserInfo',this.setUserInfo.bind(this));
@@ -1711,7 +1732,7 @@ gameCompleted(avatar){
     // backend.delete(data.person.friendId, data.person.socketId).then(()=> {
     //   location.reload();
     // })
-    
+
   }
   updateOnlineUsers(data){
     const users = data.filter(u=>u.socketId!=this.player.socketId);
@@ -1747,7 +1768,7 @@ gameCompleted(avatar){
     this.friendRequestWaitModal.classList.add('hide');
     this.selectItemInterface.classList.remove('hide');
   }
-  
+
   friendChooseItem(myItem){
     this.selectItem.classList.add("hide");
     this.requestNotificationModal.classList.add('hide');
@@ -1784,7 +1805,7 @@ gameCompleted(avatar){
       }
     }
   }
-  
+
 
   handleFriendMove(data){
     this.myTurn = true;
