@@ -208,7 +208,6 @@ export class Board {
         y <= point.y + goatHeight
       );
     });
-    console.log(clickedPoint);
     if (!clickedPoint) {
       return true;
     }
@@ -257,7 +256,6 @@ export class Board {
    * @param {mouse event} event
    */
   handleMouseUpEvent(event) {
-    console.log(this.myTurn);
     if(!this.myTurn){
       return false;
     }
@@ -367,7 +365,6 @@ export class Board {
              if(this.playSound){
               this.sound.play("goat");
              }
-             console.log('Its Computer Turn', this.friend);
               // computer turns to move goat
               if(this.friend===COMPUTER){
                 this.renderComputerGoatMove();
@@ -880,11 +877,11 @@ export class Board {
         // in case of move, goatPoint is a goat value from this.goats
         goatPoint =  this.goats.filter(g => !g.dead).find(goat => goat.currentPoint == nextBestMove.sourcePoint);
       }
-      this.moveGoat(nextPoint, goatPoint, goatType);
+      this.moveGoat(nextPoint, goatPoint, goatType,COMPUTER);
     } else {
-      // console.log('====================================');
-      // console.log('no at all move', nextBestMove);
-      // console.log('====================================');
+        // console.log('====================================');
+        // console.log('no at all move', nextBestMove);
+        // console.log('====================================');
     }
     this.render();
     const deadGoats = this.goats.filter(g => g.dead).length;
@@ -1151,7 +1148,7 @@ export class Board {
   /**
    * method to move goat from both computer or friends move
    */
-   moveGoat(nextPoint, goatPoint, type='new') {
+   moveGoat(nextPoint, goatPoint, type='new',source=FRIEND) {
     if (type === "move") {
       // here goatPoint is an element of this.goats[index]
       const point = this.points.find(point => point.index == nextPoint);
@@ -1167,15 +1164,15 @@ export class Board {
         type: "move",
         pointData: {x:point.x,y:point.y,currentPoint:point.index,index:goatPoint.index}
       }).then(result=>{
-        if(this.friend===COMPUTER){
           this.showMoveNotification(this.chosenItem);
-        }
       })
-
     } else {
+      if(source===COMPUTER){
+        goatPoint.currentPoint = goatPoint.index;
+      }
       // here goatPoint is an element of the this.points[i]
-      this.points[goatPoint.index].item = GOAT;
-      this.points[goatPoint.index].itemIndex = this.goats.length;
+      this.points[goatPoint.currentPoint].item = GOAT;
+      this.points[goatPoint.currentPoint].itemIndex = this.goats.length;
        this.showMoveAnimation(GOAT, {
         type: "new",
         pointData: {
@@ -1184,13 +1181,11 @@ export class Board {
           dead: false,
           drag: false,
           index: this.goats.length,
-          currentPoint: goatPoint.index
+          currentPoint: goatPoint.currentPoint
         }
       }).then(result=>{
-        if(this.friend===COMPUTER){
           this.showMoveNotification(this.chosenItem);
-        }
-      })
+      });
     }
 
   }
@@ -1227,9 +1222,15 @@ export class Board {
       currentPointIndex: tigerData.tigerIndex
     };
     this.showMoveAnimation(TIGER, animationTigerData).then(result=>{
-      if(this.friend===COMPUTER){
+      if(tigerData.eatGoat){
+        this.showMoveNotification(this.chosenItem, `${TIGER} ate your goat!`);
+        setTimeout(()=>{
+          this.showMoveNotification(this.chosenItem);
+        },2000);
+      }else{
         this.showMoveNotification(this.chosenItem);
       }
+
     });
     // add new reference of tiger to the points
     this.points[tigerData.nextPointIndex].item = TIGER;
@@ -1540,7 +1541,6 @@ export class Board {
               .then(function () {
               let game = this.game;
                backend.clear(FBInstant.context.getID()).then(function () {
-                // console.log(FBInstant.context.getID())
                 // setTimeout(function(){
                      game.start();
                 // }, 1000)
@@ -1688,10 +1688,9 @@ gameCompleted(avatar){
         modal.classList.remove('is-open');
         const previousGameBoard = document.getElementsByClassName('game-box')
         if (previousGameBoard) previousGameBoard[0].remove();
-        location.reload();
-        // window.game.init({
-        //   container: "game-container"
-        // });
+        window.game.init({
+          container: "game-container"
+        });
       })
 
       // Close modal when hitting escape
@@ -1723,7 +1722,6 @@ gameCompleted(avatar){
    // data.friendId, data.socketId
    let _this = this;
    let contextId = this.FBInstant.context.getID();
-  //  console.log(contextId,"~sd")
     const backend = new Backend('https://wiggly-licorice.glitch.me')
     backend.clear(contextId).then(function () {
            _this.FBInstant.quit();
@@ -1792,18 +1790,21 @@ gameCompleted(avatar){
   }
 
   showMoveNotification(item,message=null){
-    this.moveNotificationModal.classList.remove('hide');
-    this.moveNotificationModal.querySelector('p').innerHTML = message ? message : `Its your turn to move ${item}.`;
     setTimeout(()=>{
-      this.moveNotificationModal.classList.add('hide');
-    },2000);
-    if(!message && item){
-      if(this.myTurn){
-        this.moveIndicator.innerHTML = `Its your turn to move ${this.chosenItem}`;
-      }else{
-        this.moveIndicator.innerHTML = `Wait! Its ${this.friend===COMPUTER ? 'Computer\'s' : 'friend\'s' } turn to move ${this.chosenItem===TIGER?GOAT: TIGER}`;
+      this.moveNotificationModal.classList.remove('hide');
+      this.moveNotificationModal.querySelector('p').innerHTML = message ? message : `Its your turn to move ${item}.`;
+      setTimeout(()=>{
+        this.moveNotificationModal.classList.add('hide');
+      },2000);
+      if(!message && item){
+        if(this.myTurn){
+          this.moveIndicator.innerHTML = `Its your turn to move ${this.chosenItem}`;
+        }else{
+          this.moveIndicator.innerHTML = `Wait! Its ${this.friend===COMPUTER ? 'Computer\'s' : 'friend\'s' } turn to move ${this.chosenItem===TIGER?GOAT: TIGER}`;
+        }
       }
-    }
+    },1000);
+
   }
 
 
@@ -1820,7 +1821,7 @@ gameCompleted(avatar){
           dead: false,
           drag: false,
           currentPoint: myClickedPoint.index,
-          index: this.goats.length
+          index: this.goats.length+1
         }
       }else{
         goatMovePoint = this.goats[prevPoint];
