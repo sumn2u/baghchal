@@ -30,6 +30,9 @@ export class Socket{
         this.socket.on('friendMovedItem', data=>{
             this.dispatcher.dispatch('friendMovedItem',data);
         });
+        this.socket.on('closeGame', data => {
+            this.dispatcher.dispatch('closeGame', data);
+        })
     }
     requestForOnlineUsers(){
         this.socket.emit('requestForOnlineUsers');

@@ -5,7 +5,7 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 
-
+// html2canvas.min
 module.exports = (env) => {
     return {
         mode: env || 'development',
@@ -19,7 +19,7 @@ module.exports = (env) => {
             compress: true,
             open: true,
             hot: true,
-            port: 3002||process.env.port,
+            port: 5000||process.env.port,
             writeToDisk:true
         },
         module: {
