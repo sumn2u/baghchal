@@ -1831,7 +1831,8 @@ export class Board {
           this.friend === COMPUTER ? "Computer's" : "friend's"
         } turn to move ${this.chosenItem === TIGER ? GOAT : TIGER}`;
       }
-    }
+    },1000);
+
   }
 
   handleFriendMove(data) {
