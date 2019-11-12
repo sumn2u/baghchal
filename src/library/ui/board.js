@@ -1615,8 +1615,11 @@ export class Board {
         if(this.chosenItem===GOAT){
           this.showMoveNotification(GOAT);
         }
-        if(this.friend==COMPUTER && this.chosenItem===TIGER){
-          this.renderComputerGoatMove();
+        if(this.friend===COMPUTER){
+          // not added above because if it's against computer and you choose goat, then socket is triggered from else
+          if(this.chosenItem===TIGER){
+            this.renderComputerGoatMove();
+          }
         }else{
           // send item chosen info to friend
           // logic happens here

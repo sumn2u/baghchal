@@ -349,7 +349,7 @@ export class Logic {
                 } else {
                     this.board.goats.forEach(goat => {
                         const possibleMovePoints = this.board.getNextPossibleMove(goat.currentPoint, GOAT);
-                        console.log('possible moves points', possibleMovePoints);
+                        // console.log('possible moves points', possibleMovePoints);
                         if(possibleMovePoints.length){
                             possibleMovePoints.forEach(point => {
                                 moveLists.push({
