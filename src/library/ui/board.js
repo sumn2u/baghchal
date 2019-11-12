@@ -1,5 +1,5 @@
 import { Logic } from "../ai/logic";
-import { TIGER, GOAT, EAT, PUT, MOVE,COMPUTER,FRIEND } from "../constants";
+import { TIGER, GOAT, EAT, PUT, MOVE, COMPUTER, FRIEND } from "../constants";
 import { Howl } from "howler";
 import tigerImage from "../images/tiger.png";
 import goatImage from "../images/goat.png";
@@ -11,9 +11,17 @@ import { mount, el, list } from "../ui/dom";
 import { Socket } from "../game/socket";
 import { Backend } from "./backend";
 import { OnlineUsersList } from "./components/online-users-list";
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
 export class Board {
-  constructor(realCanvasElement, fakeCanvasElement, infoBox, dataContainer,moveIndicator, FBInstant, matchData) {
+  constructor(
+    realCanvasElement,
+    fakeCanvasElement,
+    infoBox,
+    dataContainer,
+    moveIndicator,
+    FBInstant,
+    matchData
+  ) {
     this.chosenItem = null;
     this.myTurn = false;
     this.friend = COMPUTER;
@@ -39,7 +47,7 @@ export class Board {
         eating: [4000, 5500]
       }
     });
-  
+
     // addRequiredDom ELEMENTS
     this.addUIDOMToGame();
     this.goats = []; // Array<{x:number,y:number,dead:false, currentPoint,drag: false,index: number;}>
@@ -95,17 +103,13 @@ export class Board {
     // item ready for drag
     this.dragItem = null; //  {item:TIGER,itemData:clickedPoint}
     this.animationInProgress = false;
-    
+
     this.logic = null;
     this.socket = null;
     this.player = null;
     this.startGame = null;
-    
   }
 
-
-
-  
   /**
    * handle mouse intraction
    */
@@ -161,19 +165,18 @@ export class Board {
 
   /**
    * returns roomId
-   * 
+   *
    */
   getRoomId() {
     return this.roomId;
   }
 
-  
   /**
    * method to handle mouse down event/touch start
    * @param {mouse event} event
    */
   handelMouseDownEvent(event) {
-    if(!this.myTurn){
+    if (!this.myTurn) {
       return false;
     }
     event.preventDefault();
@@ -221,12 +224,12 @@ export class Board {
       // track goat point to all points array
       this.points[i].item = GOAT;
       this.points[i].itemIndex = this.goats.length - 1;
-      if(this.friend===COMPUTER){
+      if (this.friend === COMPUTER) {
         this.renderComputerTigerMove();
-      }else{
+      } else {
         this.sendGoatMoveDataToFriend({
-          type: 'new',
-          nextPoint:null,
+          type: "new",
+          nextPoint: null,
           clickedPoint
         });
       }
@@ -248,7 +251,7 @@ export class Board {
    * @param {mouse event} event
    */
   handleMouseUpEvent(event) {
-    if(!this.myTurn){
+    if (!this.myTurn) {
       return false;
     }
     this.mouseDown = false;
@@ -263,7 +266,6 @@ export class Board {
       const goatWidth = Math.floor(this.goatWidth / 2);
       const goatHeight = Math.floor(this.goatHeight / 2);
       const releasedPoint = this.points.find(point => {
-
         return (
           x >= point.x - goatWidth &&
           x <= point.x + goatWidth &&
@@ -271,9 +273,8 @@ export class Board {
           y <= point.y + goatHeight
         );
       });
-      
+
       if (releasedPoint) {
-       
         if (this.dragItem.item === GOAT) {
           const possiblePoints = this.getNextPossibleMove(
             this.dragItem.point.index,
@@ -300,15 +301,15 @@ export class Board {
               this.points[currentPointIndex].item = GOAT;
               this.points[currentPointIndex].itemIndex = draggedGoat.index;
               // computer turn to move tiger
-              if(this.friend===COMPUTER){
+              if (this.friend === COMPUTER) {
                 this.renderComputerTigerMove();
-              }else{
+              } else {
                 // send current data to friend
                 this.sendGoatMoveDataToFriend({
-                  type: 'move',
+                  type: "move",
                   prevPoint: prevPointIndex,
-                  nextPoint:currentPointIndex,
-                  type: 'new'
+                  nextPoint: currentPointIndex,
+                  type: "new"
                 });
               }
             }
@@ -331,9 +332,10 @@ export class Board {
               // update tiger point
               this.tigers[draggedTiger.index].x = releasedPoint.x;
               this.tigers[draggedTiger.index].y = releasedPoint.y;
-              this.tigers[draggedTiger.index].currentPoint = releasedPoint.index;
+              this.tigers[draggedTiger.index].currentPoint =
+                releasedPoint.index;
               // add this tiger reference to points array
-              const nextPointIndex =releasedPoint.index;
+              const nextPointIndex = releasedPoint.index;
               this.points[nextPointIndex].item = TIGER;
               this.points[nextPointIndex].itemIndex = draggedTiger.index;
               // if tiger eat the goat remove goat from goats
@@ -350,23 +352,23 @@ export class Board {
                   dead: true,
                   currentPoint: -currentEatenGoatIndex
                 };
-               if(this.playSound){
-                this.sound.play("tiger");
-               }
+                if (this.playSound) {
+                  this.sound.play("tiger");
+                }
               }
-             if(this.playSound){
-              this.sound.play("goat");
-             }
+              if (this.playSound) {
+                this.sound.play("goat");
+              }
               // computer turns to move goat
-              if(this.friend===COMPUTER){
+              if (this.friend === COMPUTER) {
                 this.renderComputerGoatMove();
-              }else{
+              } else {
                 this.sendTigerMoveDataToFriend({
-                    tigerIndex: draggedTiger.index,
-                    nextPointIndex,
-                    eatGoat: validPoint.eatGoat,
-                    eatGoatIndex: validPoint.eatGoatIndex
-                  });
+                  tigerIndex: draggedTiger.index,
+                  nextPointIndex,
+                  eatGoat: validPoint.eatGoat,
+                  eatGoatIndex: validPoint.eatGoatIndex
+                });
               }
             }
           }
@@ -804,24 +806,22 @@ export class Board {
       // Filter out only eatable goats as first priority, start
       const goatEatingTigers = [];
       avilableTigers.forEach(tiger => {
-
         const goatEatingMoves = [];
-        tiger.possibleMoves.forEach( possibleMove => {
+        tiger.possibleMoves.forEach(possibleMove => {
           // check if the move can eat goat
-          if(possibleMove.eatGoat){
+          if (possibleMove.eatGoat) {
             goatEatingMoves.push(possibleMove);
           }
         });
 
         // check if each tiger has goat eating moves
-        if(goatEatingMoves.length){
+        if (goatEatingMoves.length) {
           tiger.possibleMoves = goatEatingMoves;
           goatEatingTigers.push(tiger);
         }
-
       });
       // check if there are goat eating tigers
-      if(goatEatingTigers.length) {
+      if (goatEatingTigers.length) {
         avilableTigers = goatEatingTigers;
       }
       // Filter out only eatable goats as first priority, end
@@ -830,17 +830,16 @@ export class Board {
       const bestMove = this.logic.getNextBestMove(TIGER, avilableTigers);
       if (bestMove.eatGoat) {
         // eats the goat
-       if(this.playSound){
-        this.sound.play("tiger");
-       }       
-      } 
+        if (this.playSound) {
+          this.sound.play("tiger");
+        }
+      }
       this.moveTiger(bestMove);
     } else {
       // GOATS WINS the Game
-      this.gameCompleted(this.chosenItem)
+      this.gameCompleted(this.chosenItem);
     }
 
-    
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
   }
@@ -850,19 +849,21 @@ export class Board {
    */
   renderComputerGoatMove() {
     const nextBestMove = this.logic.getNextBestMove(GOAT);
-    if(nextBestMove) {
+    if (nextBestMove) {
       // only used "new" and "move" because it was used in this file
       let goatType = "new";
       let nextPoint = null;
       // in case of put, goatPoint is just a board point
-      let goatPoint = nextBestMove.move; 
-      if(nextBestMove.type == MOVE) {
+      let goatPoint = nextBestMove.move;
+      if (nextBestMove.type == MOVE) {
         goatType = "move";
-        nextPoint =  nextBestMove.destinationPoint;
+        nextPoint = nextBestMove.destinationPoint;
         // in case of move, goatPoint is a goat value from this.goats
-        goatPoint =  this.goats.filter(g => !g.dead).find(goat => goat.currentPoint == nextBestMove.sourcePoint);
+        goatPoint = this.goats
+          .filter(g => !g.dead)
+          .find(goat => goat.currentPoint == nextBestMove.sourcePoint);
       }
-      this.moveGoat(nextPoint, goatPoint, goatType,COMPUTER);
+      this.moveGoat(nextPoint, goatPoint, goatType, COMPUTER);
     }
     this.render();
     const deadGoats = this.goats.filter(g => g.dead).length;
@@ -871,9 +872,9 @@ export class Board {
     if (deadGoats >= 5) this.gameCompleted(TIGER);
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
-    if (deadGoats >= 5){
+    if (deadGoats >= 5) {
       // GOATS WINS THE GAME
-      this.gameCompleted(this.chosenItem)
+      this.gameCompleted(this.chosenItem);
     }
     this.myTurn = true;
   }
@@ -917,15 +918,15 @@ export class Board {
     });
     if (type === GOAT) {
       let goatLegalPoints = nextLegalPoints.map(p => {
-        if(!this.points[p] || (this.points[p] && this.points[p].item)){
+        if (!this.points[p] || (this.points[p] && this.points[p].item)) {
           return false;
         }
         const point = {
           point: p,
           canDie: false,
-          tigerJumpPoint:null,
+          tigerJumpPoint: null,
           possibleTigerPoint: null
-        }
+        };
         const goatMoveDistance = p - pointIndex;
         const tigerJumpPoint = Number(p) + Number(goatMoveDistance);
         // get the distance between current position and next position
@@ -933,39 +934,38 @@ export class Board {
         if (
           tigerJumpPoint < 0 ||
           tigerJumpPoint > this.totalPoints ||
-           ([1, 4, 6].indexOf(Math.abs(goatMoveDistance)) >= 0 &&
-          (p % 5 === 4 || p % 5 === 0))){
-            return point;
-          }
-          const eatPoint = this.points[goatMoveDistance];
-          if(!eatPoint){
-            return point;
-          }
-          if (eatPoint.item) {
-            return point;
-          }
+          ([1, 4, 6].indexOf(Math.abs(goatMoveDistance)) >= 0 &&
+            (p % 5 === 4 || p % 5 === 0))
+        ) {
+          return point;
+        }
+        const eatPoint = this.points[goatMoveDistance];
+        if (!eatPoint) {
+          return point;
+        }
+        if (eatPoint.item) {
+          return point;
+        }
 
-          const possibleTigerPoint = Number(p) - Number(goatMoveDistance);
-          if (
-            possibleTigerPoint < 0 ||
-            possibleTigerPoint > this.totalPoints){
-              return point;
-            }
-            const tigerPoint = this.points[goatMoveDistance];
-            if(!tigerPoint){
-              return point;
-            }
-            if (tigerPoint.item!==TIGER) {
-              return point;
-            }
-            return {
-              point: p,
-              canDie: true,
-              tigerJumpPoint,
-              possibleTigerPoint
-            }
+        const possibleTigerPoint = Number(p) - Number(goatMoveDistance);
+        if (possibleTigerPoint < 0 || possibleTigerPoint > this.totalPoints) {
+          return point;
+        }
+        const tigerPoint = this.points[goatMoveDistance];
+        if (!tigerPoint) {
+          return point;
+        }
+        if (tigerPoint.item !== TIGER) {
+          return point;
+        }
+        return {
+          point: p,
+          canDie: true,
+          tigerJumpPoint,
+          possibleTigerPoint
+        };
       });
-      goatLegalPoints = goatLegalPoints.filter(p=>p);
+      goatLegalPoints = goatLegalPoints.filter(p => p);
       return goatLegalPoints;
     }
     nextLegalPoints = nextLegalPoints.map(p => {
@@ -1003,8 +1003,6 @@ export class Board {
     return nextLegalPoints.filter(p => p);
   }
 
- 
-
   drawText(x, y, side, text) {
     this.canvas.beginPath();
     this.canvas.font = "20px Arial";
@@ -1022,7 +1020,7 @@ export class Board {
    * @param {{prevPoint:this.tigers[tigerToMove.tiger],nextPoint:tigerNewPoint,currentPoint:tigerMovePoint.point}} data
    */
   showMoveAnimation(item, data) {
-    return new Promise((resolve,reject)=>{
+    return new Promise((resolve, reject) => {
       const frameRate = 24;
       this.animationInProgress = true;
       if (item === TIGER) {
@@ -1076,16 +1074,16 @@ export class Board {
         // {type:'new',pointData:{x:point.x,y:point.y,dead: false,drag: false,index:this.goats.length,currentPoint:point.index}
         const pointData = data.pointData;
         const midPoint = this.totalWidth / 2;
-        let x = data.type === "new" ? midPoint : this.goats[pointData.index].x ;
-        let y = data.type === "new" ? 0 : this.goats[pointData.index].y ;
+        let x = data.type === "new" ? midPoint : this.goats[pointData.index].x;
+        let y = data.type === "new" ? 0 : this.goats[pointData.index].y;
         const dx = pointData.x - x;
-        const dy = pointData.y-y;
+        const dy = pointData.y - y;
         const absDx = Math.abs(dx);
         const absDy = Math.abs(dy);
         const xIncrement = dx / frameRate;
         const yIncrement = dy / frameRate;
         let frame = 0;
-        if(data.type==='move'){
+        if (data.type === "move") {
           this.goats[pointData.index].x = -200;
           this.goats[pointData.index].y = -200;
           this.render();
@@ -1127,7 +1125,7 @@ export class Board {
   /**
    * method to move goat from both computer or friends move
    */
-   moveGoat(nextPoint, goatPoint, type='new',source=FRIEND) {
+  moveGoat(nextPoint, goatPoint, type = "new", source = FRIEND) {
     if (type === "move") {
       // here goatPoint is an element of this.goats[index]
       const point = this.points.find(point => point.index == nextPoint);
@@ -1139,20 +1137,25 @@ export class Board {
       point.itemIndex = goatPoint.index;
       // show animation and change goat point
 
-       this.showMoveAnimation(GOAT, {
+      this.showMoveAnimation(GOAT, {
         type: "move",
-        pointData: {x:point.x,y:point.y,currentPoint:point.index,index:goatPoint.index}
-      }).then(result=>{
-          this.showMoveNotification(this.chosenItem);
-      })
+        pointData: {
+          x: point.x,
+          y: point.y,
+          currentPoint: point.index,
+          index: goatPoint.index
+        }
+      }).then(result => {
+        this.showMoveNotification(this.chosenItem);
+      });
     } else {
-      if(source===COMPUTER){
+      if (source === COMPUTER) {
         goatPoint.currentPoint = goatPoint.index;
       }
       // here goatPoint is an element of the this.points[i]
       this.points[goatPoint.currentPoint].item = GOAT;
       this.points[goatPoint.currentPoint].itemIndex = this.goats.length;
-       this.showMoveAnimation(GOAT, {
+      this.showMoveAnimation(GOAT, {
         type: "new",
         pointData: {
           x: goatPoint.x,
@@ -1162,11 +1165,10 @@ export class Board {
           index: this.goats.length,
           currentPoint: goatPoint.currentPoint
         }
-      }).then(result=>{
-          this.showMoveNotification(this.chosenItem);
+      }).then(result => {
+        this.showMoveNotification(this.chosenItem);
       });
     }
-   
   }
 
   /**
@@ -1174,10 +1176,9 @@ export class Board {
    * @param tigerData { tigerIndex: index from tigers array, tigerNextPointIndex: tigerNextPointIndex,   eatGoat: boolean,  eatGoatIndex: number };
    */
   moveTiger(tigerData) {
-    if(tigerData.eatGoat){
-      const currentEatenGoatIndex = this.goats[
-        tigerData.eatGoatIndex
-      ].currentPoint;
+    if (tigerData.eatGoat) {
+      const currentEatenGoatIndex = this.goats[tigerData.eatGoatIndex]
+        .currentPoint;
       this.points[currentEatenGoatIndex].item = null;
       this.points[currentEatenGoatIndex].itemIndex = null;
       this.goats[tigerData.eatGoatIndex] = {
@@ -1200,16 +1201,15 @@ export class Board {
       nextPoint: tigerNewPoint,
       currentPointIndex: tigerData.tigerIndex
     };
-    this.showMoveAnimation(TIGER, animationTigerData).then(result=>{
-      if(tigerData.eatGoat){
+    this.showMoveAnimation(TIGER, animationTigerData).then(result => {
+      if (tigerData.eatGoat) {
         this.showMoveNotification(this.chosenItem, `${TIGER} ate your goat!`);
-        setTimeout(()=>{
+        setTimeout(() => {
           this.showMoveNotification(this.chosenItem);
-        },2000);
-      }else{
+        }, 2000);
+      } else {
         this.showMoveNotification(this.chosenItem);
       }
-      
     });
     // add new reference of tiger to the points
     this.points[tigerData.nextPointIndex].item = TIGER;
@@ -1221,86 +1221,86 @@ export class Board {
    * @param data {nextPoint, goatPoint, type}
    *
    */
-  sendGoatMoveDataToFriend(data){
-    this.socket.sendMoveDataToFriend(data,GOAT);
-    setTimeout(()=>{
+  sendGoatMoveDataToFriend(data) {
+    this.socket.sendMoveDataToFriend(data, GOAT);
+    setTimeout(() => {
       this.myTurn = false;
-    },500);
+    }, 500);
     this.persistDataMovement(data);
-    
   }
   /**
-   * 
-   * @param {*} matchData  persist data to backend 
+   *
+   * @param {*} matchData  persist data to backend
    */
-  persistDataMovement(data){
-    let matcheData = window.game.bagchal._matchData
+  persistDataMovement(data) {
+    let matcheData = window.game.bagchal._matchData;
     matcheData.moves = data;
-    matcheData.playerTurn ^= 1
+    matcheData.playerTurn ^= 1;
     const socket = this.socket;
     const playerSocketId = socket.player.socketId;
     const friendSocketId = socket.friend.socketId;
     this.saveDataAsync(matcheData, playerSocketId, friendSocketId)
-      .then(function () {
-        return this.getPlayerImageAsync()
-      }.bind(this))
-      .then(function (image) {
-        // let updateConfig = this.getUpdateConfig(image)
-        // return FBInstant.updateAsync(updateConfig)
-      }.bind(this))
-      .then(function () {
-         // closes the game after the update is posted.
-         // FBInstant.quit();
-    });
-
+      .then(
+        function() {
+          return this.getPlayerImageAsync();
+        }.bind(this)
+      )
+      .then(
+        function(image) {
+          // let updateConfig = this.getUpdateConfig(image)
+          // return FBInstant.updateAsync(updateConfig)
+        }.bind(this)
+      )
+      .then(function() {
+        // closes the game after the update is posted.
+        // FBInstant.quit();
+      });
   }
 
   saveDataAsync(matchData, playerSocketId, friendSocketId) {
-    const backend = new Backend('https://wiggly-licorice.glitch.me/')
-    return new Promise(function (resolve, reject) {
+    const backend = new Backend("https://wiggly-licorice.glitch.me/");
+    return new Promise(function(resolve, reject) {
       FBInstant.player
         .getSignedPlayerInfoAsync(JSON.stringify(matchData))
-        .then(function (result) {
+        .then(function(result) {
           return backend.save(
             FBInstant.context.getID(),
             result.getPlayerID(),
             result.getSignature(),
             playerSocketId,
             friendSocketId
-          )
+          );
         })
-        .then(function () {
+        .then(function() {
           resolve(matchData);
         })
-        .catch(function (error) {
-          console.error(error, "error")
+        .catch(function(error) {
+          console.error(error, "error");
           reject(error);
-        })
+        });
     });
   }
   /**
    * create image of the game to send it back to friend
    */
   getPlayerImageAsync() {
-    return new Promise(function (resolve, reject) {
-      var sceneRoot = document.getElementById('game-box');
+    return new Promise(function(resolve, reject) {
+      var sceneRoot = document.getElementById("game-box");
       var sceneWidth = sceneRoot.offsetWidth;
       html2canvas(sceneRoot, {
-          width: sceneWidth * 3,
-          x: -(sceneWidth)
-        })
-        .then(function (canvas) {
+        width: sceneWidth * 3,
+        x: -sceneWidth
+      })
+        .then(function(canvas) {
           resolve(canvas.toDataURL("image/png"));
         })
-        .catch(function (err) {
+        .catch(function(err) {
           reject(err);
-        })
-    })
-
+        });
+    });
   }
 
-  getUpdateConfig (base64Picture) {
-
+  getUpdateConfig(base64Picture) {
     var isMatchWon = this.isMatchWon();
     var isBoardFull = this.isBoardFull();
     var updateData = null;
@@ -1309,45 +1309,44 @@ export class Board {
     if (isMatchWon) {
       // Game over, player won
       updateData = {
-        action: 'CUSTOM',
-        cta: 'Rematch!',
+        action: "CUSTOM",
+        cta: "Rematch!",
         image: base64Picture,
         text: {
-          default: playerName + ' has won!',
+          default: playerName + " has won!",
           localizations: {
-            pt_BR: playerName + ' venceu!',
-            en_US: playerName + ' has won!',
-            de_DE: playerName + ' hat gewonnen'
+            pt_BR: playerName + " venceu!",
+            en_US: playerName + " has won!",
+            de_DE: playerName + " hat gewonnen"
           }
         },
-        template: 'match_won',
+        template: "match_won",
         data: {
           rematchButton: true
         },
-        strategy: 'IMMEDIATE',
-        notification: 'NO_PUSH',
+        strategy: "IMMEDIATE",
+        notification: "NO_PUSH"
       };
-
     } else if (isBoardFull) {
       // Game over, tie
       updateData = {
-        action: 'CUSTOM',
-        cta: 'Rematch!',
+        action: "CUSTOM",
+        cta: "Rematch!",
         image: base64Picture,
         text: {
-          default: 'It\'s a tie!',
+          default: "It's a tie!",
           localizations: {
-            pt_BR: 'Deu empate!',
-            en_US: 'It\'s a tie!',
-            de_DE: 'Es ist ein unentschiedenes Spiel!'
+            pt_BR: "Deu empate!",
+            en_US: "It's a tie!",
+            de_DE: "Es ist ein unentschiedenes Spiel!"
           }
         },
-        template: 'match_tie',
+        template: "match_tie",
         data: {
           rematchButton: true
         },
-        strategy: 'IMMEDIATE',
-        notification: 'NO_PUSH',
+        strategy: "IMMEDIATE",
+        notification: "NO_PUSH"
       };
     } else {
       // Next player's turn
@@ -1373,82 +1372,99 @@ export class Board {
     }
 
     return updateData;
-
   }
 
-  isMatchWon(){
+  isMatchWon() {
     // match won conditions
     return false;
   }
 
-  isBoardFull(){
-    return false; 
+  isBoardFull() {
+    return false;
   }
   /**
-   * 
-   * @param {*} data 
+   *
+   * @param {*} data
    */
   /**
    * send current user's tiger move data to friend
    * @param data {prevPointIndex,nextPointIndex,tiger: draggedTiger}
    */
-  sendTigerMoveDataToFriend(data){
-    // send tiger moved data 
-    this.socket.sendMoveDataToFriend(data,TIGER);
-    setTimeout(()=>{
+  sendTigerMoveDataToFriend(data) {
+    // send tiger moved data
+    this.socket.sendMoveDataToFriend(data, TIGER);
+    setTimeout(() => {
       this.myTurn = false;
-    },500);
+    }, 500);
     this.persistDataMovement(data);
   }
- 
-  addUIDOMToGame(){
+
+  addUIDOMToGame() {
     mount(
       this.infoBox,
-      (el('div',
-      this.moveNotificationModal = el('div.move-notification-modal.hide',el('div.wrapper',el('p','Test'))),
+      el(
+        "div",
+        (this.moveNotificationModal = el(
+          "div.move-notification-modal.hide",
+          el("div.wrapper", el("p", "Test"))
+        )),
 
-        this.selectItem = el(
-        "div.select-option#select-option",
-        el(
-          "div.container-fluid",
-          el('div.game-name',''),
-          
-          this.playWithInterface = el('div.play-with-interface#play-with-interface',
-       
-            el("p", "Play with?"),
-            el("div.play-options",
-              el( "button.play-with-computer", ""),
-              el( "button.play-with-friend", ""),
-            )
-            
-          ),
-          this.inputNameInterface = el('div.input-user-name.hide',
-           
-            el('p','Enter your Name'),
-            el('div.input-group',
-            this.playerNameInput = el('input.form-control',{placeholder:'Enter Your Name'}),
-              this.submitInputName = el('div.input-group-append',
-                el('button.btn.btn-info.active','Submit')
+        (this.selectItem = el(
+          "div.select-option#select-option",
+          el(
+            "div.container-fluid",
+            el("div.game-name", ""),
+
+            (this.playWithInterface = el(
+              "div.play-with-interface#play-with-interface",
+
+              el("p", "Play with?"),
+              el(
+                "div.play-options",
+                el("button.play-with-computer", ""),
+                el("button.play-with-friend", "")
               )
-            )
-          ),
-          this.friendsListInterface = el('div.friends-list.hide'),
-          this.friendRequestWaitModal = el('div.friend-request-wait-modal.hide',el('div.wait-wrapper',el('p'))),
-          this.requestNotificationModal = el('div.friend-request-notification.hide',
-          el('div.req-holder',
-            el('p',''),
-            el('button.btn.accept-friend-request','Start Game')
-          )
-          ),
-          this.difficultyLevelInterface = el('div.difficulty-level-interface.hide',
-          el("p", "Level"),
-          el("div.difficulty-levels",
-            el( "button.easy", "Easy"),
-            el( "button.medium", "Medium"),
-            el( "button.hard", "Hard"),
-          )
-          ),
-          this.selectItemInterface = el('div.select-interface.hide#select-interface',
+            )),
+            (this.inputNameInterface = el(
+              "div.input-user-name.hide",
+
+              el("p", "Enter your Name"),
+              el(
+                "div.input-group",
+                (this.playerNameInput = el("input.form-control", {
+                  placeholder: "Enter Your Name"
+                })),
+                (this.submitInputName = el(
+                  "div.input-group-append",
+                  el("button.btn.btn-info.active", "Submit")
+                ))
+              )
+            )),
+            (this.friendsListInterface = el("div.friends-list.hide")),
+            (this.friendRequestWaitModal = el(
+              "div.friend-request-wait-modal.hide",
+              el("div.wait-wrapper", el("p"))
+            )),
+            (this.requestNotificationModal = el(
+              "div.friend-request-notification.hide",
+              el(
+                "div.req-holder",
+                el("p", ""),
+                el("button.btn.accept-friend-request", "Start Game")
+              )
+            )),
+            (this.difficultyLevelInterface = el(
+              "div.difficulty-level-interface.hide",
+              el("p", "Level"),
+              el(
+                "div.difficulty-levels",
+                el("button.easy", "Easy"),
+                el("button.medium", "Medium"),
+                el("button.hard", "Hard")
+              )
+            )),
+            (this.selectItemInterface = el(
+              "div.select-interface.hide#select-interface",
               el("p", "Play as?"),
               el(
                 "div.pick-options",
@@ -1461,11 +1477,14 @@ export class Board {
                 ),
                 el("button", { class: "select-turn-btn goat" }, "")
               ),
-              el('div.sound-settings.text-right',
-              this.playSoundButton = el('button.play-sound',''),
-           ))
-        )
-      )))
+              el(
+                "div.sound-settings.text-right",
+                (this.playSoundButton = el("button.play-sound", ""))
+              )
+            ))
+          )
+        ))
+      )
     );
     mount(
       this.infoBox,
@@ -1488,21 +1507,21 @@ export class Board {
         )
       ))
     );
-    
-    this.emitSocket = () =>{
-       let name = FBInstant.player.getName();
-       // HERE Initialise the Socket Object and Send User Name  to Server
-         this.socket = new Socket(name);
-       // hide add name interface
-         this.inputNameInterface.classList.add('hide');
-        //handle events dispatched from socket
-         this.handleSocketEvents();
+
+    this.emitSocket = () => {
+      let name = FBInstant.player.getName();
+      // HERE Initialise the Socket Object and Send User Name  to Server
+      this.socket = new Socket(name);
+      // hide add name interface
+      this.inputNameInterface.classList.add("hide");
+      //handle events dispatched from socket
+      this.handleSocketEvents();
 
       return this.socket;
-    }
+    };
     this.getSocketId = () => {
       return this.socket.player.socketId();
-    }
+    };
     /**
      * =============================================
      * UI INTRACTION
@@ -1512,135 +1531,132 @@ export class Board {
     this.playWithInterface.querySelectorAll("button").forEach(element => {
       element.addEventListener("click", event => {
         var _this = this;
-        if (event.target.classList.contains('play-with-friend')) {
-          this.friend = FRIEND
+        if (event.target.classList.contains("play-with-friend")) {
+          this.friend = FRIEND;
           let contextId = this.FBInstant.context.getID();
-          const backend = new Backend('https://wiggly-licorice.glitch.me');
-            FBInstant.context.chooseAsync()
-              .then(function () {
-              let game = this.game;
-               backend.clear(FBInstant.context.getID()).then(function () {
-                // setTimeout(function(){
-                     game.start();
-                // }, 1000)
-               
-
-              })
+          const backend = new Backend("https://wiggly-licorice.glitch.me");
+          FBInstant.context.chooseAsync().then(function() {
+            let game = this.game;
+            backend.clear(FBInstant.context.getID()).then(function() {
+              // setTimeout(function(){
+              game.start();
+              // }, 1000)
+            });
           });
-             
-          // this.inputNameInterface.classList.remove('hide'); 
+
+          // this.inputNameInterface.classList.remove('hide');
         } else {
-          this.difficultyLevelInterface.classList.remove('hide');
-          this.friend = COMPUTER; 
-          this.playWithInterface.classList.add('hide');
-        } 
+          this.difficultyLevelInterface.classList.remove("hide");
+          this.friend = COMPUTER;
+          this.playWithInterface.classList.add("hide");
+        }
       });
     });
 
     // IF USER SELECT WITH FRIEND GET HIS NAME AND SEND TO SERVER
 
-    this.submitInputName.addEventListener('click',(event)=>{
+    this.submitInputName.addEventListener("click", event => {
       event.preventDefault();
       const userName = this.playerNameInput.value;
-      if(!userName){
-        alert('Enter Valid Name');
+      if (!userName) {
+        alert("Enter Valid Name");
         return false;
       }
       // HERE Initialise the Socket Object and Send User Name  to Server
       this.socket = new Socket(userName);
       // hide add name interface
-      this.inputNameInterface.classList.add('hide');
+      this.inputNameInterface.classList.add("hide");
       // handle events dispatched from socket
       this.handleSocketEvents();
-      this.friendsListInterface.classList.remove('hide');
-    })
+      this.friendsListInterface.classList.remove("hide");
+    });
 
     // mute unmute sound button
-    this.playSoundButton.addEventListener('click', ()=>{
-      if(this.playSoundButton.classList.contains('play-sound')){
-        this.playSoundButton.classList.remove('play-sound');
-        this.playSoundButton.classList.add('mute-sound');
-       this.playSound  = false;
-      }else{
-        this.playSoundButton.classList.add('play-sound');
-        this.playSoundButton.classList.remove('mute-sound');
-        this.playSound  = true;
+    this.playSoundButton.addEventListener("click", () => {
+      if (this.playSoundButton.classList.contains("play-sound")) {
+        this.playSoundButton.classList.remove("play-sound");
+        this.playSoundButton.classList.add("mute-sound");
+        this.playSound = false;
+      } else {
+        this.playSoundButton.classList.add("play-sound");
+        this.playSoundButton.classList.remove("mute-sound");
+        this.playSound = true;
       }
-    })
+    });
 
     /**
      * USER SELECTS TIGER OR GOAT
      */
     this.selectItem.querySelectorAll(".select-turn-btn").forEach(element => {
       // update info
-      element.addEventListener("click", (event) => {
+      element.addEventListener("click", event => {
         if (event.target.classList.contains(TIGER)) {
           this.chosenItem = TIGER;
-          if(this.playSound){
+          if (this.playSound) {
             this.sound.play("tiger");
           }
-          
         } else {
           this.chosenItem = GOAT;
-          if(this.playSound){
+          if (this.playSound) {
             this.sound.play("goat");
           }
         }
         this.myTurn = this.chosenItem === GOAT ? true : false;
-        
+
         this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
         this.selectItem.classList.add("hide");
         // IF user is playing with computer
-        if(this.chosenItem===GOAT){
+        if (this.chosenItem === GOAT) {
           this.showMoveNotification(GOAT);
         }
-        if(this.friend==COMPUTER && this.chosenItem===TIGER){
+        if (this.friend == COMPUTER && this.chosenItem === TIGER) {
           this.renderComputerGoatMove();
-        }else{
+        } else {
           // send item chosen info to friend
           // logic happens here
           let matchData = window.game.bagchal._matchData;
           matchData.avatar = this.chosenItem;
           this.socket.friendChoseTigerGoat(this.chosenItem);
         }
-       
       });
     });
 
-    
     // SELECT DIFFICULTY LEVEL FOR PLAYING WITH COMPUTER
-    this.difficultyLevelInterface.querySelectorAll('button').forEach(element =>{
-      element.addEventListener("click", event => {
-        if (event.target.classList.contains('easy')) {
-         this.difficultyLevel = 1;
-        } else if(event.target.classList.contains('medium')) {
-          this.difficultyLevel = 2;
-
-        }else{
-          this.difficultyLevel = 3;
-        } 
-        // initialise new logic object for playing with friend
-        this.logic = new Logic(this, this.difficultyLevel);
-        this.difficultyLevelInterface.classList.add('hide');  
-        this.selectItemInterface.classList.remove('hide');    
+    this.difficultyLevelInterface
+      .querySelectorAll("button")
+      .forEach(element => {
+        element.addEventListener("click", event => {
+          if (event.target.classList.contains("easy")) {
+            this.difficultyLevel = 1;
+          } else if (event.target.classList.contains("medium")) {
+            this.difficultyLevel = 2;
+          } else {
+            this.difficultyLevel = 3;
+          }
+          // initialise new logic object for playing with friend
+          this.logic = new Logic(this, this.difficultyLevel);
+          this.difficultyLevelInterface.classList.add("hide");
+          this.selectItemInterface.classList.remove("hide");
+        });
       });
-    });
 
     // HANDLE CLICK ON ACCEPT FRIEND REQUEST
-    this.requestNotificationModal.querySelector('.accept-friend-request').addEventListener('click',()=>{
-      this.socket.acceptFriendRequest();
-      this.requestNotificationModal.classList.add('hide');
-      this.friendRequestWaitModal.classList.remove('hide');
-      this.friendRequestWaitModal.querySelector('p').innerHTML = 'Wait! Let your friend choose the tiger/goat';
-    })
+    this.requestNotificationModal
+      .querySelector(".accept-friend-request")
+      .addEventListener("click", () => {
+        this.socket.acceptFriendRequest();
+        this.requestNotificationModal.classList.add("hide");
+        this.friendRequestWaitModal.classList.remove("hide");
+        this.friendRequestWaitModal.querySelector("p").innerHTML =
+          "Wait! Let your friend choose the tiger/goat";
+      });
   }
-  
 
-gameCompleted(avatar){
-  // debugger;
+  gameCompleted(avatar) {
+    // debugger;
     const d = document;
-    const body = d.querySelector('body');
-    const buttons = d.querySelectorAll('[data-modal-trigger]');
+    const body = d.querySelector("body");
+    const buttons = d.querySelectorAll("[data-modal-trigger]");
 
     // attach click event to all modal triggers
     for (let button of buttons) {
@@ -1649,149 +1665,180 @@ gameCompleted(avatar){
 
     function triggerEvent(button) {
       // button.addEventListener('click', () => {
-      const trigger = button.getAttribute('data-modal-trigger');
+      const trigger = button.getAttribute("data-modal-trigger");
       const modal = d.querySelector(`[data-modal=${trigger}]`);
-      const modalBody = modal.querySelector('.modal-body');
-      const closeBtn = modal.querySelector('.close');
-      document.getElementById('game-end-heading').innerHTML = ` Alas, the ${avatar ==='goat' ? "🐐" :"🐅" } has claimed victory!`
-      closeBtn.addEventListener('click', () => modal.classList.remove('is-open'))
-      modal.addEventListener('click', () => modal.classList.remove('is-open'))
-      const gameResetButton = document.getElementById('game-reset-btn');
+      const modalBody = modal.querySelector(".modal-body");
+      const closeBtn = modal.querySelector(".close");
+      document.getElementById("game-end-heading").innerHTML = ` Alas, the ${
+        avatar === "goat" ? "🐐" : "🐅"
+      } has claimed victory!`;
+      closeBtn.addEventListener("click", () =>
+        modal.classList.remove("is-open")
+      );
+      modal.addEventListener("click", () => modal.classList.remove("is-open"));
+      const gameResetButton = document.getElementById("game-reset-btn");
 
-      modalBody.addEventListener('click', (e) => e.stopPropagation());
+      modalBody.addEventListener("click", e => e.stopPropagation());
 
-      modal.classList.toggle('is-open');
+      modal.classList.toggle("is-open");
       const _this = this;
-      gameResetButton.addEventListener('click', (e) => {
+      gameResetButton.addEventListener("click", e => {
         e.preventDefault();
-        modal.classList.remove('is-open');
-        const previousGameBoard = document.getElementsByClassName('game-box')
+        modal.classList.remove("is-open");
+        const previousGameBoard = document.getElementsByClassName("game-box");
         if (previousGameBoard) previousGameBoard[0].remove();
         window.game.init({
           container: "game-container"
         });
-      })
+      });
 
       // Close modal when hitting escape
-      body.addEventListener('keydown', (e) => {
+      body.addEventListener("keydown", e => {
         if (e.keyCode === 27) {
-          modal.classList.remove('is-open')
+          modal.classList.remove("is-open");
         }
       });
       //  });
     }
   }
- 
+
   /**
-   * Method to handle event dispatched from socket 
+   * Method to handle event dispatched from socket
    */
-  handleSocketEvents(){
-    this.socket.dispatcher.on('setUserInfo',this.setUserInfo.bind(this));
-    this.socket.dispatcher.on('updateOnlineUsers',this.updateOnlineUsers.bind(this));
-    this.socket.dispatcher.on('friendSendsRequest',this.showFriendRequestNotification.bind(this));
-    this.socket.dispatcher.on('requestAccepted',  this.friendRequestAccepted.bind(this));
-    this.socket.dispatcher.on('friendChoseItem', this.friendChooseItem.bind(this));
-    this.socket.dispatcher.on('friendMovedItem', this.handleFriendMove.bind(this));
-    this.socket.dispatcher.on('closeGame', this.closeGame.bind(this));
+  handleSocketEvents() {
+    this.socket.dispatcher.on("setUserInfo", this.setUserInfo.bind(this));
+    this.socket.dispatcher.on(
+      "updateOnlineUsers",
+      this.updateOnlineUsers.bind(this)
+    );
+    this.socket.dispatcher.on(
+      "friendSendsRequest",
+      this.showFriendRequestNotification.bind(this)
+    );
+    this.socket.dispatcher.on(
+      "requestAccepted",
+      this.friendRequestAccepted.bind(this)
+    );
+    this.socket.dispatcher.on(
+      "friendChoseItem",
+      this.friendChooseItem.bind(this)
+    );
+    this.socket.dispatcher.on(
+      "friendMovedItem",
+      this.handleFriendMove.bind(this)
+    );
+    this.socket.dispatcher.on("closeGame", this.closeGame.bind(this));
   }
-  setUserInfo(data){
+  setUserInfo(data) {
     this.player = data;
   }
   closeGame(data) {
-   // data.friendId, data.socketId
-   let _this = this;
-   let contextId = this.FBInstant.context.getID();
-    const backend = new Backend('https://wiggly-licorice.glitch.me')
-    backend.clear(contextId).then(function () {
-           _this.FBInstant.quit();
-           location.reload();
-      });
+    // data.friendId, data.socketId
+    let _this = this;
+    let contextId = this.FBInstant.context.getID();
+    const backend = new Backend("https://wiggly-licorice.glitch.me");
+    backend.clear(contextId).then(function() {
+      _this.FBInstant.quit();
+      location.reload();
+    });
     // backend.delete(data.person.friendId, data.person.socketId).then(()=> {
     //   location.reload();
     // })
-    
   }
-  updateOnlineUsers(data){
-    const users = data.filter(u=>u.socketId!=this.player.socketId);
-    const onlineUsers = list(
-        `ul.online-users`,
-        OnlineUsersList
-      );
-      this.friendsListInterface.innerHTML = '';
-      mount(this.friendsListInterface, onlineUsers);
-      onlineUsers.update(users);
-      this.friendsListInterface.querySelectorAll('.send-friend-req').forEach(el=>{
-        el.addEventListener('click',(evt)=>{
+  updateOnlineUsers(data) {
+    const users = data.filter(u => u.socketId != this.player.socketId);
+    const onlineUsers = list(`ul.online-users`, OnlineUsersList);
+    this.friendsListInterface.innerHTML = "";
+    mount(this.friendsListInterface, onlineUsers);
+    onlineUsers.update(users);
+    this.friendsListInterface
+      .querySelectorAll(".send-friend-req")
+      .forEach(el => {
+        el.addEventListener("click", evt => {
           evt.preventDefault();
-          const friendId = el.getAttribute('socketId');
+          const friendId = el.getAttribute("socketId");
           this.socket.sendRequestToFriend(friendId);
-          this.friendRequestWaitModal.classList.remove('hide');
-          this.friendRequestWaitModal.querySelector('p').innerHTML = 'Wait! Let your friend accept the request';
-        })
-      })
+          this.friendRequestWaitModal.classList.remove("hide");
+          this.friendRequestWaitModal.querySelector("p").innerHTML =
+            "Wait! Let your friend accept the request";
+        });
+      });
   }
-  showFriendRequestNotification(data){
-    this.requestNotificationModal.classList.remove('hide');
-    this.requestNotificationModal.querySelector('p').innerHTML = `${data.name} Sends you request for playing game`;
+  showFriendRequestNotification(data) {
+    this.requestNotificationModal.classList.remove("hide");
+    this.requestNotificationModal.querySelector(
+      "p"
+    ).innerHTML = `${data.name} Sends you request for playing game`;
   }
-  showPlayerJoinGame(){
-  this.friendRequestWaitModal.classList.remove('hide');
-  this.friendRequestWaitModal.querySelector('p').innerHTML = 'Wait! Let your friend start the game';
+  showPlayerJoinGame() {
+    this.friendRequestWaitModal.classList.remove("hide");
+    this.friendRequestWaitModal.querySelector("p").innerHTML =
+      "Wait! Let your friend start the game";
   }
-  friendRequestAccepted(data){
+  friendRequestAccepted(data) {
     this.friend = FRIEND;
-    this.requestNotificationModal.classList.add('hide');
-    this.friendsListInterface.classList.add('hide');
-    this.friendRequestWaitModal.classList.add('hide');
-    this.selectItemInterface.classList.remove('hide');
+    this.requestNotificationModal.classList.add("hide");
+    this.friendsListInterface.classList.add("hide");
+    this.friendRequestWaitModal.classList.add("hide");
+    this.selectItemInterface.classList.remove("hide");
   }
-  
-  friendChooseItem(myItem){
+
+  friendChooseItem(myItem) {
     this.selectItem.classList.add("hide");
-    this.requestNotificationModal.classList.add('hide');
-    this.friendsListInterface.classList.add('hide');
-    this.friendRequestWaitModal.classList.add('hide');
-    this.selectItemInterface.classList.remove('hide');
-    this.friendRequestWaitModal.classList.add('hide');
+    this.requestNotificationModal.classList.add("hide");
+    this.friendsListInterface.classList.add("hide");
+    this.friendRequestWaitModal.classList.add("hide");
+    this.selectItemInterface.classList.remove("hide");
+    this.friendRequestWaitModal.classList.add("hide");
     this.chosenItem = myItem;
     this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
     this.myTurn = this.chosenItem === GOAT ? true : false;
-    this.showMoveNotification(this.chosenItem,`Your Friend Choose ${this.chosenItem===TIGER ? GOAT: TIGER}`);
-    if(this.chosenItem===GOAT){
-      setTimeout(()=>{
+    this.showMoveNotification(
+      this.chosenItem,
+      `Your Friend Choose ${this.chosenItem === TIGER ? GOAT : TIGER}`
+    );
+    if (this.chosenItem === GOAT) {
+      setTimeout(() => {
         this.showMoveNotification(this.chosenItem);
-      },2100)
-    }else{
-      setTimeout(()=>{
-        this.showMoveNotification(this.chosenItem,'Please Wait.. Friends Turn')
-      },2100)
+      }, 2100);
+    } else {
+      setTimeout(() => {
+        this.showMoveNotification(
+          this.chosenItem,
+          "Please Wait.. Friends Turn"
+        );
+      }, 2100);
     }
   }
 
-  showMoveNotification(item,message=null){
-    setTimeout(()=>{
-      this.moveNotificationModal.classList.remove('hide');
-      this.moveNotificationModal.querySelector('p').innerHTML = message ? message : `Its your turn to move ${item}.`;
-      setTimeout(()=>{
-        this.moveNotificationModal.classList.add('hide');
-      },2000);
-      if(!message && item){
-        if(this.myTurn){
-          this.moveIndicator.innerHTML = `Its your turn to move ${this.chosenItem}`;
-        }else{
-          this.moveIndicator.innerHTML = `Wait! Its ${this.friend===COMPUTER ? 'Computer\'s' : 'friend\'s' } turn to move ${this.chosenItem===TIGER?GOAT: TIGER}`;
-        }
+  showMoveNotification(item, message = null) {
+    if (message) {
+      setTimeout(() => {
+        this.moveNotificationModal.classList.remove("hide");
+        this.moveNotificationModal.querySelector("p").innerHTML = message
+          ? message
+          : `Its your turn to move ${item}.`;
+        setTimeout(() => {
+          this.moveNotificationModal.classList.add("hide");
+        }, 2000);
+      }, 1000);
+    }
+    if (item) {
+      if (this.myTurn) {
+        this.moveIndicator.innerHTML = `Its your turn to move ${this.chosenItem}`;
+      } else {
+        this.moveIndicator.innerHTML = `Wait! Its ${
+          this.friend === COMPUTER ? "Computer's" : "friend's"
+        } turn to move ${this.chosenItem === TIGER ? GOAT : TIGER}`;
       }
-    },1000);
-    
+    }
   }
-  
 
-  handleFriendMove(data){
+  handleFriendMove(data) {
     this.myTurn = true;
-    if(data.movedItem===GOAT){
-      let goatMovePoint= null;
-      if(data.moveData.type==='new'){
+    if (data.movedItem === GOAT) {
+      let goatMovePoint = null;
+      if (data.moveData.type === "new") {
         const friendClickedPoint = data.moveData.clickedPoint;
         const myClickedPoint = this.points[friendClickedPoint.index];
         goatMovePoint = {
@@ -1800,13 +1847,13 @@ gameCompleted(avatar){
           dead: false,
           drag: false,
           currentPoint: myClickedPoint.index,
-          index: this.goats.length+1
-        }
-      }else{
+          index: this.goats.length + 1
+        };
+      } else {
         goatMovePoint = this.goats[prevPoint];
       }
-      this.moveGoat(data.moveData.nextPoint,goatMovePoint,data.moveData.type);
-    }else{
+      this.moveGoat(data.moveData.nextPoint, goatMovePoint, data.moveData.type);
+    } else {
       this.moveTiger(data.moveData);
     }
 
