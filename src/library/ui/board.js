@@ -1703,9 +1703,7 @@ export class Board {
         modal.classList.remove("is-open");
         const previousGameBoard = document.getElementsByClassName("game-box");
         if (previousGameBoard) previousGameBoard[0].remove();
-        window.game.init({
-          container: "game-container"
-        }).createBoard();
+        window.location.reload();
       });
 
       // Close modal when hitting escape
