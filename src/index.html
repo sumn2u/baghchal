@@ -18,6 +18,8 @@
     <% if (htmlWebpackPlugin.options.env === "production") {%>
     <script>
     FBInstant.initializeAsync().then(function () {
+        FBInstant.setLoadingProgress(50);
+        FBInstant.setLoadingProgress(100);
         // start facebook game
         FBInstant.startGameAsync().then(function () {
                 game.init({
@@ -26,7 +28,6 @@
                     backendClient: ''
                 }).createBoard();
         // check fb instant type and start game 
-        console.log(FBInstant.context.getType(), 'FBInstant.context.getType()')
         if(FBInstant.context.getType() !== 'SOLO') {
          game.start();
         }
@@ -39,7 +40,7 @@
     <script>   
     game.init({
         container: "game-container"
-    });
+    }).createBoard();
     </script>
     <% } %>
 </body>

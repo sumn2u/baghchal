@@ -797,9 +797,6 @@ export class Board {
     });
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    if (goatsInBoard === 20) this.gameCompleted(GOAT);
-    if (deadGoats >= 5) this.gameCompleted(TIGER);
-
     if (avilableTigers.length > 0) {
       let tigerData = null;
 
@@ -834,7 +831,16 @@ export class Board {
           this.sound.play("tiger");
         }
       }
+      if (goatsInBoard === 20) {
+        this.gameCompleted(GOAT);
+        return false;
+      }
+      if (deadGoats >= 5) {
+        this.gameCompleted(TIGER);
+        return false;
+      }
       this.moveTiger(bestMove);
+      
     } else {
       // GOATS WINS the Game
       this.gameCompleted(this.chosenItem);
@@ -849,6 +855,7 @@ export class Board {
    */
   renderComputerGoatMove() {
     const nextBestMove = this.logic.getNextBestMove(GOAT);
+    
     if (nextBestMove) {
       // only used "new" and "move" because it was used in this file
       let goatType = "new";
@@ -865,11 +872,22 @@ export class Board {
       }
       this.moveGoat(nextPoint, goatPoint, goatType, COMPUTER);
     }
-    this.render();
+    
     const deadGoats = this.goats.filter(g => g.dead).length;
     const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    if (goatsInBoard === 20) this.gameCompleted(GOAT);
-    if (deadGoats >= 5) this.gameCompleted(TIGER);
+    if (goatsInBoard === 20) {
+      this.gameCompleted(GOAT);
+      return false;
+    }
+    if (deadGoats >= 5) {
+      this.gameCompleted(TIGER);
+      return false;
+    }
+    this.render();
+    // console.log(deadGoats, goatsInBoard, 'goatsInBoard', deadGoats >= 5, this)
+    // if (goatsInBoard === 20) this.gameCompleted(GOAT);
+    // if (deadGoats >= 5) this.gameCompleted(TIGER);
+
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
     if (deadGoats >= 5) {
@@ -1653,11 +1671,9 @@ export class Board {
   }
 
   gameCompleted(avatar) {
-    // debugger;
     const d = document;
     const body = d.querySelector("body");
     const buttons = d.querySelectorAll("[data-modal-trigger]");
-
     // attach click event to all modal triggers
     for (let button of buttons) {
       triggerEvent(button);
@@ -1689,7 +1705,7 @@ export class Board {
         if (previousGameBoard) previousGameBoard[0].remove();
         window.game.init({
           container: "game-container"
-        });
+        }).createBoard();
       });
 
       // Close modal when hitting escape
@@ -1831,7 +1847,7 @@ export class Board {
           this.friend === COMPUTER ? "Computer's" : "friend's"
         } turn to move ${this.chosenItem === TIGER ? GOAT : TIGER}`;
       }
-    },1000);
+    };
 
   }
 
