@@ -228,7 +228,6 @@
 
  .modal-body {
    animation: pop 0.5s ease;
-   width:33%;
  }
 
  header {
@@ -307,6 +306,7 @@
 
  .modal-body {
    top: 20vh;
+   min-width: 360px;
    margin: 30px auto;
    background-color: rgb(44, 62, 80);
    border-radius: 5px;
@@ -553,7 +553,7 @@ button#mutebtn {
     font-size: 1em;
   }
   .modal-body {
-    min-width: 320px;
+    min-width: 360px !important;
   }
 }
 .input-user-name{
