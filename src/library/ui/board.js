@@ -831,25 +831,37 @@ export class Board {
           this.sound.play("tiger");
         }
       }
-      if (goatsInBoard === 20) {
-        this.gameCompleted(GOAT);
-        return false;
-      }
-      if (deadGoats >= 5) {
-        this.gameCompleted(TIGER);
-        return false;
-      }
       this.moveTiger(bestMove);
       
     } else {
       // GOATS WINS the Game
       this.gameCompleted(this.chosenItem);
     }
-
+    this.updateResults();
+    
+  }
+  /**
+   * update results 
+   */
+  updateResults() {
+    
+    let deadGoats = this.goats.filter(g => g.dead).length;
+    let goatsInBoard = this.goats.filter(g => !g.dead).length;
+    if (this.friend === COMPUTER && this.chosenItem === TIGER && this.goats.length<20) goatsInBoard = goatsInBoard + 1
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
+    if (goatsInBoard === 20) {
+      this.gameCompleted(GOAT);
+      return false;
+    }
+    if (deadGoats >= 5) {
+      this.gameCompleted(TIGER);
+      return false;
+    }
   }
-
+  /**
+   * 
+   */
   /**
    * render goat after user moves tiger
    */
@@ -872,29 +884,10 @@ export class Board {
       }
       this.moveGoat(nextPoint, goatPoint, goatType, COMPUTER);
     }
-    
-    const deadGoats = this.goats.filter(g => g.dead).length;
-    const goatsInBoard = this.goats.filter(g => !g.dead).length;
-    if (goatsInBoard === 20) {
-      this.gameCompleted(GOAT);
-      return false;
-    }
-    if (deadGoats >= 5) {
-      this.gameCompleted(TIGER);
-      return false;
-    }
-    this.render();
-    // console.log(deadGoats, goatsInBoard, 'goatsInBoard', deadGoats >= 5, this)
-    // if (goatsInBoard === 20) this.gameCompleted(GOAT);
-    // if (deadGoats >= 5) this.gameCompleted(TIGER);
-
-    this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
-    this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
-    if (deadGoats >= 5) {
-      // GOATS WINS THE GAME
-      this.gameCompleted(this.chosenItem);
-    }
+  
+    this.updateResults();
     this.myTurn = true;
+    this.render();
   }
   /**
    * get next possible moves of tiger/goat
@@ -1882,15 +1875,6 @@ export class Board {
       this.showMoveNotification(this.chosenItem);
     }, 1100);
     this.render();
-     if (goatsInBoard === 20) {
-       this.gameCompleted(GOAT);
-       return false;
-     }
-     if (deadGoats >= 5) {
-       this.gameCompleted(TIGER);
-       return false;
-     }
-    this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
-    this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
+    this.updateResults();
   }
 }
