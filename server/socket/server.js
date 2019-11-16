@@ -5,6 +5,9 @@ const io = require('socket.io')(server);
 let users = []; // {name,avatar}
 app.use(express.static('.'));
 
+app.get("/", function (request, response) {
+    response.json("Welcome to bagchal socket server");
+});
 
 io.on('connection', (socket) => {
     // Create a new game room and notify the creator of game.
