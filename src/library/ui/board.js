@@ -1221,10 +1221,14 @@ export class Board {
     };
     this.showMoveAnimation(TIGER, animationTigerData).then(result => {
       if (tigerData.eatGoat) {
-        this.showMoveNotification(this.chosenItem, `${TIGER} ate your goat!`);
+        // HIDE POP UP THAT'S Causing problem
+        if (this.friend !== COMPUTER){
+          this.showMoveNotification(this.chosenItem, `🐅 ate your 🐐!`);
+        }
         setTimeout(() => {
           this.showMoveNotification(this.chosenItem);
         }, 2000);
+      
       } else {
         this.showMoveNotification(this.chosenItem);
       }
@@ -1851,6 +1855,8 @@ export class Board {
 
   handleFriendMove(data) {
     this.myTurn = true;
+    const deadGoats = this.goats.filter(g => g.dead).length;
+    const goatsInBoard = this.goats.filter(g => !g.dead).length;
     if (data.movedItem === GOAT) {
       let goatMovePoint = null;
       if (data.moveData.type === "new") {
@@ -1876,5 +1882,15 @@ export class Board {
       this.showMoveNotification(this.chosenItem);
     }, 1100);
     this.render();
+     if (goatsInBoard === 20) {
+       this.gameCompleted(GOAT);
+       return false;
+     }
+     if (deadGoats >= 5) {
+       this.gameCompleted(TIGER);
+       return false;
+     }
+    this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
+    this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
   }
 }
