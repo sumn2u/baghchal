@@ -44,8 +44,8 @@ export class Board {
       sprite: {
         goat: [0, 2500],
         tiger: [3000, 3002],
-        eating: [4000, 5500]
-      }
+        eating: [4000, 5500],
+      },
     });
 
     // addRequiredDom ELEMENTS
@@ -195,7 +195,7 @@ export class Board {
     const y = pageY - this.canvasPosition.top;
     const goatWidth = Math.floor(this.goatWidth / 2);
     const goatHeight = Math.floor(this.goatHeight / 2);
-    const clickedPoint = this.points.find(point => {
+    const clickedPoint = this.points.find((point) => {
       return (
         x >= point.x - goatWidth &&
         x <= point.x + goatWidth &&
@@ -218,7 +218,7 @@ export class Board {
         dead: false,
         drag: false,
         currentPoint: i,
-        index: this.goats.length
+        index: this.goats.length,
       };
       this.goats.push(clickedGoatData); // add new point to goat
       // track goat point to all points array
@@ -230,15 +230,18 @@ export class Board {
         this.sendGoatMoveDataToFriend({
           type: "new",
           nextPoint: null,
-          clickedPoint
+          clickedPoint,
         });
       }
     } else if (this.chosenItem === GOAT && this.goats.length === 20) {
-      this.goats.forEach(g => (g.drag = g.currentPoint === i ? true : false));
+      this.goats.forEach((g) => (g.drag = g.currentPoint === i ? true : false));
       this.dragItem = { item: GOAT, point: clickedPoint };
     } else if (this.chosenItem === TIGER) {
-      this.tigers.forEach(t => (t.drag = t.currentPoint === i ? true : false));
+      this.tigers.forEach(
+        (t) => (t.drag = t.currentPoint === i ? true : false)
+      );
       this.dragItem = { item: TIGER, point: clickedPoint };
+      this.render;
     }
     if (!this.dragItem) {
       return true;
@@ -265,7 +268,7 @@ export class Board {
       const y = pageY - this.canvasPosition.top;
       const goatWidth = Math.floor(this.goatWidth / 2);
       const goatHeight = Math.floor(this.goatHeight / 2);
-      const releasedPoint = this.points.find(point => {
+      const releasedPoint = this.points.find((point) => {
         return (
           x >= point.x - goatWidth &&
           x <= point.x + goatWidth &&
@@ -281,10 +284,10 @@ export class Board {
             GOAT
           );
           const validPoint = possiblePoints.find(
-            p => p.point === releasedPoint.index
+            (p) => p.point === releasedPoint.index
           );
           if (validPoint) {
-            const draggedGoat = this.goats.find(g => g.drag);
+            const draggedGoat = this.goats.find((g) => g.drag);
             if (draggedGoat) {
               const prevPointIndex = draggedGoat.currentPoint;
               const currentPointIndex = releasedPoint.index;
@@ -309,7 +312,7 @@ export class Board {
                   type: "move",
                   prevPoint: prevPointIndex,
                   nextPoint: currentPointIndex,
-                  type: "new"
+                  type: "new",
                 });
               }
             }
@@ -320,10 +323,10 @@ export class Board {
             TIGER
           );
           const validPoint = possiblePoints.find(
-            p => p.point === releasedPoint.index
+            (p) => p.point === releasedPoint.index
           );
           if (validPoint) {
-            const draggedTiger = this.tigers.find(t => t.drag);
+            const draggedTiger = this.tigers.find((t) => t.drag);
             if (draggedTiger) {
               // release  item from prev point
               const prevPointIndex = draggedTiger.currentPoint;
@@ -341,16 +344,15 @@ export class Board {
               // if tiger eat the goat remove goat from goats
               if (validPoint.eatGoat) {
                 // remove eaten goat point index from points
-                const currentEatenGoatIndex = this.goats[
-                  validPoint.eatGoatIndex
-                ].currentPoint;
+                const currentEatenGoatIndex =
+                  this.goats[validPoint.eatGoatIndex].currentPoint;
                 this.points[currentEatenGoatIndex].item = null;
                 this.points[currentEatenGoatIndex].itemIndex = null;
                 this.goats[validPoint.eatGoatIndex] = {
                   x: 0,
                   y: 0,
                   dead: true,
-                  currentPoint: -currentEatenGoatIndex
+                  currentPoint: -currentEatenGoatIndex,
                 };
                 if (this.playSound) {
                   this.sound.play("tiger");
@@ -360,6 +362,7 @@ export class Board {
                 this.sound.play("goat");
               }
               // computer turns to move goat
+
               if (this.friend === COMPUTER) {
                 this.renderComputerGoatMove();
               } else {
@@ -367,7 +370,7 @@ export class Board {
                   tigerIndex: draggedTiger.index,
                   nextPointIndex,
                   eatGoat: validPoint.eatGoat,
-                  eatGoatIndex: validPoint.eatGoatIndex
+                  eatGoatIndex: validPoint.eatGoatIndex,
                 });
               }
             }
@@ -376,8 +379,8 @@ export class Board {
       }
     }
     this.dragItem = null;
-    this.goats.forEach(g => (g.drag = false));
-    this.tigers.forEach(t => (t.drag = false));
+    this.goats.forEach((g) => (g.drag = false));
+    this.tigers.forEach((t) => (t.drag = false));
     this.render();
   }
 
@@ -411,7 +414,6 @@ export class Board {
     this.drawBoard();
     this.drawTigers();
     this.renderGoats();
-    this.firstGoatRender++;
   }
   /**
    * calculate all posible points of board
@@ -433,7 +435,7 @@ export class Board {
           y: y,
           index: points.length,
           item: null,
-          itemIndex: null
+          itemIndex: null,
         });
         if (this.diamondCircleImage) {
           this.canvas.drawImage(
@@ -473,7 +475,7 @@ export class Board {
         y: point.y,
         currentPoint: t,
         drag: false,
-        index: i
+        index: i,
       });
     });
   }
@@ -486,7 +488,7 @@ export class Board {
     //draw inner rectangle
     let yMiddlePoint = this.paddingTop + this.height / 2;
 
-    sides.forEach(element => {
+    sides.forEach((element) => {
       let i = 0;
       let stepSize =
         element == "vertical" ? this.verticalStep : this.horizontalStep;
@@ -639,7 +641,7 @@ export class Board {
    * draw tigers on board
    */
   drawTigers() {
-    this.tigers.forEach(element => {
+    this.tigers.forEach((element) => {
       if (element.drag) {
         return;
       }
@@ -671,11 +673,12 @@ export class Board {
     };
     this.tigerImage.src = tigerImage;
   }
+
   /**
    * draw goats on standby rectangle or on board
    */
   renderGoats() {
-    this.goats.forEach(point => {
+    this.goats.forEach((point) => {
       if (point.dead || point.drag) {
         return;
       }
@@ -791,20 +794,20 @@ export class Board {
         avilableTigers.push({
           tiger: i,
           point: pointIndex,
-          possibleMoves: nextMovePossibleMoves
+          possibleMoves: nextMovePossibleMoves,
         });
       }
     });
-    const deadGoats = this.goats.filter(g => g.dead).length;
-    const goatsInBoard = this.goats.filter(g => !g.dead).length;
+    const deadGoats = this.goats.filter((g) => g.dead).length;
+    const goatsInBoard = this.goats.filter((g) => !g.dead).length;
     if (avilableTigers.length > 0) {
       let tigerData = null;
 
       // Filter out only eatable goats as first priority, start
       const goatEatingTigers = [];
-      avilableTigers.forEach(tiger => {
+      avilableTigers.forEach((tiger) => {
         const goatEatingMoves = [];
-        tiger.possibleMoves.forEach(possibleMove => {
+        tiger.possibleMoves.forEach((possibleMove) => {
           // check if the move can eat goat
           if (possibleMove.eatGoat) {
             goatEatingMoves.push(possibleMove);
@@ -840,14 +843,20 @@ export class Board {
         return false;
       }
       this.moveTiger(bestMove);
-      
     } else {
       // GOATS WINS the Game
       this.gameCompleted(this.chosenItem);
     }
-
-    this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
-    this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
+    const updatedDeadGoats = this.goats.filter((g) => g.dead).length;
+    const updatedBoardGoats = this.goats.filter((g) => !g.dead).length;
+    this.deadGoatIndicator.innerHTML = `Dead Goats: ${updatedDeadGoats}`;
+    this.goatBoardIndicator.innerHTML = `Goats in Board : ${updatedBoardGoats}`;
+  }
+  /**
+   * remove duplicate values
+   */
+  isDuplicate(entry, arr) {
+    return arr.some((x) => entry.x == x.x && entry.y == x.y);
   }
 
   /**
@@ -855,7 +864,7 @@ export class Board {
    */
   renderComputerGoatMove() {
     const nextBestMove = this.logic.getNextBestMove(GOAT);
-    
+    console.log(this.goats, "fff");
     if (nextBestMove) {
       // only used "new" and "move" because it was used in this file
       let goatType = "new";
@@ -867,14 +876,21 @@ export class Board {
         nextPoint = nextBestMove.destinationPoint;
         // in case of move, goatPoint is a goat value from this.goats
         goatPoint = this.goats
-          .filter(g => !g.dead)
-          .find(goat => goat.currentPoint == nextBestMove.sourcePoint);
+          .filter((g) => !g.dead)
+          .find((goat) => goat.currentPoint == nextBestMove.sourcePoint);
       }
       this.moveGoat(nextPoint, goatPoint, goatType, COMPUTER);
     }
-    
-    const deadGoats = this.goats.filter(g => g.dead).length;
-    const goatsInBoard = this.goats.filter(g => !g.dead).length;
+
+    let updatedGoats = [];
+    for (const entry of this.goats) {
+      if (!this.isDuplicate(entry, updatedGoats)) {
+        updatedGoats.push(entry);
+      }
+    }
+
+    const deadGoats = this.goats.filter((g) => g.dead).length;
+    const goatsInBoard = updatedGoats.filter((g) => !g.dead).length;
     if (goatsInBoard === 20) {
       this.gameCompleted(GOAT);
       return false;
@@ -884,16 +900,22 @@ export class Board {
       return false;
     }
     this.render();
+
     // console.log(deadGoats, goatsInBoard, 'goatsInBoard', deadGoats >= 5, this)
     // if (goatsInBoard === 20) this.gameCompleted(GOAT);
     // if (deadGoats >= 5) this.gameCompleted(TIGER);
-
+    // const updatedDeadGoats = this.goats.filter((g) => g.dead).length;
+    // const updatedBoardGoats = this.goats.filter((g) => !g.dead).length;
+    // console.log(updatedBoardGoats, this.firstGoatRender, "dd");
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
-    this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
+    this.goatBoardIndicator.innerHTML = `Goats in Board : ${
+      goatsInBoard + this.firstGoatRender
+    }`;
     if (deadGoats >= 5) {
       // GOATS WINS THE GAME
       this.gameCompleted(this.chosenItem);
     }
+    this.render();
     this.myTurn = true;
   }
   /**
@@ -928,14 +950,14 @@ export class Board {
       nextPossiblePoints.push(1, -1);
     }
     let nextLegalPoints = [];
-    nextPossiblePoints.forEach(el => {
+    nextPossiblePoints.forEach((el) => {
       const index = Number(el) + Number(pointIndex);
       if (index >= 0 && index <= this.totalPoints) {
         nextLegalPoints.push(index);
       }
     });
     if (type === GOAT) {
-      let goatLegalPoints = nextLegalPoints.map(p => {
+      let goatLegalPoints = nextLegalPoints.map((p) => {
         if (!this.points[p] || (this.points[p] && this.points[p].item)) {
           return false;
         }
@@ -943,7 +965,7 @@ export class Board {
           point: p,
           canDie: false,
           tigerJumpPoint: null,
-          possibleTigerPoint: null
+          possibleTigerPoint: null,
         };
         const goatMoveDistance = p - pointIndex;
         const tigerJumpPoint = Number(p) + Number(goatMoveDistance);
@@ -980,13 +1002,13 @@ export class Board {
           point: p,
           canDie: true,
           tigerJumpPoint,
-          possibleTigerPoint
+          possibleTigerPoint,
         };
       });
-      goatLegalPoints = goatLegalPoints.filter(p => p);
+      goatLegalPoints = goatLegalPoints.filter((p) => p);
       return goatLegalPoints;
     }
-    nextLegalPoints = nextLegalPoints.map(p => {
+    nextLegalPoints = nextLegalPoints.map((p) => {
       const point = this.points[p];
       if (point.item === GOAT) {
         const tigerMoveDistance = p - pointIndex;
@@ -1009,7 +1031,7 @@ export class Board {
           return {
             point: tigerEatPoint,
             eatGoat: true,
-            eatGoatIndex: point.itemIndex
+            eatGoatIndex: point.itemIndex,
           };
         }
         return null;
@@ -1018,7 +1040,7 @@ export class Board {
       }
       return null;
     });
-    return nextLegalPoints.filter(p => p);
+    return nextLegalPoints.filter((p) => p);
   }
 
   drawText(x, y, side, text) {
@@ -1056,7 +1078,7 @@ export class Board {
         this.tigers[prevPoint.index] = {
           x: -2000,
           y: -2000,
-          currentPoint: data.currentPoint
+          currentPoint: data.currentPoint,
         };
         const animationFrame = setInterval(() => {
           if (frame < 10) {
@@ -1079,7 +1101,7 @@ export class Board {
               y: nextPoint.y,
               drag: false,
               index: prevPoint.index,
-              currentPoint: nextPoint.index
+              currentPoint: nextPoint.index,
             };
             this.render();
             this.hideFakeCanvas();
@@ -1146,7 +1168,7 @@ export class Board {
   moveGoat(nextPoint, goatPoint, type = "new", source = FRIEND) {
     if (type === "move") {
       // here goatPoint is an element of this.goats[index]
-      const point = this.points.find(point => point.index == nextPoint);
+      const point = this.points.find((point) => point.index == nextPoint);
       // release goat from prev point
       this.points[goatPoint.currentPoint].item = null;
       this.points[goatPoint.currentPoint].itemIndex = null;
@@ -1161,9 +1183,9 @@ export class Board {
           x: point.x,
           y: point.y,
           currentPoint: point.index,
-          index: goatPoint.index
-        }
-      }).then(result => {
+          index: goatPoint.index,
+        },
+      }).then((result) => {
         this.showMoveNotification(this.chosenItem);
       });
     } else {
@@ -1181,9 +1203,9 @@ export class Board {
           dead: false,
           drag: false,
           index: this.goats.length,
-          currentPoint: goatPoint.currentPoint
-        }
-      }).then(result => {
+          currentPoint: goatPoint.currentPoint,
+        },
+      }).then((result) => {
         this.showMoveNotification(this.chosenItem);
       });
     }
@@ -1195,40 +1217,39 @@ export class Board {
    */
   moveTiger(tigerData) {
     if (tigerData.eatGoat) {
-      const currentEatenGoatIndex = this.goats[tigerData.eatGoatIndex]
-        .currentPoint;
+      const currentEatenGoatIndex =
+        this.goats[tigerData.eatGoatIndex].currentPoint;
       this.points[currentEatenGoatIndex].item = null;
       this.points[currentEatenGoatIndex].itemIndex = null;
       this.goats[tigerData.eatGoatIndex] = {
         x: 0,
         y: 0,
         dead: true,
-        currentPoint: -currentEatenGoatIndex
+        currentPoint: -currentEatenGoatIndex,
       };
     }
 
     const tigerNewPoint = this.points[tigerData.nextPointIndex];
     // release prev tiger index from all points
-    const currentTigerPointIndex = this.tigers[tigerData.tigerIndex]
-      .currentPoint;
+    const currentTigerPointIndex =
+      this.tigers[tigerData.tigerIndex].currentPoint;
     this.points[currentTigerPointIndex].item = null;
     this.points[currentTigerPointIndex].itemIndex = null;
 
     const animationTigerData = {
       prevPoint: this.tigers[tigerData.tigerIndex],
       nextPoint: tigerNewPoint,
-      currentPointIndex: tigerData.tigerIndex
+      currentPointIndex: tigerData.tigerIndex,
     };
-    this.showMoveAnimation(TIGER, animationTigerData).then(result => {
+    this.showMoveAnimation(TIGER, animationTigerData).then((result) => {
       if (tigerData.eatGoat) {
         // HIDE POP UP THAT'S Causing problem
-        if (this.friend !== COMPUTER){
+        if (this.friend !== COMPUTER) {
           this.showMoveNotification(this.chosenItem, `🐅 ate your 🐐!`);
         }
         setTimeout(() => {
           this.showMoveNotification(this.chosenItem);
         }, 2000);
-      
       } else {
         this.showMoveNotification(this.chosenItem);
       }
@@ -1263,17 +1284,17 @@ export class Board {
     const friendSocketId = socket.friend.socketId;
     this.saveDataAsync(matcheData, playerSocketId, friendSocketId)
       .then(
-        function() {
+        function () {
           return this.getPlayerImageAsync();
         }.bind(this)
       )
       .then(
-        function(image) {
+        function (image) {
           // let updateConfig = this.getUpdateConfig(image)
           // return FBInstant.updateAsync(updateConfig)
         }.bind(this)
       )
-      .then(function() {
+      .then(function () {
         // closes the game after the update is posted.
         // FBInstant.quit();
       });
@@ -1281,10 +1302,10 @@ export class Board {
 
   saveDataAsync(matchData, playerSocketId, friendSocketId) {
     const backend = new Backend("https://wiggly-licorice.glitch.me/");
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       FBInstant.player
         .getSignedPlayerInfoAsync(JSON.stringify(matchData))
-        .then(function(result) {
+        .then(function (result) {
           return backend.save(
             FBInstant.context.getID(),
             result.getPlayerID(),
@@ -1293,10 +1314,10 @@ export class Board {
             friendSocketId
           );
         })
-        .then(function() {
+        .then(function () {
           resolve(matchData);
         })
-        .catch(function(error) {
+        .catch(function (error) {
           console.error(error, "error");
           reject(error);
         });
@@ -1306,17 +1327,17 @@ export class Board {
    * create image of the game to send it back to friend
    */
   getPlayerImageAsync() {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       var sceneRoot = document.getElementById("game-box");
       var sceneWidth = sceneRoot.offsetWidth;
       html2canvas(sceneRoot, {
         width: sceneWidth * 3,
-        x: -sceneWidth
+        x: -sceneWidth,
       })
-        .then(function(canvas) {
+        .then(function (canvas) {
           resolve(canvas.toDataURL("image/png"));
         })
-        .catch(function(err) {
+        .catch(function (err) {
           reject(err);
         });
     });
@@ -1339,15 +1360,15 @@ export class Board {
           localizations: {
             pt_BR: playerName + " venceu!",
             en_US: playerName + " has won!",
-            de_DE: playerName + " hat gewonnen"
-          }
+            de_DE: playerName + " hat gewonnen",
+          },
         },
         template: "match_won",
         data: {
-          rematchButton: true
+          rematchButton: true,
         },
         strategy: "IMMEDIATE",
-        notification: "NO_PUSH"
+        notification: "NO_PUSH",
       };
     } else if (isBoardFull) {
       // Game over, tie
@@ -1360,15 +1381,15 @@ export class Board {
           localizations: {
             pt_BR: "Deu empate!",
             en_US: "It's a tie!",
-            de_DE: "Es ist ein unentschiedenes Spiel!"
-          }
+            de_DE: "Es ist ein unentschiedenes Spiel!",
+          },
         },
         template: "match_tie",
         data: {
-          rematchButton: true
+          rematchButton: true,
         },
         strategy: "IMMEDIATE",
-        notification: "NO_PUSH"
+        notification: "NO_PUSH",
       };
     } else {
       // Next player's turn
@@ -1430,21 +1451,20 @@ export class Board {
           "div.move-notification-modal.hide",
           el("div.wrapper", el("p", "Test"))
         )),
-
         (this.selectItem = el(
           "div.select-option#select-option",
           el(
             "div.container-fluid",
             el("div.game-name", ""),
-
+            el("p", "A Hunt for Goats"),
             (this.playWithInterface = el(
               "div.play-with-interface#play-with-interface",
 
-              el("p", "Play with?"),
+              // el("p", "A Hunt for Goats"),
               el(
                 "div.play-options",
-                el("button.play-with-computer", ""),
-                el("button.play-with-friend", "")
+                el("button.play-with-computer", "")
+                // el("button.play-with-friend", "")
               )
             )),
             (this.inputNameInterface = el(
@@ -1454,7 +1474,7 @@ export class Board {
               el(
                 "div.input-group",
                 (this.playerNameInput = el("input.form-control", {
-                  placeholder: "Enter Your Name"
+                  placeholder: "Enter Your Name",
                 })),
                 (this.submitInputName = el(
                   "div.input-group-append",
@@ -1493,7 +1513,7 @@ export class Board {
                 el(
                   "button",
                   {
-                    class: "select-turn-btn tiger"
+                    class: "select-turn-btn tiger",
                   },
                   ""
                 ),
@@ -1550,16 +1570,16 @@ export class Board {
      * =============================================
      */
     // user selects with whom he want to play with (computer or friend)
-    this.playWithInterface.querySelectorAll("button").forEach(element => {
-      element.addEventListener("click", event => {
+    this.playWithInterface.querySelectorAll("button").forEach((element) => {
+      element.addEventListener("click", (event) => {
         var _this = this;
         if (event.target.classList.contains("play-with-friend")) {
           this.friend = FRIEND;
           let contextId = this.FBInstant.context.getID();
           const backend = new Backend("https://wiggly-licorice.glitch.me");
-          FBInstant.context.chooseAsync().then(function() {
+          FBInstant.context.chooseAsync().then(function () {
             let game = this.game;
-            backend.clear(FBInstant.context.getID()).then(function() {
+            backend.clear(FBInstant.context.getID()).then(function () {
               // setTimeout(function(){
               game.start();
               // }, 1000)
@@ -1577,7 +1597,7 @@ export class Board {
 
     // IF USER SELECT WITH FRIEND GET HIS NAME AND SEND TO SERVER
 
-    this.submitInputName.addEventListener("click", event => {
+    this.submitInputName.addEventListener("click", (event) => {
       event.preventDefault();
       const userName = this.playerNameInput.value;
       if (!userName) {
@@ -1609,9 +1629,9 @@ export class Board {
     /**
      * USER SELECTS TIGER OR GOAT
      */
-    this.selectItem.querySelectorAll(".select-turn-btn").forEach(element => {
+    this.selectItem.querySelectorAll(".select-turn-btn").forEach((element) => {
       // update info
-      element.addEventListener("click", event => {
+      element.addEventListener("click", (event) => {
         if (event.target.classList.contains(TIGER)) {
           this.chosenItem = TIGER;
           if (this.playSound) {
@@ -1623,22 +1643,26 @@ export class Board {
             this.sound.play("goat");
           }
         }
+        document.getElementById("game-box").style.background = "none";
         this.myTurn = this.chosenItem === GOAT ? true : false;
 
-        this.displayChosenItem.innerHTML = `You chose : ${this.chosenItem.toUpperCase()}`;
+        this.displayChosenItem.innerHTML = `<span>You:   <span class="player-icon-${
+          this.chosenItem === GOAT ? "goat" : "tiger"
+        }"> </span></span>`;
         this.selectItem.classList.add("hide");
         // IF user is playing with computer
         if (this.chosenItem === GOAT) {
           this.showMoveNotification(GOAT);
         }
         if (this.friend == COMPUTER && this.chosenItem === TIGER) {
+          this.firstGoatRender++;
           this.renderComputerGoatMove();
         } else {
           // send item chosen info to friend
           // logic happens here
-          let matchData = window.game.bagchal._matchData;
-          matchData.avatar = this.chosenItem;
-          this.socket.friendChoseTigerGoat(this.chosenItem);
+          // let matchData = window.game.bagchal._matchData;
+          // matchData.avatar = this.chosenItem;
+          // this.socket.friendChoseTigerGoat(this.chosenItem);
         }
       });
     });
@@ -1646,8 +1670,9 @@ export class Board {
     // SELECT DIFFICULTY LEVEL FOR PLAYING WITH COMPUTER
     this.difficultyLevelInterface
       .querySelectorAll("button")
-      .forEach(element => {
-        element.addEventListener("click", event => {
+      .forEach((element) => {
+        element.addEventListener("click", (event) => {
+          // this.selectItem.classList.remove("cover");
           if (event.target.classList.contains("easy")) {
             this.difficultyLevel = 1;
           } else if (event.target.classList.contains("medium")) {
@@ -1698,11 +1723,11 @@ export class Board {
       modal.addEventListener("click", () => modal.classList.remove("is-open"));
       const gameResetButton = document.getElementById("game-reset-btn");
 
-      modalBody.addEventListener("click", e => e.stopPropagation());
+      modalBody.addEventListener("click", (e) => e.stopPropagation());
 
       modal.classList.toggle("is-open");
       const _this = this;
-      gameResetButton.addEventListener("click", e => {
+      gameResetButton.addEventListener("click", (e) => {
         e.preventDefault();
         modal.classList.remove("is-open");
         const previousGameBoard = document.getElementsByClassName("game-box");
@@ -1711,7 +1736,7 @@ export class Board {
       });
 
       // Close modal when hitting escape
-      body.addEventListener("keydown", e => {
+      body.addEventListener("keydown", (e) => {
         if (e.keyCode === 27) {
           modal.classList.remove("is-open");
         }
@@ -1755,7 +1780,7 @@ export class Board {
     let _this = this;
     let contextId = this.FBInstant.context.getID();
     const backend = new Backend("https://wiggly-licorice.glitch.me");
-    backend.clear(contextId).then(function() {
+    backend.clear(contextId).then(function () {
       _this.FBInstant.quit();
       location.reload();
     });
@@ -1764,15 +1789,15 @@ export class Board {
     // })
   }
   updateOnlineUsers(data) {
-    const users = data.filter(u => u.socketId != this.player.socketId);
+    const users = data.filter((u) => u.socketId != this.player.socketId);
     const onlineUsers = list(`ul.online-users`, OnlineUsersList);
     this.friendsListInterface.innerHTML = "";
     mount(this.friendsListInterface, onlineUsers);
     onlineUsers.update(users);
     this.friendsListInterface
       .querySelectorAll(".send-friend-req")
-      .forEach(el => {
-        el.addEventListener("click", evt => {
+      .forEach((el) => {
+        el.addEventListener("click", (evt) => {
           evt.preventDefault();
           const friendId = el.getAttribute("socketId");
           this.socket.sendRequestToFriend(friendId);
@@ -1835,7 +1860,7 @@ export class Board {
         this.moveNotificationModal.classList.remove("hide");
         this.moveNotificationModal.querySelector("p").innerHTML = message
           ? message
-          : `Its your turn to move ${item}.`;
+          : `It's your turn to move ${item}.`;
         setTimeout(() => {
           this.moveNotificationModal.classList.add("hide");
         }, 2000);
@@ -1843,20 +1868,19 @@ export class Board {
     }
     if (item) {
       if (this.myTurn) {
-        this.moveIndicator.innerHTML = `Its your turn to move ${this.chosenItem}`;
+        this.moveIndicator.innerHTML = `It's your turn to move ${this.chosenItem}.`;
       } else {
         this.moveIndicator.innerHTML = `Wait! Its ${
           this.friend === COMPUTER ? "Computer's" : "friend's"
         } turn to move ${this.chosenItem === TIGER ? GOAT : TIGER}`;
       }
-    };
-
+    }
   }
 
   handleFriendMove(data) {
     this.myTurn = true;
-    const deadGoats = this.goats.filter(g => g.dead).length;
-    const goatsInBoard = this.goats.filter(g => !g.dead).length;
+    const deadGoats = this.goats.filter((g) => g.dead).length;
+    const goatsInBoard = this.goats.filter((g) => !g.dead).length;
     if (data.movedItem === GOAT) {
       let goatMovePoint = null;
       if (data.moveData.type === "new") {
@@ -1868,7 +1892,7 @@ export class Board {
           dead: false,
           drag: false,
           currentPoint: myClickedPoint.index,
-          index: this.goats.length + 1
+          index: this.goats.length + 1,
         };
       } else {
         goatMovePoint = this.goats[prevPoint];
@@ -1882,14 +1906,14 @@ export class Board {
       this.showMoveNotification(this.chosenItem);
     }, 1100);
     this.render();
-     if (goatsInBoard === 20) {
-       this.gameCompleted(GOAT);
-       return false;
-     }
-     if (deadGoats >= 5) {
-       this.gameCompleted(TIGER);
-       return false;
-     }
+    if (goatsInBoard === 20) {
+      this.gameCompleted(GOAT);
+      return false;
+    }
+    if (deadGoats >= 5) {
+      this.gameCompleted(TIGER);
+      return false;
+    }
     this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
     this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
   }

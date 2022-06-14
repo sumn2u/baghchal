@@ -124,18 +124,19 @@
       border:none!important;
       &.play-sound{
         background: url(../images/sound-unmute.png) no-repeat center;
-        padding:35px;
+        padding:4vh;
       }
       &.mute-sound{
         background: url(../images/sound-mute.png) no-repeat center;
-        padding:35px;
+        padding:4vh;
       }
       &.play-with-computer{
-        background: url(../images/computer.png) no-repeat center;
-        border: 8px solid #fff !important;
-        border-radius: 100%;
-        margin-right: 20px;
-        background-color: #efeded;
+        background: url(../images/play.png) no-repeat center;
+        min-width: 160px;
+        // border: 8px solid #fff !important;
+        // border-radius: 100%;
+        // margin-right: 20px;
+        // background-color: #efeded;
       }
       &.play-with-friend{
         background: url(../images/friend.png) no-repeat center;
@@ -156,14 +157,14 @@
     z-index: 999;
     color: #fff;
   p{
-    font-size: 40px;
-    color: #51b673;
+    font-size: 18px;
+    color: #fff;
     text-transform: uppercase;
     font-weight: bold;
     text-shadow: 1px 2px 1px #388664;
   }
   .game-name{
-    padding:50px;
+    padding: 10vh 0px 0px;
     background: url(../images/baghchal-text.png) no-repeat center;
     background-size: 100%;
   }
@@ -180,6 +181,10 @@
       background: #51ad6a;
     }
   }
+  &.cover{
+    // background:url(../images/baghchal.png) no-repeat center #388664;
+    // background-size: cover;
+    }
  }
  .goat-box{
     margin-bottom: 10px;
@@ -197,6 +202,22 @@
       color: #FFEB3B;
       text-shadow: 1px 1px 1px #000;
     }
+ }
+ .player-icon-goat {
+  background: url(../images/goat.png) no-repeat center;
+  background-size: cover;
+  height: 20px;
+  width: 20px;
+  margin-left: 5px;
+  position: absolute;
+ }
+ .player-icon-tiger {
+  background: url(../images/tiger.png) no-repeat center;
+  background-size: cover;
+  height: 20px;
+  width: 20px;
+  margin-left: 5px;
+  position: absolute;
  }
 
  @media(max-width:1100px){
@@ -454,7 +475,7 @@ button#mutebtn {
 }
 .sound-settings{
   position: relative;
-  padding-top: 80px;
+  padding-top: 3vh;
   margin-right: 18px;
 }
 
@@ -521,7 +542,7 @@ button#mutebtn {
 .play-with-interface,
 .difficulty-level-interface,
 .select-interface {
-  margin-top: 5vh;
+  margin-top: 25vh;
 }
 
 
