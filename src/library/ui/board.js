@@ -342,6 +342,7 @@ export class Board {
               this.points[nextPointIndex].item = TIGER;
               this.points[nextPointIndex].itemIndex = draggedTiger.index;
               // if tiger eat the goat remove goat from goats
+              this.moveIndicator.innerHTML = `🐐 is moving!`;
               if (validPoint.eatGoat) {
                 // remove eaten goat point index from points
                 const currentEatenGoatIndex =
@@ -354,6 +355,7 @@ export class Board {
                   dead: true,
                   currentPoint: -currentEatenGoatIndex,
                 };
+                this.moveIndicator.innerHTML = `🐅 ate 🐐!`;
                 if (this.playSound) {
                   this.sound.play("tiger");
                 }
@@ -864,7 +866,6 @@ export class Board {
    */
   renderComputerGoatMove() {
     const nextBestMove = this.logic.getNextBestMove(GOAT);
-    console.log(this.goats, "fff");
     if (nextBestMove) {
       // only used "new" and "move" because it was used in this file
       let goatType = "new";
@@ -1242,16 +1243,18 @@ export class Board {
       currentPointIndex: tigerData.tigerIndex,
     };
     this.showMoveAnimation(TIGER, animationTigerData).then((result) => {
+      // this.showMoveNotification(this.chosenItem);
       if (tigerData.eatGoat) {
         // HIDE POP UP THAT'S Causing problem
+        this.moveIndicator.innerHTML = `🐅 ate 🐐!`;
         if (this.friend !== COMPUTER) {
           this.showMoveNotification(this.chosenItem, `🐅 ate your 🐐!`);
         }
         setTimeout(() => {
           this.showMoveNotification(this.chosenItem);
-        }, 2000);
+        }, 500);
       } else {
-        this.showMoveNotification(this.chosenItem);
+        // this.showMoveNotification(this.chosenItem);
       }
     });
     // add new reference of tiger to the points
