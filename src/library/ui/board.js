@@ -1719,13 +1719,13 @@ export class Board {
       const trigger = button.getAttribute("data-modal-trigger");
       const modal = d.querySelector(`[data-modal=${trigger}]`);
       const modalBody = modal.querySelector(".modal-body");
-      const closeBtn = modal.querySelector(".close");
+      // const closeBtn = modal.querySelector(".close");
       document.getElementById("game-end-heading").innerHTML = ` Alas, the ${
         avatar === "goat" ? "🐐" : "🐅"
       } has claimed victory!`;
-      closeBtn.addEventListener("click", () =>
-        modal.classList.remove("is-open")
-      );
+      // closeBtn.addEventListener("click", () =>
+      //   modal.classList.remove("is-open")
+      // );
       modal.addEventListener("click", () => modal.classList.remove("is-open"));
       const gameResetButton = document.getElementById("game-reset-btn");
 

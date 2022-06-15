@@ -44,7 +44,6 @@ class Game {
               },
               el(
                 "article.modal-body",
-                el("header", el("button.close")),
                 el(
                   "div.modal-main",
                   el(
@@ -54,7 +53,7 @@ class Game {
                       "h3#game-end-subheading",
                       "May they bathe their circuits   in baghchal glory. "
                     ),
-                    el("button.game-btn#game-reset-btn", "↺ Play again")
+                    el("button.game-btn#game-reset-btn", "")
                   )
                 )
               )
