@@ -16,36 +16,7 @@ class Game {
     this.createBoard = () => {
       this.boardWrapper = el(
         "div.game-board",
-        (this.gameModal = el(
-          "div",
-          el("button", {
-            "data-modal-trigger": "error-message",
-            style: "display:none;",
-          }),
-          el(
-            "section",
-            {
-              class: "modal-wrapper",
-              "data-modal": "error-message",
-            },
-            el(
-              "article.modal-body",
-              el("header", el("button.close")),
-              el(
-                "div.modal-main",
-                el(
-                  "div#game-over",
-                  el("h2#game-end-heading"),
-                  el(
-                    "h3#game-end-subheading",
-                    "May they bathe their circuits   in baghchal glory. "
-                  ),
-                  el("button.game-btn#game-reset-btn", "↺ Play again")
-                )
-              )
-            )
-          )
-        )),
+
         (this.gameWrapper = el(
           "div.game-box#game-box",
 
@@ -59,6 +30,36 @@ class Game {
             (this.fakeCanvas = el("canvas#fake-canvas.fake-canvas"))
           )),
           (this.moveIndicator = el("div.move-indicator")),
+          (this.gameModal = el(
+            "div",
+            el("button", {
+              "data-modal-trigger": "error-message",
+              style: "display:none;",
+            }),
+            el(
+              "section",
+              {
+                class: "modal-wrapper",
+                "data-modal": "error-message",
+              },
+              el(
+                "article.modal-body",
+                el("header", el("button.close")),
+                el(
+                  "div.modal-main",
+                  el(
+                    "div#game-over",
+                    el("h2#game-end-heading"),
+                    el(
+                      "h3#game-end-subheading",
+                      "May they bathe their circuits   in baghchal glory. "
+                    ),
+                    el("button.game-btn#game-reset-btn", "↺ Play again")
+                  )
+                )
+              )
+            )
+          )),
           (this.dataWrapper = el("div"))
         ))
       );

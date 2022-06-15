@@ -238,8 +238,8 @@
 
  .modal-wrapper.is-open {
    display: block;
-   position: fixed;
-   z-index: 1;
+   position: absolute;
+   z-index: 99999;
    top: 0;
    bottom: 0;
    left: 0;
@@ -329,7 +329,7 @@
  }
 
  .modal-body {
-   top: 20vh;
+   margin: 17vh auto;
    min-width: 360px;
    margin: 30px auto;
    background-color: rgb(44, 62, 80);
@@ -416,7 +416,7 @@
    position: absolute;
    left: 15px;
    content: ' ';
-   height: 33px;
+   height: 20px;
    width: 2px;
    background-color: #6189b1;
  }
@@ -434,8 +434,8 @@
    right: 0;
    top: -10vh;
    margin-right: 15rem;
-   width: 32px;
-   height: 32px;
+   width: 20px;
+   height: 20px;
    margin-right: 20vh;
    opacity: 1;
    color: #6189b1;
