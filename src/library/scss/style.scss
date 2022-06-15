@@ -161,12 +161,15 @@
     color: #fff;
     text-transform: uppercase;
     font-weight: bold;
+    margin-top: 3vh;
     text-shadow: 1px 2px 1px #388664;
   }
   .game-name{
-    padding: 28vh 0px 0px;
+    padding: 18vh 0px 0px 0px;
     background: url(../images/baghchal-text.png) no-repeat center;
     background-size: 100%;
+    width: 60%;
+    margin: 0 auto;
   }
   .difficulty-levels{
     button{
@@ -475,7 +478,7 @@ button#mutebtn {
 }
 .sound-settings{
   position: relative;
-  padding-top: 7vh;
+  padding-top: 5vh;
   // margin-right: 18px;
 }
 
@@ -542,7 +545,7 @@ button#mutebtn {
 .play-with-interface,
 .difficulty-level-interface,
 .select-interface {
-  margin-top: 15vh;
+  margin-top: 10vh;
 }
 
 
