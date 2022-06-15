@@ -164,7 +164,7 @@
     text-shadow: 1px 2px 1px #388664;
   }
   .game-name{
-    padding: 10vh 0px 0px;
+    padding: 28vh 0px 0px;
     background: url(../images/baghchal-text.png) no-repeat center;
     background-size: 100%;
   }
@@ -475,8 +475,8 @@ button#mutebtn {
 }
 .sound-settings{
   position: relative;
-  padding-top: 3vh;
-  margin-right: 18px;
+  padding-top: 7vh;
+  // margin-right: 18px;
 }
 
 .col-xs-4{
@@ -542,7 +542,7 @@ button#mutebtn {
 .play-with-interface,
 .difficulty-level-interface,
 .select-interface {
-  margin-top: 25vh;
+  margin-top: 15vh;
 }
 
 
@@ -679,20 +679,38 @@ p{
   top: 0;
   bottom: 0;
   background: rgba(0,0,0,0.5);
+  background:url(../images/baghchal.png) no-repeat center #388664;
+  background-size: cover;
+  // margin:10% auto 0 auto;
+  width:100%;
+  height: 100%;
   z-index: 999;
   .wrapper{
-    background:#fff;
-    margin:10% auto 0 auto;
-    width:80%;
-    padding:15px;
-    border-radius: 4px;
+    // background:#fff;
+    background-color: #f1ffeb;
+    /* border: 1px solid black; */
+    opacity: 0.85;
+    height: 100%;
+    // padding:15px;
+    // border-radius: 4px;
   }
   p{
+    padding: 6vh;
     text-align: center;
-    font-size: 16px;
+    padding-top: 15vh;
+    font-size: 14px;
     text-shadow: none;
-    color: #5d5d5d
+    color: #22212a;
   }
+  .close-notifcation {
+    background: url(../images/close.png) no-repeat center;
+    min-width: 160px;
+    padding: 4vh;
+    background-size: 100%!important;
+    display: block;
+    margin: 0 auto;
+  }
+  
 }
 
 .move-indicator{
@@ -708,4 +726,13 @@ p{
     text-transform: capitalize;
     font-size: 13px;
     font-weight: bold;
+}
+
+@media(max-width: 450px) {
+  .move-notification-modal{
+    p {
+      padding: 6px;
+      padding-top: 5vh;
+    }
+  }
 }

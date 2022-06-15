@@ -1449,7 +1449,11 @@ export class Board {
         "div",
         (this.moveNotificationModal = el(
           "div.move-notification-modal.hide",
-          el("div.wrapper", el("p", "Test"))
+          el(
+            "div.wrapper",
+            el("p", "Test"),
+            el("button.close-notifcation.hide#close-notifcation", "")
+          )
         )),
         (this.selectItem = el(
           "div.select-option#select-option",
@@ -1643,6 +1647,7 @@ export class Board {
             this.sound.play("goat");
           }
         }
+
         document.getElementById("game-box").style.background = "none";
         this.myTurn = this.chosenItem === GOAT ? true : false;
 
@@ -1664,6 +1669,7 @@ export class Board {
           // matchData.avatar = this.chosenItem;
           // this.socket.friendChoseTigerGoat(this.chosenItem);
         }
+        this.showGameNotification(this.chosenItem);
       });
     });
 
@@ -1852,6 +1858,30 @@ export class Board {
         );
       }, 2100);
     }
+  }
+  showGameNotification(item) {
+    this.moveNotificationModal.classList.remove("hide");
+    this.moveNotificationModal.querySelector("p").innerHTML =
+      `You choose ` +
+      "<b>" +
+      `${this.chosenItem === TIGER ? TIGER : GOAT}` +
+      "</b>" +
+      `. To win this game you have to ${
+        this.chosenItem === TIGER
+          ? "hunt five or more goats."
+          : "surround the four tigers."
+      }` +
+      "<br/> <br/>" +
+      ` One can move along any of the lines to an adjacent junction.
+            There are free junctions on the board where goats can be placed.  Upon placement of all goats (20 goats), they can be moved to any adjacent junction following any straight line.
+            Tigers can hunt goats placed at an adjacent junction by jumping over following a straight line and landing at the next junction adjacent to the position occupied by the goat. `;
+    this.moveNotificationModal.querySelector("button").classList.remove("hide");
+    this.moveNotificationModal
+      .querySelector("button")
+      .addEventListener("click", (event) => {
+        event.preventDefault();
+        this.moveNotificationModal.classList.add("hide");
+      });
   }
 
   showMoveNotification(item, message = null) {
