@@ -29,7 +29,11 @@ class Game {
             (this.realCanvas = el(`canvas#real-canvas.real-canvas`)),
             (this.fakeCanvas = el("canvas#fake-canvas.fake-canvas"))
           )),
-          (this.moveIndicator = el("div.move-indicator")),
+          el(
+            "div.move-wrapper",
+            (this.moveCount = el("span.move-count")),
+            (this.moveIndicator = el("div.move-indicator"))
+          ),
           (this.gameModal = el(
             "div",
             el("button", {
@@ -72,6 +76,7 @@ class Game {
         this.infoBox,
         this.dataWrapper,
         this.moveIndicator,
+        this.moveCount,
         this.FBInstant,
         this._matchData
       );

@@ -19,6 +19,7 @@ export class Board {
     infoBox,
     dataContainer,
     moveIndicator,
+    moveCount,
     FBInstant,
     matchData
   ) {
@@ -30,6 +31,8 @@ export class Board {
     this.matchData = matchData;
     this.dataContainer = dataContainer;
     this.moveIndicator = moveIndicator;
+    this.moveCount = moveCount;
+    this.moves = 0;
     this.realCanvasElement = realCanvasElement;
     this.fakeCanvasElement = fakeCanvasElement;
     this.infoBox = infoBox;
@@ -225,6 +228,8 @@ export class Board {
       this.points[i].item = GOAT;
       this.points[i].itemIndex = this.goats.length - 1;
       if (this.friend === COMPUTER) {
+        this.moves++;
+        this.moveCount.innerHTML = `Moves: ${this.moves}`;
         this.renderComputerTigerMove();
       } else {
         this.sendGoatMoveDataToFriend({
@@ -288,6 +293,8 @@ export class Board {
           );
           if (validPoint) {
             const draggedGoat = this.goats.find((g) => g.drag);
+            this.moves++;
+            this.moveCount.innerHTML = `Moves: ${this.moves}`;
             if (draggedGoat) {
               const prevPointIndex = draggedGoat.currentPoint;
               const currentPointIndex = releasedPoint.index;
@@ -327,6 +334,8 @@ export class Board {
           );
           if (validPoint) {
             const draggedTiger = this.tigers.find((t) => t.drag);
+            this.moves++;
+            this.moveCount.innerHTML = `Moves: ${this.moves}`;
             if (draggedTiger) {
               // release  item from prev point
               const prevPointIndex = draggedTiger.currentPoint;
@@ -343,6 +352,7 @@ export class Board {
               this.points[nextPointIndex].itemIndex = draggedTiger.index;
               // if tiger eat the goat remove goat from goats
               this.moveIndicator.innerHTML = `🐐 is moving!`;
+
               if (validPoint.eatGoat) {
                 // remove eaten goat point index from points
                 const currentEatenGoatIndex =
@@ -1658,6 +1668,7 @@ export class Board {
           this.chosenItem === GOAT ? "goat" : "tiger"
         }"> </span></span>`;
         this.selectItem.classList.add("hide");
+        this.moveCount.innerHTML = `Moves: 0`;
         // IF user is playing with computer
         if (this.chosenItem === GOAT) {
           this.showMoveNotification(GOAT);
