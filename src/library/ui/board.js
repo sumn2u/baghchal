@@ -902,7 +902,7 @@ export class Board {
 
     const deadGoats = this.goats.filter((g) => g.dead).length;
     const goatsInBoard = updatedGoats.filter((g) => !g.dead).length;
-    if (goatsInBoard === 20) {
+    if (goatsInBoard >= 20) {
       this.gameCompleted(GOAT);
       return false;
     }
