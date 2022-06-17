@@ -291,7 +291,9 @@ export class Board {
           const validPoint = possiblePoints.find(
             (p) => p.point === releasedPoint.index
           );
-          if (validPoint) {
+
+          const lastPointIndex = this.dragItem.point.lastPoint;
+          if (validPoint && lastPointIndex !== releasedPoint.index) {
             const draggedGoat = this.goats.find((g) => g.drag);
             this.moves++;
             this.moveCount.innerHTML = `Moves: ${this.moves}`;
@@ -310,6 +312,8 @@ export class Board {
               // add new item to points
               this.points[currentPointIndex].item = GOAT;
               this.points[currentPointIndex].itemIndex = draggedGoat.index;
+              this.points[currentPointIndex].lastPoint =
+                this.dragItem.point.index;
               // computer turn to move tiger
               if (this.friend === COMPUTER) {
                 this.renderComputerTigerMove();
@@ -332,7 +336,9 @@ export class Board {
           const validPoint = possiblePoints.find(
             (p) => p.point === releasedPoint.index
           );
-          if (validPoint) {
+
+          const lastPointIndex = this.dragItem.point.lastPoint;
+          if (validPoint && lastPointIndex !== releasedPoint.index) {
             const draggedTiger = this.tigers.find((t) => t.drag);
             this.moves++;
             this.moveCount.innerHTML = `Moves: ${this.moves}`;
@@ -350,6 +356,7 @@ export class Board {
               const nextPointIndex = releasedPoint.index;
               this.points[nextPointIndex].item = TIGER;
               this.points[nextPointIndex].itemIndex = draggedTiger.index;
+              this.points[nextPointIndex].lastPoint = this.dragItem.point.index;
               // if tiger eat the goat remove goat from goats
               this.moveIndicator.innerHTML = `🐐 is moving!`;
 
@@ -870,6 +877,21 @@ export class Board {
   isDuplicate(entry, arr) {
     return arr.some((x) => entry.x == x.x && entry.y == x.y);
   }
+  renderGoatStatus(updatedGoats) {
+    const deadGoats = this.goats.filter((g) => g.dead).length;
+    this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
+    const goatsInBoard = updatedGoats.filter((g) => !g.dead).length;
+    this.goatBoardIndicator.innerHTML = `Goats in Board : ${goatsInBoard}`;
+    if (goatsInBoard >= 20) {
+      this.gameCompleted(GOAT);
+      return false;
+    }
+    if (deadGoats >= 5) {
+      this.gameCompleted(TIGER);
+      return false;
+    }
+    this.render();
+  }
 
   /**
    * render goat after user moves tiger
@@ -899,34 +921,7 @@ export class Board {
         updatedGoats.push(entry);
       }
     }
-
-    const deadGoats = this.goats.filter((g) => g.dead).length;
-    const goatsInBoard = updatedGoats.filter((g) => !g.dead).length;
-    if (goatsInBoard >= 20) {
-      this.gameCompleted(GOAT);
-      return false;
-    }
-    if (deadGoats >= 5) {
-      this.gameCompleted(TIGER);
-      return false;
-    }
-    this.render();
-
-    // console.log(deadGoats, goatsInBoard, 'goatsInBoard', deadGoats >= 5, this)
-    // if (goatsInBoard === 20) this.gameCompleted(GOAT);
-    // if (deadGoats >= 5) this.gameCompleted(TIGER);
-    // const updatedDeadGoats = this.goats.filter((g) => g.dead).length;
-    // const updatedBoardGoats = this.goats.filter((g) => !g.dead).length;
-    // console.log(updatedBoardGoats, this.firstGoatRender, "dd");
-    this.deadGoatIndicator.innerHTML = `Dead Goats: ${deadGoats}`;
-    this.goatBoardIndicator.innerHTML = `Goats in Board : ${
-      goatsInBoard + this.firstGoatRender
-    }`;
-    if (deadGoats >= 5) {
-      // GOATS WINS THE GAME
-      this.gameCompleted(this.chosenItem);
-    }
-    this.render();
+    this.renderGoatStatus(updatedGoats);
     this.myTurn = true;
   }
   /**
@@ -1157,6 +1152,7 @@ export class Board {
             this.animationInProgress = false;
             if (data.type === "new") {
               this.goats.push(pointData);
+              this.renderGoatStatus(this.goats);
             } else {
               this.goats[pointData.index].x = pointData.x;
               this.goats[pointData.index].y = pointData.y;
@@ -1888,7 +1884,7 @@ export class Board {
       "<br/> <br/>" +
       ` One can move along any of the lines to an adjacent junction.
             There are free junctions on the board where goats can be placed.  Upon placement of all goats (20 goats), they can be moved to any adjacent junction following any straight line.
-            Tigers can hunt goats placed at an adjacent junction by jumping over following a straight line and landing at the next junction adjacent to the position occupied by the goat. `;
+            Tigers can hunt goats placed at an adjacent junction by jumping over following a straight line and landing at the next junction adjacent to the position occupied by the goat. A tiger or goat cannot move a piece in such a way that a similar position appears repeatedly on the board.`;
     this.moveNotificationModal.querySelector("button").classList.remove("hide");
     this.moveNotificationModal
       .querySelector("button")
