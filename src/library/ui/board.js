@@ -338,6 +338,13 @@ export class Board {
           );
 
           const lastPointIndex = this.dragItem.point.lastPoint;
+          if (
+            validPoint &&
+            lastPointIndex === releasedPoint.index &&
+            possiblePoints.length == 1
+          ) {
+            this.gameCompleted(GOAT);
+          }
           if (validPoint && lastPointIndex !== releasedPoint.index) {
             const draggedTiger = this.tigers.find((t) => t.drag);
             this.moves++;
