@@ -522,7 +522,18 @@ button#mutebtn {
   font-size: 1.5em;
   margin: 10px;
 }
-
+#game-close-btn {
+  background: url(../images/close.png) no-repeat center;
+  min-width: 160px;
+  padding: 4vh;
+  
+  background-size: 100%!important;
+  display: block;
+  margin: 1rem auto;
+}
+.text-black {
+  color: #5d5d5d;
+}
 #game-reset-btn {
   background: url(../images/replay.png) no-repeat center;
   min-width: 160px;
@@ -645,19 +656,24 @@ p{
    }
    
  }
- .friend-request-notification,.friend-request-wait-modal{
+ .friend-request-notification,.friend-request-wait-modal,.error-notification {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
   background: rgba(0,0,0,0.5);
+  z-index: 99;
   .req-holder,.wait-wrapper{
     background:#fff;
-    margin:10% auto 0 auto;
+    margin: 28vh auto 0 auto;
     width:80%;
     padding:15px;
     border-radius: 4px;
+    p {
+      text-transform: none;
+      font-size: 2.3vh;
+    }
   }
   p{
     font-size: 16px;

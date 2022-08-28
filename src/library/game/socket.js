@@ -6,7 +6,9 @@ export class Socket {
     this.player = null;
     this.friend = null;
     this.dispatcher = new Dispatcher();
-    this.socket = io.connect("https://bagchal-socket.vercel.app");
+    this.socket = io.connect("https://bagchal-socket.vercel.app", {
+      reconnection: false
+    });
     this.socket.emit("joinGame", { name: userName });
     this.socket.on("setUserInfo", (data) => {
       this.player = data;

@@ -1508,6 +1508,10 @@ export class Board {
               "div.friend-request-wait-modal.hide",
               el("div.wait-wrapper", el("p"))
             )),
+            (this.connectionErrorModal = el(
+              "div.error-notification.hide",
+              el("div.wait-wrapper", el("p"), el("span.text-black"),el("button.game-btn#game-close-btn", ""))
+            )),
             (this.requestNotificationModal = el(
               "div.friend-request-notification.hide",
               el(
@@ -1645,6 +1649,7 @@ export class Board {
         this.friendsListInterface.classList.remove("hide");
       }else {
         console.log("show error");
+        this.showConnectionError();
       }
     });
 
@@ -1890,6 +1895,18 @@ export class Board {
         );
       }, 2100);
     }
+  }
+  showConnectionError() {
+    this.connectionErrorModal.classList.remove("hide");
+    this.connectionErrorModal.querySelector("p").innerHTML = "Oops! Connection issue.";
+    this.connectionErrorModal.querySelector("span").innerHTML = "We have trouble connecting to the server. Please try after sometime.";
+    this.connectionErrorModal.querySelector("button").addEventListener("click", (e) => {
+        e.preventDefault();
+        this.playWithInterface.firstChild.classList.remove('hide');
+        this.playWithInterface.lastChild.classList.remove('hide');
+        this.inputNameInterface.classList.add('hide');
+        this.connectionErrorModal.classList.add("hide");
+    })
   }
   showGameNotification(item) {
     this.moveNotificationModal.classList.remove("hide");
