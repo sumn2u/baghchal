@@ -1641,16 +1641,17 @@ export class Board {
       }
       // HERE Initialise the Socket Object and Send User Name  to Server
       this.socket = new Socket(userName);
-      if(this.socket.connected){
-        // hide add name interface
-        this.inputNameInterface.classList.add("hide");
-        // handle events dispatched from socket
-        this.handleSocketEvents();
-        this.friendsListInterface.classList.remove("hide");
-      }else {
-        console.log("show error");
-        this.showConnectionError();
-      }
+      setTimeout(()  =>{
+        if(this.socket.socket && this.socket.socket.connected){
+          // hide add name interface
+          this.inputNameInterface.classList.add("hide");
+          // handle events dispatched from socket
+          this.handleSocketEvents();
+          this.friendsListInterface.classList.remove("hide");
+        }else {
+          this.showConnectionError();
+        }
+      }, 500)
     });
 
     // mute unmute sound button
@@ -1832,6 +1833,7 @@ export class Board {
     // })
   }
   updateOnlineUsers(data) {
+    console.log(updateOnlineUsers, 'updateOnlineUsers')
     const users = data.filter((u) => u.socketId != this.player.socketId);
     const onlineUsers = list(`ul.online-users`, OnlineUsersList);
     this.friendsListInterface.innerHTML = "";
