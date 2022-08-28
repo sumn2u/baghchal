@@ -1481,24 +1481,25 @@ export class Board {
               "div.play-with-interface#play-with-interface",
 
               // el("p", "A Hunt for Goats"),
+              el("p#play-with", "Play with"),
               el(
                 "div.play-options",
-                el("button.play-with-computer", "")
-                // el("button.play-with-friend", "")
+                el("button.play-with-computer", ""),
+                el("button.play-with-friend", "")
               )
             )),
             (this.inputNameInterface = el(
               "div.input-user-name.hide",
 
-              el("p", "Enter your Name"),
+              // el("p", "Enter your Name"),
               el(
                 "div.input-group",
                 (this.playerNameInput = el("input.form-control", {
-                  placeholder: "Enter Your Name",
+                  placeholder: "Your Name",
                 })),
                 (this.submitInputName = el(
                   "div.input-group-append",
-                  el("button.btn.btn-info.active", "Submit")
+                  this.submitInputButton = el("button.btn.btn-info.active.font-weight-bold", {disabled: true}, "Submit")
                 ))
               )
             )),
@@ -1595,18 +1596,19 @@ export class Board {
         var _this = this;
         if (event.target.classList.contains("play-with-friend")) {
           this.friend = FRIEND;
-          let contextId = this.FBInstant.context.getID();
-          const backend = new Backend("https://wiggly-licorice.glitch.me");
-          FBInstant.context.chooseAsync().then(function () {
-            let game = this.game;
-            backend.clear(FBInstant.context.getID()).then(function () {
-              // setTimeout(function(){
-              game.start();
-              // }, 1000)
-            });
-          });
-
-          // this.inputNameInterface.classList.remove('hide');
+          // let contextId = this.FBInstant.context.getID();
+          // const backend = new Backend("https://wiggly-licorice.glitch.me");
+          // FBInstant.context.chooseAsync().then(function () {
+          //   let game = this.game;
+          //   backend.clear(FBInstant.context.getID()).then(function () {
+          //     // setTimeout(function(){
+          //     game.start();
+          //     // }, 1000)
+          //   });
+          // });
+          event.target.parentNode.previousSibling.classList.add('hide');
+          event.target.parentNode.classList.add('hide');
+          this.inputNameInterface.classList.remove('hide');
         } else {
           this.difficultyLevelInterface.classList.remove("hide");
           this.friend = COMPUTER;
@@ -1615,22 +1617,35 @@ export class Board {
       });
     });
 
+    // user input 
+    this.playerNameInput.addEventListener('keyup', (event) => {
+      const userName = this.playerNameInput.value;
+      if(!userName.trim().length){
+        //show error message
+        this.submitInputButton.setAttribute('disabled', true);
+      }else {
+        this.submitInputButton.removeAttribute('disabled')
+      }
+    })
     // IF USER SELECT WITH FRIEND GET HIS NAME AND SEND TO SERVER
 
     this.submitInputName.addEventListener("click", (event) => {
       event.preventDefault();
       const userName = this.playerNameInput.value;
       if (!userName) {
-        alert("Enter Valid Name");
         return false;
       }
       // HERE Initialise the Socket Object and Send User Name  to Server
       this.socket = new Socket(userName);
-      // hide add name interface
-      this.inputNameInterface.classList.add("hide");
-      // handle events dispatched from socket
-      this.handleSocketEvents();
-      this.friendsListInterface.classList.remove("hide");
+      if(this.socket.connected){
+        // hide add name interface
+        this.inputNameInterface.classList.add("hide");
+        // handle events dispatched from socket
+        this.handleSocketEvents();
+        this.friendsListInterface.classList.remove("hide");
+      }else {
+        console.log("show error");
+      }
     });
 
     // mute unmute sound button
