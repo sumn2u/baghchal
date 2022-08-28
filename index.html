@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Bagh Chal</title>
-    <link rel="icon" href="https://humanassistai.com/humanassitai.ico">
     <script src="https://connect.facebook.net/en_US/fbinstant.6.2.js"></script>
 </head>
 <body>
@@ -13,32 +12,14 @@
     <div class="container mt-1">
         <div id="game-container"></div>
     </div>
-    <button data-modal-trigger="error-message" style="display:none;">Trigger modal #2</button>
 
 
-    <!-- Content of modal #2 -->
-    <section data-modal="error-message" class="modal-wrapper">
-        <article class="modal-body">
-            <header>
-                <button class="close"></button>
-            </header>
-            <div class="modal-main">
-                 <div id="game-over">
-                     <h2 id="game-end-heading"> </h2>
-                     <h3 id="game-end-subheading">May they bathe their circuits in baghchal glory </h3>
-                         
-                         <button class="game-btn" id="game-reset-btn">&#8634; Play again</button>
-                 </div>
-            </div>
-            
-        </article>
-    </section>
-
+    
     
     <script>   
     game.init({
         container: "game-container"
-    });
+    }).createBoard();
     </script>
     
 <script type="text/javascript" src="bundle.js"></script></body>
