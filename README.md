@@ -1,6 +1,6 @@
 Baghchal
 ======
-[![Build Status](https://travis-ci.org/sumn2u/baghchal.svg?branch=master)](https://travis-ci.org/sumn2u/baghchal)
+
 [![GitHub issues](https://img.shields.io/github/issues/sumn2u/baghchal)](https://github.com/sumn2u/baghchal/issues) [![GitHub forks](https://img.shields.io/github/forks/sumn2u/baghchal)](https://github.com/sumn2u/baghchal/network)
 [![GitHub stars](https://img.shields.io/github/stars/sumn2u/baghchal)](https://github.com/sumn2u/baghchal/stargazers)
 [![GitHub license](https://img.shields.io/github/license/sumn2u/baghchal)](https://github.com/sumn2u/baghchal/blob/master/LICENSE)
@@ -88,9 +88,9 @@ yarn run test
 
 ## Contributing
 
-Feel free to pull and contribute!  If you do, please make a separate branch on your Pull Request, rather than pushing your changes to the Master.  It would also be greatly appreciated if you ran the appropriate tests before submitting the request.
+Feel free to pull and contribute!  If you do, please make a separate branch on your Pull Request, rather than pushing your changes to the Master.  It would also be greatly appreciated if you ran the appropriate tests before submitting the request. Hope you enjoy playing this game 💜.
 
 
 ## License
 
-MIT
+ BSD-3-Clause license
