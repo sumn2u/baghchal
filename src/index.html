@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="full-screen" content="yes"/>
+    <meta name="screen-orientation" content="portrait"/>
     <title><%= htmlWebpackPlugin.options.title %></title>
     <script src="https://connect.facebook.net/en_US/fbinstant.6.2.js"></script>
 </head>
@@ -18,21 +21,28 @@
     <% if (htmlWebpackPlugin.options.env === "production") {%>
     <script>
     FBInstant.initializeAsync().then(function () {
-        FBInstant.setLoadingProgress(50);
-        FBInstant.setLoadingProgress(100);
-        // start facebook game
-        FBInstant.startGameAsync().then(function () {
-                game.init({
-                    container: "game-container",
-                    FBInstant: FBInstant,
-                    backendClient: ''
-                }).createBoard();
-        // check fb instant type and start game 
-        if(FBInstant.context.getType() !== 'SOLO') {
-         game.start();
-        }
-           
-        })
+        var progess = 0;
+        var interval = setInterval(function(){
+            if(progess >= 95){
+                clearInterval(interval);
+                // start facebook game
+                FBInstant.startGameAsync().then(function () {
+                        game.init({
+                            container: "game-container",
+                            FBInstant: FBInstant,
+                            backendClient: ''
+                        }).createBoard();
+
+                if(FBInstant.context.getType() !== 'SOLO') {
+                    game.start();
+                }
+                })
+            }
+            FBInstant.setLoadingProgress(progess);
+            progess+=5;
+        }, 100)
+        
+        
      });
     </script> 
 
