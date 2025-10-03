@@ -1,16 +1,28 @@
 @import "bootstrap.css";
 @import "material-design.css";
+// @font-face{
+// 	font-family:'Material Icons';
+// 	font-style: normal;
+// 	font-weight: normal;
+// 	src: url("MaterialIcons-Regular.eot?") format("eot"),
+// 	     url("MaterialIcons-Regular.woff2") format("woff2"),
+// 	     url("MaterialIcons-Regular.woff") format("woff"),
+// 	     url("MaterialIcons-Regular.ttf") format("truetype"),
+// 	     url("MaterialIcons-Regular.svg#Samplina_Neue") format("svg");
+// }
+
 @font-face{
 	font-family:'Material Icons';
 	font-style: normal;
 	font-weight: normal;
-	src: url("MaterialIcons-Regular.eot?") format("eot"),
-	     url("MaterialIcons-Regular.woff2") format("woff2"),
+	src: url("MaterialIcons-Regular.eot"); /* Correct for IE */
+	src: local('Material Icons'),
+         local('MaterialIcons-Regular'),
+         url("MaterialIcons-Regular.woff2") format("woff2"),
 	     url("MaterialIcons-Regular.woff") format("woff"),
 	     url("MaterialIcons-Regular.ttf") format("truetype"),
-	     url("MaterialIcons-Regular.svg#Samplina_Neue") format("svg");
+	     url("MaterialIcons-Regular.svg#MaterialIcons") format("svg"); /* Use a correct fragment identifier */
 }
-
 
  .material-icons {
    font-family: 'Material Icons';

@@ -1,5 +1,5 @@
 import Game from "./game/game";
-
+import './scss/style.scss';
 (function(window){
      window.game = {
       bagchal:null,
