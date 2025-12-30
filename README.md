@@ -25,6 +25,7 @@ Bagchal: The Hunt for Goats
       <img src="https://img.shields.io/badge/Web_Version-FF7139?style=for-the-badge&logo=firefox-browser&logoColor=white"  alt="Web"/>
     </a>
   </div>
+  <br/>
 </div>
 
 
@@ -58,7 +59,7 @@ This project was initially built for [Community Challenge hackathon](https://dev
 </tr>
 <tr>
 <td align="center">
-<strong>Instructions for goat</strong><br>
+<strong>Instructions for Goat</strong><br>
 <img alt="game-board-screen" width="300" src="./screenshots/Slice 4.png">
 </td>
 <td align="center">
